@@ -1,0 +1,73 @@
+name: Render STL Previews
+
+on:
+  push:
+    branches:
+        - main
+        - flow
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-matrix:
+    name: Detect Changed SCAD files
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Pythone with Cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Find SCAD files
+        id: set-matrix
+        run: python3 .github/matrix/generate.py
+
+  render-with-preview:
+    if: ${{ needs.generate-matrix.outputs.matrix != '' }}
+    name: Generate Previews
+    needs: generate-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: 
+        include: ${{ fromJson(needs.generate-matrix.outputs.matrix).include }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.folder }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render STL
+        run: |
+          docker run --rm -v "$PWD":/openscad -w /openscad openscad/openscad:latest \
+            openscad -o "${{ matrix.name }}.stl" "${{ matrix.name }}.scad"
+      - name: Render PNG
+        run: |
+          docker run --rm --init -v "$PWD":/openscad -w /openscad openscad/openscad:latest \
+            xvfb-run -a openscad -o "${{ matrix.name }}.png" --imgsize=800,600 --render --viewall "${{ matrix.name }}.scad"
+      - name: Check the results image from STL
+        run: ls ${{ matrix.name }}.png
+      # Readme
+      - name: Create README.md if missing
+        run: |
+          if [ ! -f README.md ]; then
+            echo "# ${{ matrix.name }}" > README.md
+            echo "" >> README.md
+            echo "![preview](${{ matrix.name }}.png)" >> README.md
+            echo "Created README.md"
+          else
+            echo "README.md already exists, skipping creation"
+          fi
+      # Commit
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Add STL & preview for ${{ matrix.folder }}/${{ matrix.name }}.scad" || echo "No changes to commit"
+          git push
