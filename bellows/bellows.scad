@@ -1,4 +1,9 @@
-// Parametric Purge Bellow for Zerno Z1 Grinder (Accordion Shape)
+// Parametric Purge Bellow for Zerno Z1 Grinder (v2 funnel)
+// Author: Denis Shatilov 
+// License: CC BY-NC 4.0
+// https://creativecommons.org/licenses/by-nc/4.0/
+// You may remix, adapt, and share this work non-commercially,
+// but you must give appropriate credit.
 
 // Parameters
 diameter = 58.5;           // Outer diameter (mm)
@@ -6,7 +11,6 @@ fold_sections = 5;         // Number of accordion folds
 wall_thickness = 0.8;      // Wall thickness (mm)
 wave_depth = 8.0;          // Depth of each accordion wave (mm)
 height_per_fold = 4;       // Height of each fold (mm)
-fit_tolerance = 0;         // Tolerance for tighter fit bottom/top (mm). Sane values: (0-1)
 sgmt = 120;                // Number of sgmt per fold (must be even for wave)
 insert_height = 10.5;      // Heigh used for inserts
 solid_top = false;         // Controls whether to create hole for the funnel cap
@@ -17,9 +21,9 @@ total_height_accordion = folds * height_per_fold;
 insert_height_cap = insert_height-2.5;
 starting_hight = solid_top ? 0.8 : insert_height_cap;
 total_height = solid_top ? total_height_accordion + starting_hight : total_height_accordion + 2*starting_hight;
-cap_insert_cutout_diameter = diameter-4.375*wall_thickness-fit_tolerance; // Cutout for cap insert
-insert_lip_diameter = diameter-3.75*wall_thickness+fit_tolerance; // Width of the insert
-insert_lip_cutout_diameter = diameter-7.5*wall_thickness+fit_tolerance; // Cutout from the insert
+cap_insert_cutout_diameter = diameter-4.375*wall_thickness; // Cutout for cap insert
+insert_lip_diameter = diameter-3.5*wall_thickness; // Width of the insert
+insert_lip_cutout_diameter = diameter-7.5*wall_thickness; // Cutout from the insert
 
 
 // Module for accordion shape
@@ -70,7 +74,7 @@ module insert_lip() {
                     h = 1+0.02,
                     // Creating smooth transition into the accordion to avoid overhang.
                     // 4 is a magic number for the angle with 1mm height
-                    d1 = insert_lip_cutout_diameter+4-fit_tolerance,
+                    d1 = insert_lip_cutout_diameter+4,
                     d2 = insert_lip_cutout_diameter,
                     $fn=100
                 );
