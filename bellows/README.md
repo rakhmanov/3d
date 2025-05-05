@@ -1,3 +1,3 @@
-# bellow
+# bellows
 
-![preview](bellow.png)
+![preview](bellows.png)
