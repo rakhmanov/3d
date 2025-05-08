@@ -2,7 +2,7 @@
 // by VincentM is licensed under the Creative Commons - Attribution - Share Alike license.
 
 // Height of the gasket
-height = 3;
+height = 4;
 
 // Roundness
 $fn=60; 
