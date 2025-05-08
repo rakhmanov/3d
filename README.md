@@ -1,8 +1,9 @@
 # 3D Design Repository
 
-Designes are shared here under CC BY-NC 4.0 License.
+Designes are shared here under CC BY-NC 4.0 License, unless stated otherwise in the source file header.
 
 * [Zerno Z1 Purging Bellows](./bellows)
+* [Nema motor spacer](./nema-spacer)
 
 ---
 
