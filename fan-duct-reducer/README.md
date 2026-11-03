@@ -10,6 +10,12 @@ Parametric duct reducer / adapter for any two round duct or hose sizes. The read
 
 ![preview](fan-duct-reducer-short.png)
 
+## 4" to 5" (100 mm tall)
+
+A 4" pipe (outer diameter) slides into the small end and a 5" duct into the large end.
+
+![preview](fan-duct-reducer-4to5.png)
+
 ## Custom sizes
 
 Open `fan-duct-reducer.scad` in OpenSCAD and use **Window > Customizer**, or set parameters from the command line:
