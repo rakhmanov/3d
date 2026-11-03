@@ -5,7 +5,7 @@
 //
 // Open in OpenSCAD and use Window > Customizer, or call duct_reducer(...) from another file:
 //   use <fan-duct-reducer.scad>
-//   duct_reducer(large_size=4, small_size=3, small_fit="outside");
+//   duct_reducer(large_size=4, small_size=3, small_fit="into");
 
 /* [Sizes] */
 // Units for large_size / small_size (everything else is mm)
@@ -16,9 +16,9 @@ large_size = 6;
 small_size = 5;
 
 /* [Fit] */
-// inside: duct slides into the reducer (sized by duct OD). outside: hose slides over the reducer (sized by hose ID)
-large_fit = "inside"; // [inside, outside]
-small_fit = "inside"; // [inside, outside]
+// over: reducer slides OVER the pipe (size = pipe outer diameter). into: reducer slides INTO the pipe/hose (size = its inner diameter)
+large_fit = "over"; // [over, into]
+small_fit = "over"; // [over, into]
 // Diametral slip-fit clearance, mm
 clearance = 0.5;
 
@@ -27,8 +27,10 @@ clearance = 0.5;
 wall = 3;
 // Length of the tapered section, mm
 taper_height = 60;
-// Length of the straight collar on each end, mm
-lip_length = 20;
+// Length of the straight collar on the large end, mm
+large_lip = 20;
+// Length of the straight collar on the small end, mm
+small_lip = 20;
 
 /* [Hidden] */
 $fn = 128;
@@ -38,19 +40,20 @@ function to_mm(size, units) = units == "mm" ? size : size * 25.4;
 
 // [inner, outer] diameters of one end
 function end_diameters(d, fit, clearance, wall) =
-    fit == "inside"
+    assert(fit == "over" || fit == "into", str("fit must be \"over\" or \"into\", got ", fit))
+    fit == "over"
         ? [d + clearance, d + clearance + 2*wall]
         : [d - clearance - 2*wall, d - clearance];
 
 module duct_reducer(large_size = large_size, small_size = small_size, units = units,
                     large_fit = large_fit, small_fit = small_fit, clearance = clearance,
-                    wall = wall, taper_height = taper_height, lip_length = lip_length) {
+                    wall = wall, taper_height = taper_height, large_lip = large_lip, small_lip = small_lip) {
     L = end_diameters(to_mm(large_size, units), large_fit, clearance, wall);
     S = end_diameters(to_mm(small_size, units), small_fit, clearance, wall);
-    total = 2*lip_length + taper_height;
+    total = large_lip + taper_height + small_lip;
 
-    // Slope of the steeper (outer) surface, for printability with the large end down
-    angle = atan((L[1] - S[1]) / 2 / taper_height);
+    // Slope of the steeper of the inner/outer taper surfaces, for printability with the large end down
+    angle = max(atan((L[0] - S[0]) / 2 / taper_height), atan((L[1] - S[1]) / 2 / taper_height));
     echo(str("Inner: ", L[0], " -> ", S[0], " mm, outer: ", L[1], " -> ", S[1],
              " mm, height: ", total, " mm, taper: ", angle, " deg from vertical"));
     if (angle > 45) echo("WARNING: taper steeper than 45 deg, increase taper_height or print with supports");
@@ -59,11 +62,11 @@ module duct_reducer(large_size = large_size, small_size = small_size, units = un
     // Large collar, taper and small collar as one profile
     module body(dl, ds, extra) {
         translate([0, 0, -extra])
-            cylinder(d = dl, h = lip_length + 2*extra);
-        translate([0, 0, lip_length])
+            cylinder(d = dl, h = large_lip + 2*extra);
+        translate([0, 0, large_lip])
             cylinder(d1 = dl, d2 = ds, h = taper_height);
-        translate([0, 0, lip_length + taper_height - extra])
-            cylinder(d = ds, h = lip_length + 2*extra);
+        translate([0, 0, large_lip + taper_height - extra])
+            cylinder(d = ds, h = small_lip + 2*extra);
     }
 
     difference() {
