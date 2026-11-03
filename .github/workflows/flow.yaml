@@ -93,9 +93,9 @@ jobs:
             while read -r entry; do
               folder=$(jq -r .folder <<< "$entry")
               name=$(jq -r .name <<< "$entry")
-              # SCAD changed again since this run started: leave it to the next run
-              if ! git diff --quiet "$GITHUB_SHA" HEAD -- "$folder/$name.scad"; then
-                echo "Skipping $folder/$name.scad, changed since $GITHUB_SHA"
+              # Model folder (SCAD or its use<>/include<> deps) changed since this run started: leave it to the next run
+              if ! git diff --quiet "$GITHUB_SHA" HEAD -- "$folder"; then
+                echo "Skipping $folder/$name.scad, $folder changed since $GITHUB_SHA"
                 continue
               fi
               cp "$RUNNER_TEMP/out/$folder/$name.stl" "$RUNNER_TEMP/out/$folder/$name.png" "$folder/"
