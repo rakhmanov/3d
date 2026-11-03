@@ -1,58 +1,75 @@
-$fn = 128;  // smoothness
+// Parametric duct reducer / adapter
+// Author: Denis Shatilov
+// License: CC BY-NC 4.0
+// https://creativecommons.org/licenses/by-nc/4.0/
+//
+// Open in OpenSCAD and use Window > Customizer, or call duct_reducer(...) from another file:
+//   use <fan-duct-reducer.scad>
+//   duct_reducer(large_size=4, small_size=3, small_fit="outside");
 
+/* [Sizes] */
+// Units for large_size / small_size (everything else is mm)
+units = "inch"; // [inch, mm]
+// Nominal diameter of the large duct
+large_size = 6;
+// Nominal diameter of the small duct
+small_size = 5;
 
-d_large = 6;           // 6" inner
-d_small = 5;           // 5" inner
-wall = 3;              // wall thickness
-height = 60;           // taper section height
-lip_length = 20;       // 1 inch lips on both sides
-inner_offset = 0.5;    // clearance for hose slip-on
+/* [Fit] */
+// inside: duct slides into the reducer (sized by duct OD). outside: hose slides over the reducer (sized by hose ID)
+large_fit = "inside"; // [inside, outside]
+small_fit = "inside"; // [inside, outside]
+// Diametral slip-fit clearance, mm
+clearance = 0.5;
 
-// Computed
-dd_large = d_large*25.4;
-dd_small = d_small*25.4;
+/* [Shape] */
+// Wall thickness, mm
+wall = 3;
+// Length of the tapered section, mm
+taper_height = 60;
+// Length of the straight collar on each end, mm
+lip_length = 20;
 
-// === MAIN REDUCER BODY ===
-module duct_reducer_with_lips() {
+/* [Hidden] */
+$fn = 128;
+eps = 0.01;
+
+function to_mm(size, units) = units == "mm" ? size : size * 25.4;
+
+// [inner, outer] diameters of one end
+function end_diameters(d, fit, clearance, wall) =
+    fit == "inside"
+        ? [d + clearance, d + clearance + 2*wall]
+        : [d - clearance - 2*wall, d - clearance];
+
+module duct_reducer(large_size = large_size, small_size = small_size, units = units,
+                    large_fit = large_fit, small_fit = small_fit, clearance = clearance,
+                    wall = wall, taper_height = taper_height, lip_length = lip_length) {
+    L = end_diameters(to_mm(large_size, units), large_fit, clearance, wall);
+    S = end_diameters(to_mm(small_size, units), small_fit, clearance, wall);
+    total = 2*lip_length + taper_height;
+
+    // Slope of the steeper (outer) surface, for printability with the large end down
+    angle = atan((L[1] - S[1]) / 2 / taper_height);
+    echo(str("Inner: ", L[0], " -> ", S[0], " mm, outer: ", L[1], " -> ", S[1],
+             " mm, height: ", total, " mm, taper: ", angle, " deg from vertical"));
+    if (angle > 45) echo("WARNING: taper steeper than 45 deg, increase taper_height or print with supports");
+    assert(S[0] > 0, "small end too small for this wall/fit");
+
+    // Large collar, taper and small collar as one profile
+    module body(dl, ds, extra) {
+        translate([0, 0, -extra])
+            cylinder(d = dl, h = lip_length + 2*extra);
+        translate([0, 0, lip_length])
+            cylinder(d1 = dl, d2 = ds, h = taper_height);
+        translate([0, 0, lip_length + taper_height - extra])
+            cylinder(d = ds, h = lip_length + 2*extra);
+    }
+
     difference() {
-        union() {
-            // Main tapered reducer
-            hull() {
-                translate([0, 0, lip_length])
-                    cylinder(d=dd_large + 2*wall, h=1);
-                translate([0, 0, lip_length + height])
-                    cylinder(d=dd_small + 2*wall, h=1);
-            }
-
-            // Large-end lip
-            translate([0, 0, 0])
-                cylinder(d=dd_large + 2*wall, h=lip_length);
-
-            // Small-end lip
-            translate([0, 0, lip_length + height])
-                cylinder(d=dd_small + 2*wall, h=lip_length);
-        }
-
-        // Hollow air path (offset for hose slip-on)
-        union() {
-            // Main taper
-            hull() {
-                translate([0, 0, lip_length])
-                    cylinder(d=dd_large + inner_offset, h=1);
-                translate([0, 0, lip_length + height])
-                    cylinder(d=dd_small + inner_offset, h=1);
-            }
-
-            // Large-end hollow (lip section)
-            translate([0, 0, 0-0.01])
-                cylinder(d=dd_large + inner_offset, h=lip_length + 0.02);
-
-            // Small-end hollow (lip section)
-            translate([0, 0, lip_length + height])
-                cylinder(d=dd_small + inner_offset, h=lip_length + 0.02);
-        }
+        body(L[1], S[1], 0);
+        body(L[0], S[0], eps);
     }
 }
 
-// === RENDER ===
-duct_reducer_with_lips();
+duct_reducer();
