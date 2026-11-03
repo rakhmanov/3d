@@ -2,22 +2,38 @@ import os
 import json
 import subprocess
 
-# Get changed files from the current commit
-changed_files = subprocess.check_output(
-    ['git', 'diff-tree', '--no-commit-id', '--name-only', '--diff-filter=ACMR', '-r', 'HEAD']
-).decode().splitlines()
+
+def last_commit(path):
+    return subprocess.check_output(
+        ['git', 'log', '-1', '--format=%H', '--', path]
+    ).decode().strip()
+
+
+def is_ancestor(older, newer):
+    return subprocess.run(
+        ['git', 'merge-base', '--is-ancestor', older, newer]
+    ).returncode == 0
+
+
+# Pick every SCAD whose STL or PNG is missing or was last committed before the SCAD changed.
+# Unlike diffing only HEAD, this catches pushes with several commits and runs that failed earlier.
+scad_files = subprocess.check_output(['git', 'ls-files', '*.scad']).decode().splitlines()
 
 entries = []
-for path in changed_files:
-    if path.endswith('.scad'):
-        splitName = os.path.splitext(os.path.basename(path))
-        folder = os.path.dirname(path)
-        name = splitName[0]
-        extension = splitName[1]
-        entries.append({"folder": folder, "name": name})
+for path in scad_files:
+    base = os.path.splitext(path)[0]
+    scad_commit = last_commit(path)
+    stale = False
+    for ext in ('.stl', '.png'):
+        output_commit = last_commit(base + ext)
+        if not output_commit or not is_ancestor(scad_commit, output_commit):
+            stale = True
+    if stale:
+        entries.append({"folder": os.path.dirname(path), "name": os.path.basename(base)})
 
 if entries:
     matrix = {"include": entries}
+    print(json.dumps(matrix, indent=2))
     with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
         f.write(f"matrix={json.dumps(matrix)}\n")
 else:
