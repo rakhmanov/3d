@@ -4,6 +4,9 @@ Designes are shared here under CC BY-NC 4.0 License, unless stated otherwise in 
 
 * [Zerno Z1 Purging Bellows](./bellows)
 * [Nema motor spacer](./nema-spacer)
+* [6" to 5" duct reducer](./fan-duct-reducer) (standard and short)
+* [Mounting bracket](./mounting-bracket)
+* [Spacer insert](./spacer-insert)
 
 ---
 
