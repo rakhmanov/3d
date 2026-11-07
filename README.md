@@ -7,7 +7,7 @@ Designes are shared here under CC BY-NC 4.0 License, unless stated otherwise in 
 * [Duct reducer](./fan-duct-reducer): parametric, any two sizes (presets: 6" to 5", 5" to 4")
 * [Mounting bracket](./mounting-bracket)
 * [Spacer insert](./spacer-insert)
-* [Surface Go window frame](./surface-go-window-frame): slide-in tablet frame for a shop window, landscape or portrait
+* [Surface Go window frame](./surface-go-window-frame): Surface Go frame that sticks to a shop window, landscape or portrait
 
 ---
 
