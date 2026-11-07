@@ -48,12 +48,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Render STL
         run: |
-          docker run --rm -v "$PWD":/openscad -w /openscad openscad/openscad:latest \
-            openscad -o "${{ matrix.name }}.stl" "${{ matrix.name }}.scad"
+          docker run --rm -v "$PWD":/openscad -w /openscad openscad/openscad:dev.2026-10-20 \
+            openscad --backend=manifold --export-format binstl -o "${{ matrix.name }}.stl" "${{ matrix.name }}.scad"
       - name: Render PNG
         run: |
-          docker run --rm --init -v "$PWD":/openscad -w /openscad openscad/openscad:latest \
-            xvfb-run -a openscad -o "${{ matrix.name }}.png" --imgsize=800,600 --render --viewall "${{ matrix.name }}.scad"
+          docker run --rm --init -v "$PWD":/openscad -w /openscad openscad/openscad:dev.2026-10-20 \
+            openscad --backend=manifold -o "${{ matrix.name }}.png" --imgsize=800,600 --render --viewall "${{ matrix.name }}.scad"
       - name: Check the results image from STL
         run: ls ${{ matrix.name }}.png
       # Collect outputs under out/<folder>/ so the commit job can put them back in place
