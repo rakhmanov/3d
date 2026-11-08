@@ -10,13 +10,14 @@
 // short edge, charger at the bottom). It reuses the modules here, so change
 // dimensions in this file only.
 //
-// The fit is deliberately loose. Four M4 x 20 thumbscrews go through the ears
-// on the back lip and press the tablet against the front lip to stop rattles.
+// The fit is deliberately loose. Four M4 x 20 thumbscrews go through bosses
+// on the back rim and press the tablet against the front lip to stop rattles.
 // Screw them straight into the 3.4 mm holes (they cut their own thread in PETG);
 // put a small felt pad on the tablet under each screw tip.
 //
 // Print front face down on the bed (clean, flat face for the tape). No supports:
-// the back lip overhangs 2.5 mm flat, then slopes at 45 degrees.
+// the back rim overhangs 2.5 mm flat, then slopes at 45 degrees.
+// Strength: 4 walls (perimeters), 30% gyroid infill.
 // Units mm. Tablet coordinates as seen from the room in landscape: x right,
 // y up, z from the glass (0) towards the room.
 //
@@ -31,21 +32,20 @@ play_t = 1.5;          // front-back play; the thumbscrews take it up
 tab_r = 5.0;           // pocket corner radius (keep <= tablet's corner radius)
 
 /* [Frame] */
-wall = 3.0;            // side wall thickness
-lip = 2.0;             // front lip thickness (glass side)
+wall = 3.5;            // side wall thickness (3.5 keeps the frame inside a 256 mm bed)
+lip = 3.0;             // front lip thickness (glass side)
 lip_over = 13.0;       // front lip covers the bezel this far (screen starts ~17 in)
-back_flat = 2.5;       // back lip: flat overhang (prints without support)
-back_over = 6.0;       // back lip: total reach over the tablet's back
-back_skin = 1.2;       // back lip thickness above the 45 degree slope
-finger_r = 18;         // finger notch in the back lip at the opening
+back_flat = 2.5;       // back rim: flat overhang (prints without support)
+back_over = 11.0;      // back rim: total reach over the tablet's back
+back_skin = 2.5;       // back rim thickness above the 45 degree slope
+finger_r = 18;         // finger notch in the back rim at the opening
 
 /* [Thumbscrews] */
 screw_x = 70;          // screws at x = +-screw_x on the top and bottom lips
 screw_in = 7.5;        // screw centre, in from the pocket edge
 screw_hole = 3.4;      // M4 straight into PETG (3.3 for PLA, 5.6 for heat-set insert)
-ear_w = 22;            // ear width along the edge
-ear_over = 13;         // ear reach over the tablet's back
-ear_h = 14;            // ear height above the tablet's back side of the pocket
+boss_d = 11;           // round boss on the back rim around each screw
+boss_h = 4;            // boss height above the rim
 
 /* [Cutouts - tablet edges as in landscape] */
 cable_y = [-55, 25];   // Surface Connect slot in the right wall, y range
@@ -54,9 +54,9 @@ btn_x = [-112, -68];   // power + volume on the top edge, x range
 $fn = 48;
 
 // --- derived ---------------------------------------------------------------
-pw = tab_w + 2 * clear;          // pocket 246 x 176
+pw = tab_w + 2 * clear;          // pocket 247 x 177
 ph = tab_h + 2 * clear;
-ow = pw + 2 * wall;              // outer 252 x 182
+ow = pw + 2 * wall;              // outer 254 x 184
 oh = ph + 2 * wall;
 o_r = tab_r + wall;
 
@@ -65,12 +65,14 @@ z_back = lip + tab_t + play_t;   // tablet back / start of back lip
 z_slope = z_back + (back_over - back_flat);
 z_top = z_slope + back_skin;
 
-win_w = pw - 2 * lip_over;       // 220 x 150 window (screen ~211 x 141)
+win_w = pw - 2 * lip_over;       // 221 x 151 window (screen ~211 x 141)
 win_h = ph - 2 * lip_over;
 
 echo(str("outer ", ow, " x ", oh, " x ", z_top, "  window ", win_w, " x ", win_h,
          "  tape strip ", wall + lip_over,
-         "  screw: tablet back is ", z_back + ear_h - (lip + tab_t), " mm below the ear top"));
+         "  screw: tablet back is ", z_top + boss_h - (lip + tab_t), " mm below the boss top"));
+
+assert(ow <= 255 && oh <= 255, "frame no longer fits a 256 mm bed");
 
 // --- helpers ---------------------------------------------------------------
 module rrect(w, h, r) {
@@ -94,7 +96,7 @@ module frame(open = "top") {
     difference() {
         union() {
             frame_body(open);
-            ears();
+            bosses();
         }
         screw_holes();
     }
@@ -137,28 +139,14 @@ module frame_body(open) {
 function screw_pos() = [for (sx = [-1, 1], sy = [-1, 1])
     [sx * screw_x, sy * (ph / 2 - screw_in), sy]];
 
-// thicker ear on the back lip for each screw: flat 2.5 mm, then 45 degrees
-module ears() {
-    for (p = screw_pos()) {
-        sy = p[2];
-        difference() {
-            box(p[0] - ear_w / 2, p[0] + ear_w / 2,
-                min(sy * ph / 2, sy * (ph / 2 - ear_over)),
-                max(sy * ph / 2, sy * (ph / 2 - ear_over)),
-                z_back, z_back + ear_h);
-            hull() {
-                slab(back_flat, z_back - 0.01);
-                slab(ear_over, z_back + ear_over - back_flat);
-            }
-            translate([0, 0, z_back + ear_over - back_flat - 0.01])
-                linear_extrude(ear_h) rrect(pw - 2 * ear_over, ph - 2 * ear_over, 2);
-        }
-    }
+module bosses() {
+    for (p = screw_pos())
+        translate([p[0], p[1], z_top - 0.01]) cylinder(d = boss_d, h = boss_h);
 }
 
 module screw_holes() {
     for (p = screw_pos())
-        translate([p[0], p[1], z_back - 1]) cylinder(d = screw_hole, h = ear_h + 2, $fn = 24);
+        translate([p[0], p[1], z_back - 1]) cylinder(d = screw_hole, h = z_top + boss_h, $fn = 24);
 }
 
 // Shown as it hangs: portrait is turned so the opening is at the top.
