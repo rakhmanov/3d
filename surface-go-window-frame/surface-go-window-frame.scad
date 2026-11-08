@@ -7,9 +7,9 @@
 // (looking at the screen), near the bottom. Seen from the room that is the left wall.
 //
 // This file renders the landscape frame (open on a long edge).
-// surface-go-window-frame-portrait.scad renders the portrait one (open on a
+// portrait/surface-go-window-frame-portrait.scad renders the portrait one (open on a
 // short edge, charger at the bottom). It reuses the modules here, so change
-// dimensions in this file only. The -left/-right and -portrait-top/-bottom
+// dimensions in this file only. The -left/-right (and portrait/...-top/-bottom)
 // files render the two halves of each frame for a 256 mm bed, and
 // surface-go-window-frame-key.scad the butterfly key that locks each closed seam.
 //

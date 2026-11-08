@@ -7,7 +7,7 @@ Slide-in frame for a 1st-gen Surface Go (245 x 175 x 8.3 mm) used as a shop-wind
 | Part | One piece | Two halves (256 mm bed) | Notes |
 |---|---|---|---|
 | Landscape frame | [surface-go-window-frame.stl](surface-go-window-frame.stl) | [left](surface-go-window-frame-left.stl) + [right](surface-go-window-frame-right.stl) | opens on the long top edge, charger slot bottom right (seen from outside) |
-| Portrait frame | [surface-go-window-frame-portrait.stl](surface-go-window-frame-portrait.stl) | [bottom](surface-go-window-frame-portrait-bottom.stl) + [top](surface-go-window-frame-portrait-top.stl) | opens on the short top edge, charger slot at the bottom |
+| Portrait frame | [surface-go-window-frame-portrait.stl](portrait/surface-go-window-frame-portrait.stl) | [bottom](portrait/surface-go-window-frame-portrait-bottom.stl) + [top](portrait/surface-go-window-frame-portrait-top.stl) | opens on the short top edge, charger slot at the bottom |
 | Butterfly key (halves only) | | [surface-go-window-frame-key.stl](surface-go-window-frame-key.stl) | locks the seam from the back: 1 for landscape, 2 for portrait |
 
 Each frame is 254 x 184 x 16 mm, about 70 g of PETG. That's too tight for a 256 mm bed (Bambu A1/P1/X1): the slicer won't place it once a brim or the purge area is involved. So each frame also comes as two halves, about 133 x 184 mm each, printed one at a time. A dovetail in the front lip above and below the screen locks them together, and you glue them. The tape is permanent, so print the frame for the orientation you want; a second frame is needed to switch.
