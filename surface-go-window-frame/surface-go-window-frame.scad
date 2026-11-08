@@ -1,16 +1,19 @@
-// Window frame for the Surface Go (1st gen) shop screen.
+// Slide-in window frame for the Surface Go (1st gen) shop screen.
 //
-// Glass side: front lip + skirt. Four 3M Dual Lock pads sit at
-// (+-pad_c, +-pad_c) - the same spots in landscape and portrait, so the
-// frame can be pulled off the glass and snapped back rotated 90 degrees.
-// Room side: open back; two flexible bars snap into grooves to hold the tablet.
+// The flat front face goes against the inside of the window glass, taped all
+// the way round (12 mm VHB, e.g. 3M 5952). The tablet slides in from the open
+// top edge, between the front lip and the back lip, and rests on the bottom wall.
+// Right wall (as the tablet sits in landscape) has the Surface Connect slot.
 //
-// Print orientation as modelled: back (room side) down on the bed, glass side up.
-// Supports only under the front lip (it faces the tablet bezel, hidden).
-// Units mm. Landscape as seen from the room: x right, y up, z towards the glass.
+// This file renders the landscape frame (open on a long edge).
+// surface-go-window-frame-portrait.scad renders the portrait one (open on a
+// short edge, charger at the bottom). surface-go-fit-test.scad prints a corner.
+// All of them reuse the modules here, so change dimensions in this file only.
 //
-// Parts: this file renders the frame. surface-go-back-bar.scad (print 2) and
-// surface-go-fit-test.scad reuse it via use<>, so change dimensions here only.
+// Print front face down on the bed (clean, flat face for the tape). No supports:
+// the back lip overhangs 2.5 mm flat, then slopes at 45 degrees.
+// Units mm. Tablet coordinates as seen from the room in landscape: x right,
+// y up, z from the glass (0) towards the room.
 //
 // Licence: CC BY-NC 4.0
 
@@ -18,35 +21,24 @@
 tab_w = 245.0;
 tab_h = 175.0;
 tab_t = 8.3;
-clear = 0.5;           // per side in the pocket
+clear = 0.5;           // per side around the tablet edge
+play_t = 0.6;          // front-back play so it slides easily
 tab_r = 5.0;           // pocket corner radius (keep <= tablet's corner radius)
 
 /* [Frame] */
 wall = 3.0;            // side wall thickness
 lip = 2.0;             // front lip thickness (glass side)
-lip_over = 13.0;       // how far the lip covers the bezel (screen starts ~17 in)
+lip_over = 13.0;       // front lip covers the bezel this far (screen starts ~17 in)
+back_flat = 2.5;       // back lip: flat overhang (prints without support)
+back_over = 6.0;       // back lip: total reach over the tablet's back
+back_skin = 1.2;       // back lip thickness above the 45 degree slope
+finger_r = 18;         // finger notch in the back lip at the opening
 
-/* [Back retention bars] */
-ret = 1.5;             // wall material behind the groove (holds the bar in)
-bar_t = 3.0;
-groove_h = bar_t + 0.3;
-groove_d = 1.2;        // groove depth into the long walls
-bar_w = 14.0;
-bar_play = 0.4;        // bar is this much shorter than groove-to-groove
-tab_play = 0.5;        // front-back slack for the tablet
+/* [Cutouts - tablet edges as in landscape] */
+cable_y = [-55, 25];   // Surface Connect slot in the right wall, y range
+btn_x = [-112, -68];   // power + volume on the top edge, x range
 
-/* [3M Dual Lock] */
-dl_mated = 5.7;        // measure your mated pair incl. both adhesives!
-pad = 12.0;            // pad square size
-pad_c = 81.5;          // pad centre offset from frame centre (both axes)
-pad_recess = 0.4;      // shallow locating pocket for each pad
-skirt_gap = 0.3;       // skirt stops this short of the glass
-
-/* [Cutouts - landscape: right edge = Surface Connect, top-left = buttons] */
-cable_y = [-55, 25];   // slot in the right wall, y range
-btn_x = [-112, -68];   // slot in the top wall, x range (power + volume)
-
-$fn = 64;
+$fn = 48;
 
 // --- derived ---------------------------------------------------------------
 pw = tab_w + 2 * clear;          // pocket 246 x 176
@@ -55,21 +47,16 @@ ow = pw + 2 * wall;              // outer 252 x 182
 oh = ph + 2 * wall;
 o_r = tab_r + wall;
 
-z_groove0 = ret;
-z_tab0 = ret + groove_h;
-z_lip0 = z_tab0 + tab_t + tab_play;
-z_lip1 = z_lip0 + lip;
-skirt = dl_mated - pad_recess - skirt_gap;
-z_top = z_lip1 + skirt;
+z_pocket0 = lip;
+z_back = lip + tab_t + play_t;   // tablet back / start of back lip
+z_slope = z_back + (back_over - back_flat);
+z_top = z_slope + back_skin;
 
 win_w = pw - 2 * lip_over;       // 220 x 150 window (screen ~211 x 141)
 win_h = ph - 2 * lip_over;
 
-// sanity: pad must sit inside the lip band, clear of the skirt
-assert(pad_c - pad / 2 >= ph / 2 - lip_over, "pad overlaps the screen window");
-assert(pad_c + pad / 2 <= ph / 2, "pad overlaps the skirt");
-
-echo(str("outer ", ow, " x ", oh, " x ", z_top, "  window ", win_w, " x ", win_h));
+echo(str("outer ", ow, " x ", oh, " x ", z_top, "  window ", win_w, " x ", win_h,
+         "  tape strip ", wall + lip_over));
 
 // --- helpers ---------------------------------------------------------------
 module rrect(w, h, r) {
@@ -80,50 +67,60 @@ module box(x0, x1, y0, y1, z0, z1) {
     translate([x0, y0, z0]) cube([x1 - x0, y1 - y0, z1 - z0]);
 }
 
-// --- parts -----------------------------------------------------------------
-module frame() {
+module slab(inset, z) {
+    translate([0, 0, z]) linear_extrude(0.01)
+        rrect(pw - 2 * inset, ph - 2 * inset, max(tab_r - inset, 2));
+}
+
+// --- frame -----------------------------------------------------------------
+// open = "top"  : landscape, tablet slides down onto its long bottom edge
+// open = "left" : portrait (tablet turned clockwise), slides down onto its
+//                 charger edge, so the charger slot ends up at the bottom
+module frame(open = "top") {
+    big = 50;
     difference() {
         linear_extrude(z_top) rrect(ow, oh, o_r);
 
-        // tablet pocket (open back)
-        translate([0, 0, -0.01]) linear_extrude(z_lip0 + 0.01) rrect(pw, ph, tab_r);
-        // screen window through the lip
+        // screen window, all the way through
         translate([0, 0, -1]) linear_extrude(z_top + 2) rrect(win_w, win_h, 3);
-        // space inside the skirt, in front of the lip
-        translate([0, 0, z_lip1]) linear_extrude(skirt + 1) rrect(pw, ph, tab_r);
+        // tablet pocket
+        translate([0, 0, z_pocket0]) linear_extrude(z_back - z_pocket0) rrect(pw, ph, tab_r);
+        // back opening: flat overhang, then 45 degree slope, then straight up
+        hull() {
+            slab(back_flat, z_back - 0.01);
+            slab(back_over, z_slope);
+        }
+        translate([0, 0, z_slope - 0.01])
+            linear_extrude(z_top) rrect(pw - 2 * back_over, ph - 2 * back_over, 2);
 
-        // bar grooves along the full length of both long walls
-        for (s = [1, -1])
-            box(-pw / 2 + tab_r, pw / 2 - tab_r,
-                min(s * ph / 2, s * (ph / 2 + groove_d)),
-                max(s * ph / 2, s * (ph / 2 + groove_d)),
-                z_groove0, z_groove0 + groove_h);
+        // the opening: wall removed between the lips, plus a finger notch
+        if (open == "top") {
+            box(-pw / 2, pw / 2, 0, big + ph / 2, z_pocket0, z_back);
+            translate([0, oh / 2, z_back - 0.01]) cylinder(r = finger_r, h = z_top);
+        } else {
+            box(-big - pw / 2, 0, -ph / 2, ph / 2, z_pocket0, z_back);
+            translate([-ow / 2, 0, z_back - 0.01]) cylinder(r = finger_r, h = z_top);
+        }
 
-        // Surface Connect slot (right wall), open from the back up to the lip
-        box(pw / 2 - 1, ow / 2 + 1, cable_y[0], cable_y[1], -1, z_lip0);
-        // button access (top wall)
-        box(btn_x[0], btn_x[1], ph / 2 - 1, oh / 2 + 1, -1, z_lip0);
-
-        // Dual Lock locating recesses on the lip's glass face
-        for (sx = [1, -1], sy = [1, -1])
-            translate([sx * pad_c, sy * pad_c, 0])
-                box(-pad / 2 - 0.2, pad / 2 + 0.2, -pad / 2 - 0.2, pad / 2 + 0.2,
-                    z_lip1 - pad_recess, z_lip1 + 1);
+        // Surface Connect slot (right edge of the tablet)
+        box(pw / 2 - 1, ow / 2 + 1, cable_y[0], cable_y[1], z_pocket0, z_back);
+        // power / volume access (top edge) when the top is closed
+        if (open != "top")
+            box(btn_x[0], btn_x[1], ph / 2 - 1, oh / 2 + 1, z_pocket0, z_back);
     }
 }
 
-module bar() {
-    bar_len = ph + 2 * groove_d - bar_play;
-    linear_extrude(bar_t) rrect(bar_w, bar_len, 2);
-    linear_extrude(bar_t + 4) rrect(bar_w, 20, 2);   // finger tab to pull it out
-}
+// Shown as it hangs: portrait is turned so the opening is at the top.
+module frame_landscape() frame("top");
+module frame_portrait() rotate([0, 0, -90]) frame("left");
 
-// one corner of the frame, ~20 min print: check the tablet corner, lip and bar fit
+// bottom-right corner incl. the start of the charger slot (~25 min print):
+// slide the tablet corner in from the cut side to check the fit
 module test_corner() {
     intersection() {
-        frame();
-        box(70, 130, 40, 95, -1, 30);
+        frame("top");
+        box(70, 130, -95, -40, -1, 30);
     }
 }
 
-frame();
+frame_landscape();
