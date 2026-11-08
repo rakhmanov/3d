@@ -9,12 +9,12 @@ Slide-in frame for a 1st-gen Surface Go (245 x 175 x 8.3 mm) used as a shop-wind
 | Landscape frame | [surface-go-window-frame.stl](surface-go-window-frame.stl) | [left](surface-go-window-frame-left.stl) + [right](surface-go-window-frame-right.stl) | opens on the long top edge, charger slot bottom right (seen from outside) |
 | Portrait frame | [surface-go-window-frame-portrait.stl](surface-go-window-frame-portrait.stl) | [bottom](surface-go-window-frame-portrait-bottom.stl) + [top](surface-go-window-frame-portrait-top.stl) | opens on the short top edge, charger slot at the bottom |
 
-Each frame is 254 x 184 x 19 mm, about 80 g of PETG. That's too tight for a 256 mm bed (Bambu A1/P1/X1): the slicer won't place it once a brim or the purge area is involved. So each frame also comes as two halves, about 133 x 184 mm each, printed one at a time. A dovetail in the front lip above and below the screen locks them together, and you glue them. The tape is permanent, so print the frame for the orientation you want; a second frame is needed to switch.
+Each frame is 254 x 184 x 16 mm, about 70 g of PETG. That's too tight for a 256 mm bed (Bambu A1/P1/X1): the slicer won't place it once a brim or the purge area is involved. So each frame also comes as two halves, about 133 x 184 mm each, printed one at a time. A dovetail in the front lip above and below the screen locks them together, and you glue them. The tape is permanent, so print the frame for the orientation you want; a second frame is needed to switch.
 
 ## Print
 
 - Front face down on the bed: that's the face that gets taped, so it comes out flat and clean.
-- No supports. The back rim overhangs 2.5 mm flat, then slopes at 45 degrees, and there is no rim along the open edge. The only bridge is over the charger slot (60 mm).
+- No supports. The back rim overhangs 3 mm flat, then slopes at 45 degrees, and there is no rim along the open edge. The only bridge is over the charger slot (60 mm).
 - Matte black PETG, or ASA on an enclosed printer. Avoid PLA in a sunny window.
 - 4 walls (perimeters) and 30% gyroid infill for strength.
 - The fit is deliberately loose (1 mm each side, 1 mm front to back), so it fits without a test print.
@@ -30,12 +30,12 @@ Each frame is 254 x 184 x 19 mm, about 80 g of PETG. That's too tight for a 256 
 1. Clean the glass with isopropyl alcohol.
 2. Run 12 mm VHB tape (e.g. 3M 5952, black) round the front face. The flat strip is 16 mm wide, all four sides.
 3. Use a level, press the frame onto the glass hard for 30 s, and wait 24 h before loading the tablet.
-4. Stick a strip of 1 mm self-adhesive felt along the back of the tablet's two side edges and bottom edge, within 6 mm of the edge (that's where the back rim overlaps it). It takes up the slack so the tablet doesn't rattle.
+4. Stick a strip of 1 mm self-adhesive felt along the back of the tablet's two side edges and bottom edge, within 4 mm of the edge (that's where the back rim overlaps it). It takes up the slack so the tablet doesn't rattle.
 5. Slide the tablet in from the top, screen towards the glass, and plug in the charger through the slot.
 
 ## Hardware
 
-- 1 mm self-adhesive felt, about 0.5 m (cut into 5 mm strips).
+- 1 mm self-adhesive felt, about 0.5 m (cut into 4 mm strips).
 - 12 mm VHB tape, about 0.9 m.
 
 ## Check before printing

@@ -14,10 +14,10 @@
 //
 // Anti-rattle: the pocket has 1 mm of front-back play. Stick a strip of 1 mm
 // self-adhesive felt along the back of the tablet's two side edges and bottom
-// edge (within 6 mm of the edge, where the back rim overlaps it).
+// edge (within 4 mm of the edge, where the back rim overlaps it).
 //
 // Print front face down on the bed (clean, flat face for the tape). No supports:
-// the back rim overhangs 2.5 mm flat, then slopes at 45 degrees, and there is
+// the back rim overhangs 3 mm flat, then slopes at 45 degrees, and there is
 // no rim over the opening. Only the charger slot is bridged (60 mm).
 // Strength: 4 walls (perimeters), 30% gyroid infill.
 // Units mm. Coordinates as seen from the ROOM (the tablet's back) in landscape: x right,
@@ -35,11 +35,11 @@ tab_r = 5.0;           // pocket corner radius (keep <= tablet's corner radius)
 
 /* [Frame] */
 wall = 3.5;            // side wall thickness (3.5 keeps the frame inside a 256 mm bed)
-lip = 2.5;             // front lip thickness (glass side)
+lip = 2.0;             // front lip thickness (glass side)
 lip_over = 13.0;       // front lip covers the bezel this far (screen starts ~17 in)
-back_flat = 2.5;       // back rim: flat overhang (prints without support)
-back_over = 8.0;       // back rim: total reach over the tablet's back
-back_skin = 2.0;       // back rim thickness above the 45 degree slope
+back_flat = 3.0;       // back rim: flat overhang (prints without support)
+back_over = 6.0;       // back rim: total reach over the tablet's back
+back_skin = 1.6;       // back rim thickness above the 45 degree slope
 
 /* [Cutouts - tablet edges as in landscape] */
 // (room view: the charger edge is the LEFT wall, the buttons are top RIGHT)
