@@ -10,7 +10,8 @@
 // surface-go-window-frame-portrait.scad renders the portrait one (open on a
 // short edge, charger at the bottom). It reuses the modules here, so change
 // dimensions in this file only. The -left/-right and -portrait-top/-bottom
-// files render the two halves of each frame for a 256 mm bed.
+// files render the two halves of each frame for a 256 mm bed, and
+// surface-go-window-frame-splice.scad the plate glued across each closed seam.
 //
 // Anti-rattle: the pocket has 1 mm of front-back play. Stick a strip of 1 mm
 // self-adhesive felt along the back of the tablet's two side edges and bottom
@@ -51,6 +52,10 @@ dt_neck = 6.0;         // dovetail width at the seam
 dt_head = 9.0;         // dovetail width at its tip
 dt_len = 6.0;          // how far the dovetail reaches into the other half
 dt_fit = 0.2;          // total gap between the halves (all round the dovetail)
+
+splice_len = 50.0;     // splice plate length, centred on the seam
+splice_t = 1.6;        // splice plate thickness
+splice_z0 = 1.0;       // splice side leg stops this far short of the front (tape) face
 
 $fn = 48;
 
@@ -152,6 +157,16 @@ module split_cut(g) {
     translate([0, 0, -1]) linear_extrude(lip + 1) offset(delta = g) minus_x_region();
     translate([-ow, -oh, -1]) cube([ow + g, 2 * oh, z_top + 2]);
 }
+
+// Splice: an L angle glued across the seam over a closed wall, one leg on the
+// room face of the back rim and one on the outside of the wall. Modelled in
+// place on the -y wall; splice_print() lays it down (rim leg on the bed).
+module splice() {
+    t = splice_t;
+    box(-splice_len / 2, splice_len / 2, -oh / 2 - t, -(ph / 2 - back_over), z_top, z_top + t);
+    box(-splice_len / 2, splice_len / 2, -oh / 2 - t, -oh / 2, splice_z0, z_top + t);
+}
+module splice_print() translate([0, 0, z_top + splice_t]) rotate([180, 0, 0]) splice();
 
 // half = -1 (the -x half, with the dovetails) or 1 (the +x half, with the sockets)
 module frame_half(open, half) {
