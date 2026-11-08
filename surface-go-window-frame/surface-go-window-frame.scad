@@ -146,17 +146,24 @@ module minus_x_region() {
                  [0, s * dt_y + dt_neck / 2], [-1, s * dt_y + dt_neck / 2]]);
 }
 
+// The -x side of the cut, grown by g. Dovetails only in the front lip (on the
+// bed); above it the seam is straight, so nothing hangs over the pocket.
+module split_cut(g) {
+    translate([0, 0, -1]) linear_extrude(lip + 1) offset(delta = g) minus_x_region();
+    translate([-ow, -oh, -1]) cube([ow + g, 2 * oh, z_top + 2]);
+}
+
 // half = -1 (the -x half, with the dovetails) or 1 (the +x half, with the sockets)
 module frame_half(open, half) {
     if (half < 0)
         intersection() {
             frame(open);
-            translate([0, 0, -1]) linear_extrude(z_top + 2) offset(delta = -dt_fit / 2) minus_x_region();
+            split_cut(-dt_fit / 2);
         }
     else
         difference() {
             frame(open);
-            translate([0, 0, -1]) linear_extrude(z_top + 2) offset(delta = dt_fit / 2) minus_x_region();
+            split_cut(dt_fit / 2);
         }
 }
 
