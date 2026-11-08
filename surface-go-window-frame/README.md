@@ -2,14 +2,14 @@
 
 ![preview](surface-go-window-frame.png)
 
-Slide-in frame for a 1st-gen Surface Go (245 x 175 x 8.3 mm) used as a shop-window display. The flat front face is taped to the inside of the glass all the way round, screen facing out. The tablet slides in from the open top edge and rests on the bottom wall; four thumbscrews in the back rim press it against the front lip so it doesn't rattle. The charger plugs in through a slot.
+Slide-in frame for a 1st-gen Surface Go (245 x 175 x 8.3 mm) used as a shop-window display. The flat front face is taped to the inside of the glass all the way round, screen facing out. The tablet slides in from the open top edge and rests on the bottom wall; a thin felt strip on its back stops it rattling. The charger plugs in through a slot.
 
 | Part | File | Notes |
 |---|---|---|
 | Landscape frame | [surface-go-window-frame.stl](surface-go-window-frame.stl) | opens on the long top edge, charger slot on the right |
 | Portrait frame | [surface-go-window-frame-portrait.stl](surface-go-window-frame-portrait.stl) | opens on the short top edge, charger slot at the bottom |
 
-Each frame is 254 x 184 x 24 mm (28 mm at the screw bosses), about 120 g of PETG, so it fits a 256 mm bed (Bambu P1/X1/A1) in one piece. The tape is permanent, so print the frame for the orientation you want; a second frame is needed to switch.
+Each frame is 254 x 184 x 19 mm, about 80 g of PETG, so it fits a 256 mm bed (Bambu P1/X1/A1) in one piece. The tape is permanent, so print the frame for the orientation you want; a second frame is needed to switch.
 
 ## Print
 
@@ -17,20 +17,19 @@ Each frame is 254 x 184 x 24 mm (28 mm at the screw bosses), about 120 g of PETG
 - No supports. The back rim overhangs 2.5 mm flat, then slopes at 45 degrees.
 - Matte black PETG, or ASA on an enclosed printer. Avoid PLA in a sunny window.
 - 4 walls (perimeters) and 30% gyroid infill for strength.
-- The fit is deliberately loose (1 mm each side, 1.5 mm front to back), so it fits without a test print.
+- The fit is deliberately loose (1 mm each side, 1 mm front to back), so it fits without a test print.
 
 ## Mount
 
 1. Clean the glass with isopropyl alcohol.
 2. Run 12 mm VHB tape (e.g. 3M 5952, black) round the front face. The flat strip is 16 mm wide, all four sides.
 3. Use a level, press the frame onto the glass hard for 30 s, and wait 24 h before loading the tablet.
-4. Slide the tablet in from the top, screen towards the glass, and plug in the charger through the slot.
-5. Put a small felt pad on the tablet's back under each screw, then turn the four M4 x 20 thumbscrews in finger tight until the tablet stops rattling.
+4. Stick the felt strip (see below), then slide the tablet in from the top, screen towards the glass, and plug in the charger through the slot.
+Before step 4, stick a strip of 1 mm self-adhesive felt along the back of the tablet's top and bottom edges, within 6 mm of the edge (that's where the back rim overlaps it). It takes up the slack so the tablet doesn't rattle.
 
 ## Hardware
 
-- 4x M4 x 20 thumbscrews (knurled head). They cut their own thread in the 3.4 mm holes the first time; for PLA set `screw_hole = 3.3`, for M4 heat-set inserts `5.6`.
-- 4x small felt pads (about 10 mm).
+- 1 mm self-adhesive felt, about 0.5 m (cut into 5 mm strips).
 - 12 mm VHB tape, about 0.9 m.
 
 ## Check before printing
@@ -40,5 +39,4 @@ All dimensions are parameters at the top of [surface-go-window-frame.scad](surfa
 - `cable_y`: Surface Connect slot position (an estimate). Measure your tablet.
 - `btn_x`: power/volume buttons, only cut in the portrait frame (in landscape they are at the open top).
 - `clear`, `play_t`: side and front-back clearance.
-- `screw_x`, `screw_hole`: thumbscrew positions and hole size.
 - `tab_r`: keep at or below the tablet's corner radius.

@@ -10,10 +10,9 @@
 // short edge, charger at the bottom). It reuses the modules here, so change
 // dimensions in this file only.
 //
-// The fit is deliberately loose. Four M4 x 20 thumbscrews go through bosses
-// on the back rim and press the tablet against the front lip to stop rattles.
-// Screw them straight into the 3.4 mm holes (they cut their own thread in PETG);
-// put a small felt pad on the tablet under each screw tip.
+// Anti-rattle: the pocket has 1 mm of front-back play. Stick a strip of 1 mm
+// self-adhesive felt along the back of the tablet's top and bottom edges
+// (within 6 mm of the edge, where the back rim overlaps it).
 //
 // Print front face down on the bed (clean, flat face for the tape). No supports:
 // the back rim overhangs 2.5 mm flat, then slopes at 45 degrees.
@@ -28,24 +27,17 @@ tab_w = 245.0;
 tab_h = 175.0;
 tab_t = 8.3;
 clear = 1.0;           // per side around the tablet edge
-play_t = 1.5;          // front-back play; the thumbscrews take it up
+play_t = 1.0;          // front-back play; a 1 mm felt strip takes it up
 tab_r = 5.0;           // pocket corner radius (keep <= tablet's corner radius)
 
 /* [Frame] */
 wall = 3.5;            // side wall thickness (3.5 keeps the frame inside a 256 mm bed)
-lip = 3.0;             // front lip thickness (glass side)
+lip = 2.5;             // front lip thickness (glass side)
 lip_over = 13.0;       // front lip covers the bezel this far (screen starts ~17 in)
 back_flat = 2.5;       // back rim: flat overhang (prints without support)
-back_over = 11.0;      // back rim: total reach over the tablet's back
-back_skin = 2.5;       // back rim thickness above the 45 degree slope
+back_over = 8.0;       // back rim: total reach over the tablet's back
+back_skin = 2.0;       // back rim thickness above the 45 degree slope
 finger_r = 18;         // finger notch in the back rim at the opening
-
-/* [Thumbscrews] */
-screw_x = 70;          // screws at x = +-screw_x on the top and bottom lips
-screw_in = 7.5;        // screw centre, in from the pocket edge
-screw_hole = 3.4;      // M4 straight into PETG (3.3 for PLA, 5.6 for heat-set insert)
-boss_d = 11;           // round boss on the back rim around each screw
-boss_h = 4;            // boss height above the rim
 
 /* [Cutouts - tablet edges as in landscape] */
 cable_y = [-55, 25];   // Surface Connect slot in the right wall, y range
@@ -69,8 +61,7 @@ win_w = pw - 2 * lip_over;       // 221 x 151 window (screen ~211 x 141)
 win_h = ph - 2 * lip_over;
 
 echo(str("outer ", ow, " x ", oh, " x ", z_top, "  window ", win_w, " x ", win_h,
-         "  tape strip ", wall + lip_over,
-         "  screw: tablet back is ", z_top + boss_h - (lip + tab_t), " mm below the boss top"));
+         "  tape strip ", wall + lip_over));
 
 assert(ow <= 255 && oh <= 255, "frame no longer fits a 256 mm bed");
 
@@ -92,15 +83,7 @@ module slab(inset, z) {
 // open = "top"  : landscape, tablet slides down onto its long bottom edge
 // open = "left" : portrait (tablet turned clockwise), slides down onto its
 //                 charger edge, so the charger slot ends up at the bottom
-module frame(open = "top") {
-    difference() {
-        union() {
-            frame_body(open);
-            bosses();
-        }
-        screw_holes();
-    }
-}
+module frame(open = "top") frame_body(open);
 
 module frame_body(open) {
     big = 50;
@@ -134,19 +117,6 @@ module frame_body(open) {
         if (open != "top")
             box(btn_x[0], btn_x[1], ph / 2 - 1, oh / 2 + 1, z_pocket0, z_back);
     }
-}
-
-function screw_pos() = [for (sx = [-1, 1], sy = [-1, 1])
-    [sx * screw_x, sy * (ph / 2 - screw_in), sy]];
-
-module bosses() {
-    for (p = screw_pos())
-        translate([p[0], p[1], z_top - 0.01]) cylinder(d = boss_d, h = boss_h);
-}
-
-module screw_holes() {
-    for (p = screw_pos())
-        translate([p[0], p[1], z_back - 1]) cylinder(d = screw_hole, h = z_top + boss_h, $fn = 24);
 }
 
 // Shown as it hangs: portrait is turned so the opening is at the top.
