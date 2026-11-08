@@ -12,11 +12,12 @@
 // dimensions in this file only.
 //
 // Anti-rattle: the pocket has 1 mm of front-back play. Stick a strip of 1 mm
-// self-adhesive felt along the back of the tablet's top and bottom edges
-// (within 6 mm of the edge, where the back rim overlaps it).
+// self-adhesive felt along the back of the tablet's two side edges and bottom
+// edge (within 6 mm of the edge, where the back rim overlaps it).
 //
 // Print front face down on the bed (clean, flat face for the tape). No supports:
-// the back rim overhangs 2.5 mm flat, then slopes at 45 degrees.
+// the back rim overhangs 2.5 mm flat, then slopes at 45 degrees, and there is
+// no rim over the opening. Only the charger slot is bridged (60 mm).
 // Strength: 4 walls (perimeters), 30% gyroid infill.
 // Units mm. Coordinates as seen from the ROOM (the tablet's back) in landscape: x right,
 // y up, z from the glass (0) towards the room.
@@ -103,11 +104,14 @@ module frame_body(open) {
         translate([0, 0, z_slope - 0.01])
             linear_extrude(z_top) rrect(pw - 2 * back_over, ph - 2 * back_over, 2);
 
-        // the opening: wall removed between the lips
+        // the opening: wall removed between the lips, and no back rim on that
+        // edge (it would be a full-width bridge; the side rims hold the tablet)
         if (open == "top") {
             box(-pw / 2, pw / 2, 0, big + ph / 2, z_pocket0, z_back);
+            box(-pw / 2, pw / 2, ph / 2 - back_over - 1, big + ph / 2, z_back - 0.01, z_top + 1);
         } else {
             box(0, big + pw / 2, -ph / 2, ph / 2, z_pocket0, z_back);
+            box(pw / 2 - back_over - 1, big + pw / 2, -ph / 2, ph / 2, z_back - 0.01, z_top + 1);
         }
 
         // Surface Connect slot (left wall seen from the room = right edge seen from outside)
