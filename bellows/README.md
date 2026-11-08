@@ -10,11 +10,17 @@ Made to stop the tears at the narrow rings when printed in TPU 95A.
 
 ![preview v2](bellows-v2.png)
 
-## v3: v2 plus a hard stop ([bellows-v3.scad](bellows-v3.scad) + [bellows-v3-stop.scad](bellows-v3-stop.scad))
+## v3: v1 folds, rounded creases ([bellows-v3.scad](bellows-v3.scad))
 
-Print the bellows in TPU and the stop tube in PLA or PETG. The tube drops in from the cap end
-and rests on a seat inside the funnel insert. When you press, the cap hits the tube after
-`stroke` mm (18 by default): the folds never get crushed flat, and the press ends in a rigid
-knock into the grinder, which is what frees stuck coffee.
+v2 turned out about 4x stiffer than v1 and barely folds: shallower folds and a thicker wall
+(bellows stiffness goes with depth and thickness cubed), and rounding so large there was no
+flat wall left to swing. v3 goes back to v1's 5 deep folds with flat walls that swing like
+hinges, and v1's wall: every layer is 0.8 mm wide, two 0.4 mm lines, creases included. The
+only change is a 1.2 mm radius on every crease instead of a sharp corner, so the stretch
+spreads over several layers instead of landing on one layer line. Same fit and roughly the
+same stiffness as v1.
+
+Printing tip: a tear that starts at one spot is usually the layer seam. Use a scarf seam if
+your slicer has one, and print TPU hot, slow and with little fan so the layers bond well.
 
 ![preview v3](bellows-v3.png)
