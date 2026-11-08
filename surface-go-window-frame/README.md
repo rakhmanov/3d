@@ -8,7 +8,7 @@ Slide-in frame for a 1st-gen Surface Go (245 x 175 x 8.3 mm) used as a shop-wind
 |---|---|---|---|
 | Landscape frame | [surface-go-window-frame.stl](surface-go-window-frame.stl) | [left](surface-go-window-frame-left.stl) + [right](surface-go-window-frame-right.stl) | opens on the long top edge, charger slot bottom right (seen from outside) |
 | Portrait frame | [surface-go-window-frame-portrait.stl](surface-go-window-frame-portrait.stl) | [bottom](surface-go-window-frame-portrait-bottom.stl) + [top](surface-go-window-frame-portrait-top.stl) | opens on the short top edge, charger slot at the bottom |
-| Splice plate (halves only) | | [surface-go-window-frame-splice.stl](surface-go-window-frame-splice.stl) | glued across the seam on a closed wall: 1 for landscape, 2 for portrait |
+| Butterfly key (halves only) | | [surface-go-window-frame-key.stl](surface-go-window-frame-key.stl) | locks the seam from the back: 1 for landscape, 2 for portrait |
 
 Each frame is 254 x 184 x 16 mm, about 70 g of PETG. That's too tight for a 256 mm bed (Bambu A1/P1/X1): the slicer won't place it once a brim or the purge area is involved. So each frame also comes as two halves, about 133 x 184 mm each, printed one at a time. A dovetail in the front lip above and below the screen locks them together, and you glue them. The tape is permanent, so print the frame for the orientation you want; a second frame is needed to switch.
 
@@ -24,7 +24,7 @@ Each frame is 254 x 184 x 16 mm, about 70 g of PETG. That's too tight for a 256 
 
 1. Dry-fit: the dovetails should drop into their sockets without force (`dt_fit` sets the gap).
 2. Glue the seam faces and dovetails (CA glue, or epoxy for PETG/ASA). Press the halves together front face down on a flat surface (glass or the build plate) and let it cure.
-3. Once it has cured, glue the splice plate across each seam on a closed wall (landscape: the bottom wall; portrait: both long walls). One leg goes on the back rim, the other on the outside of the wall. Centre it on the seam. It stays clear of the front face, so it doesn't get in the way of the tape.
+3. While the glue is still wet, put glue in the bow-tie pocket on the back rim and press a butterfly key into each one: landscape has one (bottom wall), portrait has two (both long walls). The key locks the back of the seam, the lip dovetails lock the front, so the frame can't fold at the seam.
 4. Lightly sand the front face across the seam so the VHB tape sits flat. The tape spanning the seam adds strength once the frame is on the glass.
 
 ## Mount

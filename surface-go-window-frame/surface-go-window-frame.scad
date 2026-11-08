@@ -11,7 +11,7 @@
 // short edge, charger at the bottom). It reuses the modules here, so change
 // dimensions in this file only. The -left/-right and -portrait-top/-bottom
 // files render the two halves of each frame for a 256 mm bed, and
-// surface-go-window-frame-splice.scad the plate glued across each closed seam.
+// surface-go-window-frame-key.scad the butterfly key that locks each closed seam.
 //
 // Anti-rattle: the pocket has 1 mm of front-back play. Stick a strip of 1 mm
 // self-adhesive felt along the back of the tablet's two side edges and bottom
@@ -53,9 +53,11 @@ dt_head = 9.0;         // dovetail width at its tip
 dt_len = 6.0;          // how far the dovetail reaches into the other half
 dt_fit = 0.2;          // total gap between the halves (all round the dovetail)
 
-splice_len = 50.0;     // splice plate length, centred on the seam
-splice_t = 1.6;        // splice plate thickness
-splice_z0 = 1.0;       // splice side leg stops this far short of the front (tape) face
+key_len = 24.0;        // butterfly key length (half in each frame half)
+key_head = 5.0;        // key width at its ends
+key_neck = 2.5;        // key width at the seam
+key_depth = 3.5;       // key thickness = pocket depth into the back rim
+key_fit = 0.2;         // total gap around the key in its pocket
 
 $fn = 48;
 
@@ -158,28 +160,44 @@ module split_cut(g) {
     translate([-ow, -oh, -1]) cube([ow + g, 2 * oh, z_top + 2]);
 }
 
-// Splice: an L angle glued across the seam over a closed wall, one leg on the
-// room face of the back rim and one on the outside of the wall. Modelled in
-// place on the -y wall; splice_print() lays it down (rim leg on the bed).
-module splice() {
-    t = splice_t;
-    box(-splice_len / 2, splice_len / 2, -oh / 2 - t, -(ph / 2 - back_over), z_top, z_top + t);
-    box(-splice_len / 2, splice_len / 2, -oh / 2 - t, -oh / 2, splice_z0, z_top + t);
+// Butterfly keys: a bow-tie pocket in the room face of the back rim over each
+// closed wall, half in each frame half; a printed key drops in (glued). It
+// locks the back of the seam, the lip dovetails lock the front.
+key_y = oh / 2 - 1.2 - (key_head + key_fit) / 2;   // key centre, |y|
+// rim's inner edge at the pocket floor (back rim: flat, then 45 degrees)
+key_rim_y = ph / 2 - back_flat - (z_top - key_depth - z_back);
+assert(key_rim_y - (key_y + (key_head + key_fit) / 2) >= 0.8, "key pocket breaks into the rim slope");
+
+module bowtie(g) {
+    offset(delta = g) polygon([
+        [-key_len / 2, -key_head / 2], [0, -key_neck / 2], [key_len / 2, -key_head / 2],
+        [key_len / 2, key_head / 2], [0, key_neck / 2], [-key_len / 2, key_head / 2]]);
 }
-module splice_print() translate([0, 0, z_top + splice_t]) rotate([180, 0, 0]) splice();
+
+module key_pockets(open) {
+    for (s = [-1, 1])
+        if (open != "top" || s < 0)   // landscape: the top edge is open, no rim
+            translate([0, s * key_y, z_top - key_depth])
+                linear_extrude(key_depth + 1) bowtie(key_fit / 2);
+}
+
+module key() linear_extrude(key_depth - 0.2) bowtie(0);
 
 // half = -1 (the -x half, with the dovetails) or 1 (the +x half, with the sockets)
 module frame_half(open, half) {
-    if (half < 0)
-        intersection() {
-            frame(open);
-            split_cut(-dt_fit / 2);
-        }
-    else
-        difference() {
-            frame(open);
-            split_cut(dt_fit / 2);
-        }
+    difference() {
+        if (half < 0)
+            intersection() {
+                frame(open);
+                split_cut(-dt_fit / 2);
+            }
+        else
+            difference() {
+                frame(open);
+                split_cut(dt_fit / 2);
+            }
+        key_pockets(open);
+    }
 }
 
 // Shown as it hangs: portrait is turned so the opening is at the top.
