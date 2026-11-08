@@ -24,8 +24,8 @@ Each frame is 254 x 184 x 19 mm, about 80 g of PETG, so it fits a 256 mm bed (Ba
 1. Clean the glass with isopropyl alcohol.
 2. Run 12 mm VHB tape (e.g. 3M 5952, black) round the front face. The flat strip is 16 mm wide, all four sides.
 3. Use a level, press the frame onto the glass hard for 30 s, and wait 24 h before loading the tablet.
-4. Stick the felt strip (see below), then slide the tablet in from the top, screen towards the glass, and plug in the charger through the slot.
-Before step 4, stick a strip of 1 mm self-adhesive felt along the back of the tablet's top and bottom edges, within 6 mm of the edge (that's where the back rim overlaps it). It takes up the slack so the tablet doesn't rattle.
+4. Stick a strip of 1 mm self-adhesive felt along the back of the tablet's top and bottom edges, within 6 mm of the edge (that's where the back rim overlaps it). It takes up the slack so the tablet doesn't rattle.
+5. Slide the tablet in from the top, screen towards the glass, and plug in the charger through the slot.
 
 ## Hardware
 
