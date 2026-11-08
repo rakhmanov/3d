@@ -9,7 +9,8 @@
 // This file renders the landscape frame (open on a long edge).
 // surface-go-window-frame-portrait.scad renders the portrait one (open on a
 // short edge, charger at the bottom). It reuses the modules here, so change
-// dimensions in this file only.
+// dimensions in this file only. The -left/-right and -portrait-top/-bottom
+// files render the two halves of each frame for a 256 mm bed.
 //
 // Anti-rattle: the pocket has 1 mm of front-back play. Stick a strip of 1 mm
 // self-adhesive felt along the back of the tablet's two side edges and bottom
@@ -44,6 +45,12 @@ back_skin = 2.0;       // back rim thickness above the 45 degree slope
 // (room view: the charger edge is the LEFT wall, the buttons are top RIGHT)
 cable_y = [-78, -18];  // Surface Connect slot in the left wall (room view), y range
 btn_x = [68, 112];     // power + volume on the top edge (room view), x range
+
+/* [Split for printing - two halves, dovetails + glue] */
+dt_neck = 6.0;         // dovetail width at the seam
+dt_head = 9.0;         // dovetail width at its tip
+dt_len = 6.0;          // how far the dovetail reaches into the other half
+dt_fit = 0.2;          // total gap between the halves (all round the dovetail)
 
 $fn = 48;
 
@@ -122,8 +129,43 @@ module frame_body(open) {
     }
 }
 
+// --- split into two halves (seam at x = 0, frame coordinates) --------------
+// A 256 mm bed can't really take the 254 mm frame, so each frame also comes as
+// two halves. A dovetail on the -x half sits in the middle of the front lip band
+// above and below the screen window and locks into the +x half. The lip is the
+// face on the bed, so the dovetails print flat; the VHB tape also spans the seam.
+dt_y = (win_h / 2 + ph / 2) / 2;   // centre of the lip band
+assert(dt_y + dt_head / 2 <= ph / 2 - 1.5, "dovetail too close to the pocket edge");
+assert(dt_y - dt_head / 2 >= win_h / 2 + 1.5, "dovetail too close to the screen window");
+
+module minus_x_region() {
+    translate([-ow, -oh]) square([ow, 2 * oh]);
+    for (s = [1, -1])
+        polygon([[-1, s * dt_y - dt_neck / 2], [0, s * dt_y - dt_neck / 2],
+                 [dt_len, s * dt_y - dt_head / 2], [dt_len, s * dt_y + dt_head / 2],
+                 [0, s * dt_y + dt_neck / 2], [-1, s * dt_y + dt_neck / 2]]);
+}
+
+// half = -1 (the -x half, with the dovetails) or 1 (the +x half, with the sockets)
+module frame_half(open, half) {
+    if (half < 0)
+        intersection() {
+            frame(open);
+            translate([0, 0, -1]) linear_extrude(z_top + 2) offset(delta = -dt_fit / 2) minus_x_region();
+        }
+    else
+        difference() {
+            frame(open);
+            translate([0, 0, -1]) linear_extrude(z_top + 2) offset(delta = dt_fit / 2) minus_x_region();
+        }
+}
+
 // Shown as it hangs: portrait is turned so the opening is at the top.
 module frame_landscape() frame("top");
 module frame_portrait() rotate([0, 0, 90]) frame("right");
+module frame_landscape_left()   frame_half("top", -1);
+module frame_landscape_right()  frame_half("top", 1);
+module frame_portrait_bottom()  rotate([0, 0, 90]) frame_half("right", -1);
+module frame_portrait_top()     rotate([0, 0, 90]) frame_half("right", 1);
 
 frame_landscape();

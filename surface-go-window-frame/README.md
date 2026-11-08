@@ -4,12 +4,12 @@
 
 Slide-in frame for a 1st-gen Surface Go (245 x 175 x 8.3 mm) used as a shop-window display. The flat front face is taped to the inside of the glass all the way round, screen facing out. The tablet slides in from the open top edge and rests on the bottom wall; a thin felt strip on its back stops it rattling. The charger plugs in through a slot.
 
-| Part | File | Notes |
-|---|---|---|
-| Landscape frame | [surface-go-window-frame.stl](surface-go-window-frame.stl) | opens on the long top edge, charger slot bottom right (seen from outside) |
-| Portrait frame | [surface-go-window-frame-portrait.stl](surface-go-window-frame-portrait.stl) | opens on the short top edge, charger slot at the bottom |
+| Part | One piece | Two halves (256 mm bed) | Notes |
+|---|---|---|---|
+| Landscape frame | [surface-go-window-frame.stl](surface-go-window-frame.stl) | [left](surface-go-window-frame-left.stl) + [right](surface-go-window-frame-right.stl) | opens on the long top edge, charger slot bottom right (seen from outside) |
+| Portrait frame | [surface-go-window-frame-portrait.stl](surface-go-window-frame-portrait.stl) | [bottom](surface-go-window-frame-portrait-bottom.stl) + [top](surface-go-window-frame-portrait-top.stl) | opens on the short top edge, charger slot at the bottom |
 
-Each frame is 254 x 184 x 19 mm, about 80 g of PETG, so it fits a 256 mm bed (Bambu P1/X1/A1) in one piece. The tape is permanent, so print the frame for the orientation you want; a second frame is needed to switch.
+Each frame is 254 x 184 x 19 mm, about 80 g of PETG. That's too tight for a 256 mm bed (Bambu A1/P1/X1): the slicer won't place it once a brim or the purge area is involved. So each frame also comes as two halves, about 133 x 184 mm each, printed one at a time. A dovetail in the front lip above and below the screen locks them together, and you glue them. The tape is permanent, so print the frame for the orientation you want; a second frame is needed to switch.
 
 ## Print
 
@@ -18,6 +18,12 @@ Each frame is 254 x 184 x 19 mm, about 80 g of PETG, so it fits a 256 mm bed (Ba
 - Matte black PETG, or ASA on an enclosed printer. Avoid PLA in a sunny window.
 - 4 walls (perimeters) and 30% gyroid infill for strength.
 - The fit is deliberately loose (1 mm each side, 1 mm front to back), so it fits without a test print.
+
+## Assemble (two halves)
+
+1. Dry-fit: the dovetails should drop into their sockets without force (`dt_fit` sets the gap).
+2. Glue the seam faces and dovetails (CA glue, or epoxy for PETG/ASA). Press the halves together front face down on a flat surface (glass or the build plate) and let it cure.
+3. Lightly sand the front face across the seam so the VHB tape sits flat. The tape spanning the seam adds strength once the frame is on the glass.
 
 ## Mount
 
@@ -34,7 +40,7 @@ Each frame is 254 x 184 x 19 mm, about 80 g of PETG, so it fits a 256 mm bed (Ba
 
 ## Check before printing
 
-All dimensions are parameters at the top of [surface-go-window-frame.scad](surface-go-window-frame.scad); the portrait file reuses them.
+All dimensions are parameters at the top of [surface-go-window-frame.scad](surface-go-window-frame.scad); the portrait and half files reuse them.
 
 - `cable_y`: Surface Connect slot position (an estimate, near the bottom of the right edge seen from outside). Measure your tablet.
 - Coordinates in the SCAD are as seen from the room (the tablet's back), so the charger edge is the left wall there.

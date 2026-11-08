@@ -1,0 +1,206 @@
+// Shower / tub valve handle adapter (round flange + hex boss with a side window)
+// Author: Denis Shatilov
+// License: CC BY-NC 4.0
+// https://creativecommons.org/licenses/by-nc/4.0/
+//
+// Reverse-engineered from photos (see README.md). Every dimension below is an
+// ESTIMATE until the real part is measured: use the measurement checklist in
+// README.md, then replace the numbers here. Print flange-down, no supports.
+//
+// Section through the window (window points at -X, which is a hex CORNER):
+//
+//              top_round_d
+//             |<------>|
+//        _____|        |_____
+//       |     |        |     |  <- round bore from the top, down to the window
+//   ____|     |        |     |
+//  |window               |___|  <- window: one side only, floor = flange top,
+//  |_______    ______    |____     reaches window_reach past the centre
+//  |_______|  |      |   |____|  <- flange, obround socket from below
+//            /________\          (long axis along the window), bevelled entry
+
+/* [Flange] */
+// Flange outer diameter. REFERENCE SIZE: the other estimates are scaled from this
+flange_d = 20.0;
+// Flange thickness
+flange_h = 3.3;
+// Chamfer on flange top and bottom edges
+flange_chamfer = 0.5;
+
+/* [Hex boss] */
+// Hex size across flats. Must match the hex socket in the handle
+hex_af = 13.0;
+// Hex height above the flange
+boss_h = 8.5;
+// Small chamfer on the top hex edges (0 = sharp)
+boss_top_chamfer = 0.4;
+
+/* [Side window] */
+// Window height, from the flange top up
+window_h = 2.6;
+// Window width where it breaks out at the hex corner
+window_w_outer = 4.5;
+// Window width at its inner end
+window_w_inner = 3.8;
+// How far the window reaches past the centre (0 = stops at the axis, negative = short of it)
+window_reach = 0.75;
+// Direction of the window, degrees. 180 = the -X hex corner. Keep it a multiple of 60 to stay on a corner
+window_angle = 180;
+
+/* [Bottom socket] */
+// Socket shape from below (the stem fits here). obround = elongated with rounded ends
+bottom_shape = "obround"; // [obround, square]
+// Long side (obround: end to end; square: across flats)
+bottom_long = 8.8;
+// Short side, across the straight sides
+bottom_short = 5.2;
+// Corner radius for the square shape
+bottom_corner_r = 0.5;
+// Bevel at the socket entry
+bottom_entry_chamfer = 0.8;
+// Socket depth from the bottom face. -1 = auto: up to the window ceiling
+bottom_depth = -1;
+// Rotation relative to the window, degrees. 0 = long axis points at the window
+bottom_rot = 0;
+
+/* [Top bore] */
+// Round bore from the top
+top_round_d = 6.2;
+// Bore depth from the top. -1 = auto: down to the window ceiling, so it meets the square
+top_round_h = -1;
+
+/* [Print fit] */
+// Added to the hex size for printing (negative = smaller, so it slides into the handle)
+hex_fit = -0.15;
+// Added to all hole sizes for printing (positive = looser)
+hole_fit = 0.2;
+
+/* [Output] */
+// adapter = the real part. hex_gauge / bottom_gauge = thin, fast fit tests
+part = "adapter"; // [adapter, hex_gauge, bottom_gauge]
+// Cut away half along the window axis to see the inside (preview only)
+cutaway = false;
+
+$fn = 96;
+eps = 0.01;
+
+hex_af_p = hex_af + hex_fit;
+hex_r    = hex_af_p / sqrt(3);    // corner radius
+total_h  = flange_h + boss_h;
+bot_depth = bottom_depth < 0 ? flange_h + window_h : bottom_depth;
+bore_h   = top_round_h  < 0 ? boss_h - window_h  : top_round_h;
+
+assert(hex_r * 2 < flange_d, "Hex corners overhang the flange");
+assert(bore_h + window_h >= boss_h - eps || bore_h + window_h < boss_h - 1, "Top bore stops less than 1 mm short of the window");
+assert(bottom_long + 2 * bottom_entry_chamfer < hex_af_p - 1, "Bottom socket leaves a too-thin wall under the hex");
+
+echo(str("Adapter: flange ", flange_d, " x ", flange_h, ", hex ", hex_af_p, " AF (",
+         round(hex_r * 200) / 100, " AC) x ", boss_h, ", total ", total_h,
+         ", window ", window_w_outer, "->", window_w_inner, " x ", window_h,
+         " at ", window_angle, " deg (corner)"));
+
+module chamfered_disc(d, h, c) {
+    hull() {
+        translate([0, 0, c]) cylinder(h = h - 2 * c, d = d);
+        cylinder(h = h, d = d - 2 * c);
+    }
+}
+
+// Hex prism with corners at 0, 60, 120 ... degrees (so ±X are corners)
+module hex_prism(r, h) { cylinder(h = h, r = r, $fn = 6); }
+
+module hex_boss(h) {
+    c = boss_top_chamfer;
+    hull() {
+        hex_prism(hex_r, h - c);
+        if (c > 0) hex_prism(hex_r - c * 2 / sqrt(3), h);
+    }
+}
+
+module rounded_square(af, r) {
+    offset(r = r) square(af - 2 * r, center = true);
+}
+
+// Bottom socket outline, grown by g on every side
+module bottom_profile(g) {
+    f = hole_fit;
+    if (bottom_shape == "square")
+        offset(delta = g) rounded_square(bottom_long + f, bottom_corner_r);
+    else
+        obround(bottom_long + f + 2 * g, bottom_short + f + 2 * g);
+}
+
+module obround(l, w) {
+    hull() for (s = [-1, 1]) translate([s * (l - w) / 2, 0]) circle(d = w);
+}
+
+module body() {
+    chamfered_disc(flange_d, flange_h, flange_chamfer);
+    translate([0, 0, flange_h - eps]) hex_boss(boss_h + eps);
+}
+
+module cuts() {
+    f = hole_fit;
+    rotate([0, 0, window_angle]) {
+        // Side window: from the +X corner (rotated to window_angle) in past the axis
+        translate([0, 0, flange_h])
+            linear_extrude(window_h)
+                polygon([
+                    [-window_reach,     -(window_w_inner + f) / 2],
+                    [hex_r + 1,         -(window_w_outer + f) / 2],
+                    [hex_r + 1,          (window_w_outer + f) / 2],
+                    [-window_reach,      (window_w_inner + f) / 2]
+                ]);
+        // Bottom socket with a bevelled entry
+        rotate([0, 0, bottom_rot]) {
+            translate([0, 0, -eps])
+                linear_extrude(bot_depth + eps)
+                    bottom_profile(0);
+            c = bottom_entry_chamfer;
+            if (c > 0)
+                hull() {
+                    translate([0, 0, -eps]) linear_extrude(eps) bottom_profile(c);
+                    translate([0, 0, c]) linear_extrude(eps) bottom_profile(0);
+                }
+        }
+    }
+    // Top bore
+    translate([0, 0, total_h - bore_h])
+        cylinder(h = bore_h + 1, d = top_round_d + f);
+}
+
+module shower_handle_adapter() {
+    difference() { body(); cuts(); }
+}
+
+// Hex gauge: the top 4 mm of the boss, to test-fit into the handle's hex socket
+module hex_gauge() {
+    translate([0, 0, -(total_h - 4)])
+        intersection() {
+            shower_handle_adapter();
+            translate([0, 0, total_h - 4]) cylinder(h = 5, d = flange_d + 1);
+        }
+}
+
+// Bottom gauge: the flange only (pocket + square), to test-fit on the stem
+module bottom_gauge() {
+    intersection() {
+        shower_handle_adapter();
+        translate([0, 0, -1]) cylinder(h = flange_h + 1, d = flange_d + 1);
+    }
+}
+
+module output() {
+    if (part == "hex_gauge") hex_gauge();
+    else if (part == "bottom_gauge") bottom_gauge();
+    else shower_handle_adapter();
+}
+
+if (cutaway)
+    difference() {
+        output();
+        rotate([0, 0, window_angle])
+            translate([-flange_d, 0, -1]) cube([2 * flange_d, flange_d, total_h + 2]);
+    }
+else
+    output();
