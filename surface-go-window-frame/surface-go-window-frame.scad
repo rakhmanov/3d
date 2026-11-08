@@ -51,13 +51,13 @@ btn_x = [68, 112];     // power + volume on the top edge (room view), x range
 dt_neck = 6.0;         // dovetail width at the seam
 dt_head = 9.0;         // dovetail width at its tip
 dt_len = 6.0;          // how far the dovetail reaches into the other half
-dt_fit = 0.2;          // total gap between the halves (all round the dovetail)
+dt_fit = 0.1;          // total gap between the halves (all round the dovetail)
 
 key_len = 24.0;        // butterfly key length (half in each frame half)
 key_head = 5.0;        // key width at its ends
 key_neck = 2.5;        // key width at the seam
 key_depth = 3.5;       // key thickness = pocket depth into the back rim
-key_fit = 0.2;         // total gap around the key in its pocket
+key_fit = 0.1;         // total gap around the key in its pocket
 
 $fn = 48;
 
