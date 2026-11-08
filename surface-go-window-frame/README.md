@@ -6,7 +6,7 @@ Slide-in frame for a 1st-gen Surface Go (245 x 175 x 8.3 mm) used as a shop-wind
 
 | Part | File | Notes |
 |---|---|---|
-| Landscape frame | [surface-go-window-frame.stl](surface-go-window-frame.stl) | opens on the long top edge, charger slot on the right |
+| Landscape frame | [surface-go-window-frame.stl](surface-go-window-frame.stl) | opens on the long top edge, charger slot bottom right (seen from outside) |
 | Portrait frame | [surface-go-window-frame-portrait.stl](surface-go-window-frame-portrait.stl) | opens on the short top edge, charger slot at the bottom |
 
 Each frame is 254 x 184 x 19 mm, about 80 g of PETG, so it fits a 256 mm bed (Bambu P1/X1/A1) in one piece. The tape is permanent, so print the frame for the orientation you want; a second frame is needed to switch.
@@ -36,7 +36,8 @@ Each frame is 254 x 184 x 19 mm, about 80 g of PETG, so it fits a 256 mm bed (Ba
 
 All dimensions are parameters at the top of [surface-go-window-frame.scad](surface-go-window-frame.scad); the portrait file reuses them.
 
-- `cable_y`: Surface Connect slot position (an estimate). Measure your tablet.
+- `cable_y`: Surface Connect slot position (an estimate, near the bottom of the right edge seen from outside). Measure your tablet.
+- Coordinates in the SCAD are as seen from the room (the tablet's back), so the charger edge is the left wall there.
 - `btn_x`: power/volume buttons, only cut in the portrait frame (in landscape they are at the open top).
 - `clear`, `play_t`: side and front-back clearance.
 - `tab_r`: keep at or below the tablet's corner radius.
