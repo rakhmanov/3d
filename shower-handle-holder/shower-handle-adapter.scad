@@ -3,9 +3,8 @@
 // License: CC BY-NC 4.0
 // https://creativecommons.org/licenses/by-nc/4.0/
 //
-// Reverse-engineered from photos (see README.md). Every dimension below is an
-// ESTIMATE until the real part is measured: use the measurement checklist in
-// README.md, then replace the numbers here. Print flange-down, no supports.
+// Hex, overall height, stem and worn bore measured with calipers 2026-11-11;
+// the rest is still estimated from photos (README.md). Print flange-down, no supports.
 //
 // Section through the window (window points at -X, which is a hex CORNER):
 //
@@ -22,16 +21,18 @@
 /* [Flange] */
 // Flange outer diameter. REFERENCE SIZE: the other estimates are scaled from this
 flange_d = 20.0;
-// Flange thickness
-flange_h = 3.3;
+// Flange thickness (estimate)
+flange_h = 3.8;
 // Chamfer on flange top and bottom edges
 flange_chamfer = 0.5;
 
 /* [Hex boss] */
-// Hex size across flats. Must match the hex socket in the handle
-hex_af = 13.0;
-// Hex height above the flange
-boss_h = 8.5;
+// Hex size across flats at the flange. Measured 15.19 on the worn original
+hex_af = 15.19;
+// Overall height, flange bottom to hex top. Measured
+total_h = 14.05;
+// Across-flats lost toward the hex top. The original looks deliberately skewed to wedge in
+hex_taper = 0;
 // Small chamfer on the top hex edges (0 = sharp)
 boss_top_chamfer = 0.4;
 
@@ -64,15 +65,17 @@ bottom_depth = -1;
 bottom_rot = 0;
 
 /* [Top bore] */
-// Round bore from the top
-top_round_d = 6.2;
+// Round bore from the top: takes the stem tip. Stem measured 6.44; worn original 6.54 x 6.80
+top_round_d = 6.44;
+// Clearance on the stem bore only. Keep it tight: this is where the original wore
+top_round_fit = 0.1;
 // Bore depth from the top. -1 = auto: down to the window ceiling, so it meets the square
 top_round_h = -1;
 
 /* [Print fit] */
 // Added to the hex size for printing (negative = smaller, so it slides into the handle)
 hex_fit = -0.15;
-// Added to all hole sizes for printing (positive = looser)
+// Added to the other hole sizes for printing (positive = looser)
 hole_fit = 0.2;
 
 /* [Output] */
@@ -86,7 +89,7 @@ eps = 0.01;
 
 hex_af_p = hex_af + hex_fit;
 hex_r    = hex_af_p / sqrt(3);    // corner radius
-total_h  = flange_h + boss_h;
+boss_h   = total_h - flange_h;
 bot_depth = bottom_depth < 0 ? flange_h + window_h : bottom_depth;
 bore_h   = top_round_h  < 0 ? boss_h - window_h  : top_round_h;
 
@@ -95,7 +98,8 @@ assert(bore_h + window_h >= boss_h - eps || bore_h + window_h < boss_h - 1, "Top
 assert(bottom_long + 2 * bottom_entry_chamfer < hex_af_p - 1, "Bottom socket leaves a too-thin wall under the hex");
 
 echo(str("Adapter: flange ", flange_d, " x ", flange_h, ", hex ", hex_af_p, " AF (",
-         round(hex_r * 200) / 100, " AC) x ", boss_h, ", total ", total_h,
+         round(hex_r * 200) / 100, " AC, taper ", hex_taper, ") x ", boss_h, ", total ", total_h,
+         ", stem bore ", top_round_d + top_round_fit,
          ", window ", window_w_outer, "->", window_w_inner, " x ", window_h,
          " at ", window_angle, " deg (corner)"));
 
@@ -111,9 +115,11 @@ module hex_prism(r, h) { cylinder(h = h, r = r, $fn = 6); }
 
 module hex_boss(h) {
     c = boss_top_chamfer;
+    r_top = hex_r - hex_taper / sqrt(3);
     hull() {
-        hex_prism(hex_r, h - c);
-        if (c > 0) hex_prism(hex_r - c * 2 / sqrt(3), h);
+        hex_prism(hex_r, eps);
+        translate([0, 0, h - c - eps]) hex_prism(r_top, eps);
+        if (c > 0) translate([0, 0, h - eps]) hex_prism(r_top - c * 2 / sqrt(3), eps);
     }
 }
 
@@ -166,7 +172,7 @@ module cuts() {
     }
     // Top bore
     translate([0, 0, total_h - bore_h])
-        cylinder(h = bore_h + 1, d = top_round_d + f);
+        cylinder(h = bore_h + 1, d = top_round_d + top_round_fit);
 }
 
 module shower_handle_adapter() {

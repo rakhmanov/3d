@@ -8,7 +8,7 @@ Designes are shared here under CC BY-NC 4.0 License, unless stated otherwise in 
 * [Mounting bracket](./mounting-bracket)
 * [Spacer insert](./spacer-insert)
 * [Surface Go window frame](./surface-go-window-frame): Surface Go frame that sticks to a shop window, landscape or portrait
-* [Shower handle adapter](./shower-handle-holder): replacement valve-stem-to-handle adapter (work in progress, estimated from photos)
+* [Shower handle adapter](./shower-handle-holder): replacement valve-stem-to-handle adapter (work in progress, hex and stem bore measured)
 
 ---
 
