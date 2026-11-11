@@ -1,12 +1,12 @@
-// Shower / tub valve handle adapter (round flange + hex boss with a side window)
+// Shower / tub valve handle adapter (round flange + 7-cornered boss with a side window)
 // Author: Denis Shatilov
 // License: CC BY-NC 4.0
 // https://creativecommons.org/licenses/by-nc/4.0/
 //
-// Hex, overall height, stem and worn bore measured with calipers 2026-11-11;
+// Boss, window depth, height, stem and worn bore measured with calipers 2026-11-11;
 // the rest is still estimated from photos (README.md). Print flange-down, no supports.
 //
-// Section through the window (window points at -X, which is a hex CORNER):
+// Section through the window (window points at -X, on a slanted boss face):
 //
 //              top_round_d
 //             |<------>|
@@ -26,11 +26,14 @@ flange_h = 3.8;
 // Chamfer on flange top and bottom edges
 flange_chamfer = 0.5;
 
-/* [Hex boss] */
-// Number of sides. The original is 7-sided: caliper width stays ~15.07 at any rotation
-boss_sides = 7;
-// Caliper width at the flange (odd sides: flat to opposite corner). Measured 15.04-15.10
+/* [Boss] */
+// Hexagon with one corner cut flat (7 corners). Window face runs from the point to a short flat
+// Across the one short pair of parallel flats. Measured
+boss_flats = 14.38;
+// Across the other two pairs of parallel flats. Measured 15.04-15.10
 hex_af = 15.09;
+// Pointed corner to the cut-flat corner opposite it. Measured
+boss_point_to_flat = 15.85;
 // Overall height, flange bottom to hex top. Measured
 total_h = 14.05;
 // Width lost toward the top. The original looks deliberately skewed to wedge in
@@ -41,13 +44,13 @@ boss_top_chamfer = 0.4;
 /* [Side window] */
 // Window height, from the flange top up
 window_h = 2.6;
-// Window width where it breaks out at the hex corner
-window_w_outer = 4.5;
-// Window width at its inner end
-window_w_inner = 3.8;
+// Window width at the face. It spans most of the face from the point to the short flat
+window_w_outer = 6.5;
+// Window width at its back wall
+window_w_inner = 6.5;
 // Window back wall to the opposite outer face (the screw opening's depth). Measured
 window_back = 11.09;
-// Direction of the window, degrees. A boss corner always points here
+// Direction of the window face normal, degrees
 window_angle = 180;
 
 /* [Bottom socket] */
@@ -90,12 +93,10 @@ $fn = 96;
 eps = 0.01;
 
 hex_af_p = hex_af + hex_fit;
-// Corner radius for a caliper width w
-function r_of(w) = boss_sides % 2 == 0 ? w / (2 * cos(180 / boss_sides))
-                                      : w / (1 + cos(180 / boss_sides));
-hex_r    = r_of(hex_af_p);
-// Window end along its axis, past the centre (negative = short of it)
-window_reach = (hex_af_p - (boss_sides % 2 == 0 ? hex_af_p / 2 : hex_r)) - window_back;
+// Pointed corner distance from the axis: the farthest point of the boss
+hex_r    = hex_af_p / sqrt(3);
+// Window back wall along its axis, past the centre (negative = short of it). Uses unfitted sizes
+window_reach = hex_af / 2 - window_back;
 boss_h   = total_h - flange_h;
 bot_depth = bottom_depth < 0 ? flange_h + window_h : bottom_depth;
 bore_h   = top_round_h  < 0 ? boss_h - window_h  : top_round_h;
@@ -104,11 +105,11 @@ assert(hex_r * 2 < flange_d, "Boss corners overhang the flange");
 assert(bore_h + window_h >= boss_h - eps || bore_h + window_h < boss_h - 1, "Top bore stops less than 1 mm short of the window");
 assert(bottom_long + 2 * bottom_entry_chamfer < hex_af_p - 1, "Bottom socket leaves a too-thin wall under the hex");
 
-echo(str("Adapter: flange ", flange_d, " x ", flange_h, ", ", boss_sides, "-sided boss ", hex_af_p, " wide (",
-         round(hex_r * 200) / 100, " across corners, taper ", hex_taper, ") x ", boss_h, ", total ", total_h,
+echo(str("Adapter: flange ", flange_d, " x ", flange_h, ", boss ", boss_flats + hex_fit, " / ", hex_af_p,
+         " flats, point to flat ", boss_point_to_flat + hex_fit, ", taper ", hex_taper, ", x ", boss_h, ", total ", total_h,
          ", stem bore ", top_round_d + top_round_fit,
          ", window ", window_w_outer, "->", window_w_inner, " x ", window_h,
-         " at ", window_angle, " deg (corner), back wall ", round(-window_reach * 100) / 100, " short of centre"));
+         " at ", window_angle, " deg, back wall ", round(-window_reach * 100) / 100, " short of centre"));
 
 module chamfered_disc(d, h, c) {
     hull() {
@@ -117,16 +118,31 @@ module chamfered_disc(d, h, c) {
     }
 }
 
-// Boss prism with a corner pointing at the window
-module hex_prism(r, h) { rotate([0, 0, window_angle]) cylinder(h = h, r = r, $fn = boss_sides); }
+// Boss outline grown by g. Built point-up (short flats vertical), then the window face
+// (normal at 120 deg) is turned to window_angle.
+module boss_profile(g) {
+    big = 4 * flange_d;
+    w_v = boss_flats + hex_fit + 2 * g;
+    w_s = hex_af_p + 2 * g;
+    cut = boss_point_to_flat + hex_fit + 2 * g - w_s / sqrt(3);
+    rotate(window_angle - 120)
+        intersection() {
+            square([w_v, big], center = true);
+            rotate(60) square([w_s, big], center = true);
+            rotate(120) square([w_s, big], center = true);
+            translate([-big / 2, -cut]) square(big);
+        }
+}
+
+module boss_slice(g, z) { translate([0, 0, z]) linear_extrude(eps) boss_profile(g); }
 
 module hex_boss(h) {
     c = boss_top_chamfer;
-    r_top = r_of(hex_af_p - hex_taper);
+    t = -hex_taper / 2;
     hull() {
-        hex_prism(hex_r, eps);
-        translate([0, 0, h - c - eps]) hex_prism(r_top, eps);
-        if (c > 0) translate([0, 0, h - eps]) hex_prism(r_top - c / cos(180 / boss_sides), eps);
+        boss_slice(0, 0);
+        boss_slice(t, h - c - eps);
+        if (c > 0) boss_slice(t - c, h - eps);
     }
 }
 
