@@ -4,7 +4,7 @@ Printable replacement for the small plastic or brass adapter between a shower or
 
 ![preview](shower-handle-adapter.png)
 
-> **Status: partly measured (2026-11-11).** Hex, overall height, stem and the worn stem bore come from calipers on the original. Flange, window and bottom socket are still scaled from photos; measure them (checklist below) before the final print.
+> **Status: mostly measured (2026-11-11).** Boss, flange diameter, overall height, window depth, stem and the worn stem bore come from calipers on the original. Flange thickness, window width and height, and the bottom socket are still estimated; measure them (checklist below) before the final print.
 
 ## Reference photos
 
@@ -29,7 +29,7 @@ Calipers are best. Write down each number and put it into the matching parameter
 
 | # | Measure | Parameter | Estimate now |
 |---|---|---|---|
-| 1 | Flange outside diameter | `flange_d` | 20.0 |
+| 1 | Flange outside diameter | `flange_d` | **22.0 measured** |
 | 2 | Flange thickness | `flange_h` | 3.8 |
 | 3 | Boss: a hexagon with one corner cut flat (7 corners). Short parallel flats; the other two pairs; point to the cut flat opposite | `boss_flats`, `hex_af`, `boss_point_to_flat` | **14.38, 15.09, 15.85 measured** |
 | 4 | Overall height, flange bottom to hex top | `total_h` | **14.05 measured** |
@@ -48,7 +48,7 @@ Helpful photos: one straight at the window, one straight at the side opposite it
 
 The render prints a summary to check before slicing:
 
-    ECHO: "Adapter: flange 20 x 3.8, boss 14.23 / 14.94 flats, point to flat 15.7, taper 0, x 10.25, total 14.05, stem bore 6.54, window 6.5->6.5 x 2.6 at 180 deg, back wall 3.55 short of centre"
+    ECHO: "Adapter: flange 22 x 3.8, boss 14.23 / 14.94 flats, point to flat 15.7, taper 0, x 10.25, total 14.05, stem bore 6.54, window 6.5->6.5 x 2.6 at 180 deg, back wall 3.55 short of centre"
 
 ## Fit tests before the full part
 

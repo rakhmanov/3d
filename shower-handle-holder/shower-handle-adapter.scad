@@ -19,8 +19,8 @@
 //            /________\          (long axis along the window), bevelled entry
 
 /* [Flange] */
-// Flange outer diameter. REFERENCE SIZE: the other estimates are scaled from this
-flange_d = 20.0;
+// Flange outer diameter. Measured
+flange_d = 22.0;
 // Flange thickness (estimate)
 flange_h = 3.8;
 // Chamfer on flange top and bottom edges
