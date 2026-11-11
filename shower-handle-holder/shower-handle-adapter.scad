@@ -27,11 +27,13 @@ flange_h = 3.8;
 flange_chamfer = 0.5;
 
 /* [Hex boss] */
-// Hex size across flats at the flange. Measured 15.19 on the worn original
-hex_af = 15.19;
+// Number of sides. The original is 7-sided: caliper width stays ~15.07 at any rotation
+boss_sides = 7;
+// Caliper width at the flange (odd sides: flat to opposite corner). Measured 15.04-15.10
+hex_af = 15.09;
 // Overall height, flange bottom to hex top. Measured
 total_h = 14.05;
-// Across-flats lost toward the hex top. The original looks deliberately skewed to wedge in
+// Width lost toward the top. The original looks deliberately skewed to wedge in
 hex_taper = 0;
 // Small chamfer on the top hex edges (0 = sharp)
 boss_top_chamfer = 0.4;
@@ -45,7 +47,7 @@ window_w_outer = 4.5;
 window_w_inner = 3.8;
 // How far the window reaches past the centre (0 = stops at the axis, negative = short of it)
 window_reach = 0.75;
-// Direction of the window, degrees. 180 = the -X hex corner. Keep it a multiple of 60 to stay on a corner
+// Direction of the window, degrees. A boss corner always points here
 window_angle = 180;
 
 /* [Bottom socket] */
@@ -88,17 +90,20 @@ $fn = 96;
 eps = 0.01;
 
 hex_af_p = hex_af + hex_fit;
-hex_r    = hex_af_p / sqrt(3);    // corner radius
+// Corner radius for a caliper width w
+function r_of(w) = boss_sides % 2 == 0 ? w / (2 * cos(180 / boss_sides))
+                                      : w / (1 + cos(180 / boss_sides));
+hex_r    = r_of(hex_af_p);
 boss_h   = total_h - flange_h;
 bot_depth = bottom_depth < 0 ? flange_h + window_h : bottom_depth;
 bore_h   = top_round_h  < 0 ? boss_h - window_h  : top_round_h;
 
-assert(hex_r * 2 < flange_d, "Hex corners overhang the flange");
+assert(hex_r * 2 < flange_d, "Boss corners overhang the flange");
 assert(bore_h + window_h >= boss_h - eps || bore_h + window_h < boss_h - 1, "Top bore stops less than 1 mm short of the window");
 assert(bottom_long + 2 * bottom_entry_chamfer < hex_af_p - 1, "Bottom socket leaves a too-thin wall under the hex");
 
-echo(str("Adapter: flange ", flange_d, " x ", flange_h, ", hex ", hex_af_p, " AF (",
-         round(hex_r * 200) / 100, " AC, taper ", hex_taper, ") x ", boss_h, ", total ", total_h,
+echo(str("Adapter: flange ", flange_d, " x ", flange_h, ", ", boss_sides, "-sided boss ", hex_af_p, " wide (",
+         round(hex_r * 200) / 100, " across corners, taper ", hex_taper, ") x ", boss_h, ", total ", total_h,
          ", stem bore ", top_round_d + top_round_fit,
          ", window ", window_w_outer, "->", window_w_inner, " x ", window_h,
          " at ", window_angle, " deg (corner)"));
@@ -110,16 +115,16 @@ module chamfered_disc(d, h, c) {
     }
 }
 
-// Hex prism with corners at 0, 60, 120 ... degrees (so ±X are corners)
-module hex_prism(r, h) { cylinder(h = h, r = r, $fn = 6); }
+// Boss prism with a corner pointing at the window
+module hex_prism(r, h) { rotate([0, 0, window_angle]) cylinder(h = h, r = r, $fn = boss_sides); }
 
 module hex_boss(h) {
     c = boss_top_chamfer;
-    r_top = hex_r - hex_taper / sqrt(3);
+    r_top = r_of(hex_af_p - hex_taper);
     hull() {
         hex_prism(hex_r, eps);
         translate([0, 0, h - c - eps]) hex_prism(r_top, eps);
-        if (c > 0) translate([0, 0, h - eps]) hex_prism(r_top - c * 2 / sqrt(3), eps);
+        if (c > 0) translate([0, 0, h - eps]) hex_prism(r_top - c / cos(180 / boss_sides), eps);
     }
 }
 

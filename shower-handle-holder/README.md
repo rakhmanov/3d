@@ -18,7 +18,7 @@ Printable replacement for the small plastic or brass adapter between a shower or
 
 Bottom to top:
 - **Flange** with an **obround socket** (elongated, rounded ends) from below, long axis pointing at the window. The socket has a bevelled entry and goes up to the window ceiling.
-- **Hex boss** with a **round bore** from the top, down to the window ceiling.
+- **7-sided boss** (not a hex) with a **round bore** from the top, down to the window ceiling. A corner points at the window.
 - **Window:** one side only, on a hex **corner**. Its floor is the flange top, and it reaches just past the centre.
 
 `cutaway = true` shows the section.
@@ -31,7 +31,7 @@ Calipers are best. Write down each number and put it into the matching parameter
 |---|---|---|---|
 | 1 | Flange outside diameter | `flange_d` | 20.0 |
 | 2 | Flange thickness | `flange_h` | 3.8 |
-| 3 | Hex across the **flats**. If the old part is damaged, measure the handle's socket instead | `hex_af` | **15.19 measured** (worn part) |
+| 3 | Boss width with calipers, turning the part between readings. It is **7-sided**: an odd count gives the same flat-to-corner width at every turn | `boss_sides`, `hex_af` | **7, 15.09 measured** (15.04 to 15.10) |
 | 4 | Overall height, flange bottom to hex top | `total_h` | **14.05 measured** |
 | 4a | Hex AF at the flange vs at the top. The original looks skewed on purpose, to wedge into the handle | `hex_taper` | 0 |
 | 5 | Window height | `window_h` | 2.6 |
@@ -48,7 +48,7 @@ Helpful photos: one straight at the window, one straight at the side opposite it
 
 The render prints a summary to check before slicing:
 
-    ECHO: "Adapter: flange 20 x 3.8, hex 15.04 AF (17.37 AC, taper 0) x 10.25, total 14.05, stem bore 6.54, window 4.5->3.8 x 2.6 at 180 deg (corner)"
+    ECHO: "Adapter: flange 20 x 3.8, 7-sided boss 14.94 wide (15.72 across corners, taper 0) x 10.25, total 14.05, stem bore 6.54, window 4.5->3.8 x 2.6 at 180 deg (corner)"
 
 ## Fit tests before the full part
 
