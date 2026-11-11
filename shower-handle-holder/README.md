@@ -19,7 +19,7 @@ Printable replacement for the small plastic or brass adapter between a shower or
 Bottom to top:
 - **Flange** with an **obround socket** (elongated, rounded ends) from below, long axis pointing at the window. The socket has a bevelled entry and goes up to the window ceiling.
 - **7-sided boss** (not a hex) with a **round bore** from the top, down to the window ceiling. A corner points at the window.
-- **Window:** one side only, on a hex **corner**. Its floor is the flange top, and it reaches just past the centre.
+- **Window:** one side only, on a boss **corner**. Its floor is the flange top; its back wall is 11.09 from the opposite face, about 4 mm short of the centre, so it opens into the bottom socket but not the stem bore.
 
 `cutaway = true` shows the section.
 
@@ -35,7 +35,7 @@ Calipers are best. Write down each number and put it into the matching parameter
 | 4 | Overall height, flange bottom to hex top | `total_h` | **14.05 measured** |
 | 4a | Hex AF at the flange vs at the top. The original looks skewed on purpose, to wedge into the handle | `hex_taper` | 0 |
 | 5 | Window height | `window_h` | 2.6 |
-| 6 | Window width at the corner, and how far in it goes | `window_w_outer`, `window_w_inner`, `window_reach` | 4.5, 3.8, 0.75 |
+| 6 | Window width at the corner and at its back wall; depth = back wall to the opposite outer face (caliper jaw inside the window) | `window_w_outer`, `window_w_inner`, `window_back` | 4.5, 3.8, **11.09 measured** |
 | 7 | Bottom socket length (end to end) and width (across the straight sides). Also measure the **stem** itself | `bottom_long`, `bottom_short` | 8.8, 5.2 |
 | 8 | Socket depth. Are the ends true half-circles? Take a photo straight into it | `bottom_depth`, `bottom_shape` | auto, obround |
 | 9 | Socket angle relative to the window (long axis pointing at it, or across it) | `bottom_rot` | 0 |

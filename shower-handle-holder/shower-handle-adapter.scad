@@ -14,7 +14,7 @@
 //       |     |        |     |  <- round bore from the top, down to the window
 //   ____|     |        |     |
 //  |window               |___|  <- window: one side only, floor = flange top,
-//  |_______    ______    |____     reaches window_reach past the centre
+//  |_______    ______    |____     back wall window_back from the far face
 //  |_______|  |      |   |____|  <- flange, obround socket from below
 //            /________\          (long axis along the window), bevelled entry
 
@@ -45,8 +45,8 @@ window_h = 2.6;
 window_w_outer = 4.5;
 // Window width at its inner end
 window_w_inner = 3.8;
-// How far the window reaches past the centre (0 = stops at the axis, negative = short of it)
-window_reach = 0.75;
+// Window back wall to the opposite outer face (the screw opening's depth). Measured
+window_back = 11.09;
 // Direction of the window, degrees. A boss corner always points here
 window_angle = 180;
 
@@ -94,6 +94,8 @@ hex_af_p = hex_af + hex_fit;
 function r_of(w) = boss_sides % 2 == 0 ? w / (2 * cos(180 / boss_sides))
                                       : w / (1 + cos(180 / boss_sides));
 hex_r    = r_of(hex_af_p);
+// Window end along its axis, past the centre (negative = short of it)
+window_reach = (hex_af_p - (boss_sides % 2 == 0 ? hex_af_p / 2 : hex_r)) - window_back;
 boss_h   = total_h - flange_h;
 bot_depth = bottom_depth < 0 ? flange_h + window_h : bottom_depth;
 bore_h   = top_round_h  < 0 ? boss_h - window_h  : top_round_h;
@@ -106,7 +108,7 @@ echo(str("Adapter: flange ", flange_d, " x ", flange_h, ", ", boss_sides, "-side
          round(hex_r * 200) / 100, " across corners, taper ", hex_taper, ") x ", boss_h, ", total ", total_h,
          ", stem bore ", top_round_d + top_round_fit,
          ", window ", window_w_outer, "->", window_w_inner, " x ", window_h,
-         " at ", window_angle, " deg (corner)"));
+         " at ", window_angle, " deg (corner), back wall ", round(-window_reach * 100) / 100, " short of centre"));
 
 module chamfered_disc(d, h, c) {
     hull() {
