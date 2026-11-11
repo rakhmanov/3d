@@ -21,36 +21,33 @@
 /* [Flange] */
 // Flange outer diameter. Measured
 flange_d = 22.0;
-// Flange thickness (estimate)
-flange_h = 3.8;
+// Flange (lip) thickness. Measured
+flange_h = 3.9;
 // Chamfer on flange top and bottom edges
 flange_chamfer = 0.5;
 
 /* [Boss] */
-// Hexagon with one corner cut flat (7 corners). Window face runs from the point to a short flat
-// Across the one short pair of parallel flats. Measured
-boss_flats = 14.38;
-// Across the other two pairs of parallel flats. Measured 15.04-15.10
-hex_af = 15.09;
-// Pointed corner to the cut-flat corner opposite it. Measured
-boss_point_to_flat = 15.85;
-// Overall height, flange bottom to hex top. Measured
-total_h = 14.05;
+// Sharp-corner outline, point up, fitted to the caliper readings (README "Boss outline").
+// The bore axis is the origin. Window side: from the point (first) down the last edge.
+boss_pts = [[-0.09, 8.92], [7.04, 4.23], [7.32, -1.46], [4.11, -6.84],
+            [-4.07, -6.74], [-7.04, -1.89], [-7.28, 3.77]];
+// Rounding on the vertical corners (fit to the side lengths)
+boss_corner_r = 0.6;
+// Rounding on the top edge, the end that goes into the handle. Measured
+boss_top_round = 1.0;
+// Overall height, flange bottom to boss top. Measured
+total_h = 14.0;
 // Width lost toward the top. The original looks deliberately skewed to wedge in
 hex_taper = 0;
-// Small chamfer on the top hex edges (0 = sharp)
-boss_top_chamfer = 0.4;
 
 /* [Side window] */
 // Window height, from the flange top up
 window_h = 2.6;
-// Window width at the face. It spans most of the face from the point to the short flat
-window_w_outer = 6.5;
-// Window width at its back wall
-window_w_inner = 6.5;
-// Window back wall to the opposite outer face (the screw opening's depth). Measured
+// The opening runs from the point to this fraction down the next parallel flat
+window_end_frac = 0.75;
+// Window back wall to the far side of the boss (the screw opening's depth). Measured
 window_back = 11.09;
-// Direction of the window face normal, degrees
+// Direction the window faces, degrees
 window_angle = 180;
 
 /* [Bottom socket] */
@@ -92,24 +89,32 @@ cutaway = false;
 $fn = 96;
 eps = 0.01;
 
-hex_af_p = hex_af + hex_fit;
-// Pointed corner distance from the axis: the farthest point of the boss
-hex_r    = hex_af_p / sqrt(3);
-// Window back wall along its axis, past the centre (negative = short of it). Uses unfitted sizes
-window_reach = hex_af / 2 - window_back;
+function unit(a) = [cos(a), sin(a)];
+function edge_dist(a, b) = abs(cross(b - a, -a)) / norm(b - a);
+n_pts    = len(boss_pts);
+hex_r    = max([for (p = boss_pts) norm(p)]);
+boss_inr = min([for (i = [0 : n_pts - 1]) edge_dist(boss_pts[i], boss_pts[(i + 1) % n_pts])]);
+// Window wedge in the outline's frame: from the point to window_end_frac down the last edge
+win_end  = boss_pts[n_pts - 1] + window_end_frac * (boss_pts[n_pts - 2] - boss_pts[n_pts - 1]);
+win_a0   = atan2(boss_pts[0][1], boss_pts[0][0]);
+win_a1r  = atan2(win_end[1], win_end[0]);
+win_a1   = win_a1r < win_a0 ? win_a1r + 360 : win_a1r;
+win_mid  = (win_a0 + win_a1) / 2;
+// Back wall square to the wedge centre line, window_back from the boss's far side
+win_wall = min([for (p = boss_pts) p * unit(win_mid)]) + window_back;
+frame_rot = window_angle - win_mid;
 boss_h   = total_h - flange_h;
 bot_depth = bottom_depth < 0 ? flange_h + window_h : bottom_depth;
 bore_h   = top_round_h  < 0 ? boss_h - window_h  : top_round_h;
 
 assert(hex_r * 2 < flange_d, "Boss corners overhang the flange");
 assert(bore_h + window_h >= boss_h - eps || bore_h + window_h < boss_h - 1, "Top bore stops less than 1 mm short of the window");
-assert(bottom_long + 2 * bottom_entry_chamfer < hex_af_p - 1, "Bottom socket leaves a too-thin wall under the hex");
+assert(bottom_long + 2 * bottom_entry_chamfer < 2 * boss_inr - 1, "Bottom socket leaves a too-thin wall under the hex");
 
-echo(str("Adapter: flange ", flange_d, " x ", flange_h, ", boss ", boss_flats + hex_fit, " / ", hex_af_p,
-         " flats, point to flat ", boss_point_to_flat + hex_fit, ", taper ", hex_taper, ", x ", boss_h, ", total ", total_h,
-         ", stem bore ", top_round_d + top_round_fit,
-         ", window ", window_w_outer, "->", window_w_inner, " x ", window_h,
-         " at ", window_angle, " deg, back wall ", round(-window_reach * 100) / 100, " short of centre"));
+echo(str("Adapter: flange ", flange_d, " x ", flange_h, ", boss ", n_pts, " corners, r ", boss_corner_r,
+         ", top round ", boss_top_round, ", taper ", hex_taper, ", height ", boss_h, ", total ", total_h,
+         ", stem bore ", top_round_d + top_round_fit, ", window ", round(win_a1 - win_a0), " deg wide x ", window_h,
+         ", back wall ", round(win_wall * 100) / 100, " from centre"));
 
 module chamfered_disc(d, h, c) {
     hull() {
@@ -118,31 +123,30 @@ module chamfered_disc(d, h, c) {
     }
 }
 
-// Boss outline grown by g. Built point-up (short flats vertical), then the window face
-// (normal at 120 deg) is turned to window_angle.
+// Boss outline grown by g, turned so the window faces window_angle
 module boss_profile(g) {
-    big = 4 * flange_d;
-    w_v = boss_flats + hex_fit + 2 * g;
-    w_s = hex_af_p + 2 * g;
-    cut = boss_point_to_flat + hex_fit + 2 * g - w_s / sqrt(3);
-    rotate(window_angle - 120)
-        intersection() {
-            square([w_v, big], center = true);
-            rotate(60) square([w_s, big], center = true);
-            rotate(120) square([w_s, big], center = true);
-            translate([-big / 2, -cut]) square(big);
-        }
+    rc = boss_corner_r;
+    rotate(frame_rot) offset(r = rc) offset(delta = g + hex_fit / 2 - rc) polygon(boss_pts);
 }
 
 module boss_slice(g, z) { translate([0, 0, z]) linear_extrude(eps) boss_profile(g); }
 
 module hex_boss(h) {
-    c = boss_top_chamfer;
+    r = boss_top_round;
     t = -hex_taper / 2;
     hull() {
         boss_slice(0, 0);
-        boss_slice(t, h - c - eps);
-        if (c > 0) boss_slice(t - c, h - eps);
+        for (a = [0 : 15 : 90])
+            boss_slice(t - r * (1 - cos(a)), h - r + r * sin(a) - (a == 90 ? eps : 0));
+    }
+}
+
+// Window wedge in the outline frame, cut back to its wall
+module window_2d() {
+    big = 2 * flange_d;
+    intersection() {
+        polygon([[0, 0], big * unit(win_a0), big * unit(win_mid), big * unit(win_a1)]);
+        rotate(win_mid) translate([win_wall, -big]) square(2 * big);
     }
 }
 
@@ -170,16 +174,8 @@ module body() {
 
 module cuts() {
     f = hole_fit;
+    rotate(frame_rot) translate([0, 0, flange_h]) linear_extrude(window_h) window_2d();
     rotate([0, 0, window_angle]) {
-        // Side window: from the +X corner (rotated to window_angle) in past the axis
-        translate([0, 0, flange_h])
-            linear_extrude(window_h)
-                polygon([
-                    [-window_reach,     -(window_w_inner + f) / 2],
-                    [hex_r + 1,         -(window_w_outer + f) / 2],
-                    [hex_r + 1,          (window_w_outer + f) / 2],
-                    [-window_reach,      (window_w_inner + f) / 2]
-                ]);
         // Bottom socket with a bevelled entry
         rotate([0, 0, bottom_rot]) {
             translate([0, 0, -eps])
