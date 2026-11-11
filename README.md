@@ -21,3 +21,5 @@ Ready to be downloaded, sliced, and printed. STLs and previews are auto generate
 ## How to tweak?
 
 Make any necessary changes locally to OpenScad, render and export STL using UI. Or generate them programmatically using [Docker](/DOCKER.md).
+
+Check overhangs: `python3 tools/stl-check.py part.stl`. Agent notes: [AGENTS.md](AGENTS.md).
