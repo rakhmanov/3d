@@ -18,8 +18,9 @@
 // edge (within 4 mm of the edge, where the back rim overlaps it).
 //
 // Print front face down on the bed (clean, flat face for the tape). No supports:
-// the back rim overhangs 3 mm flat, then slopes at 45 degrees, and there is
-// no rim over the opening. Only the charger slot is bridged (60 mm).
+// the back rim's underside is a 45 degree chamfer straight off the pocket wall
+// (no flat overhang), and there is no rim over the opening. Only the charger
+// slot is bridged (60 mm).
 // Strength: 4 walls (perimeters), 30% gyroid infill.
 // Units mm. Coordinates as seen from the ROOM (the tablet's back) in landscape: x right,
 // y up, z from the glass (0) towards the room.
@@ -38,8 +39,7 @@ tab_r = 5.0;           // pocket corner radius (keep <= tablet's corner radius)
 wall = 3.5;            // side wall thickness (3.5 keeps the frame inside a 256 mm bed)
 lip = 2.0;             // front lip thickness (glass side)
 lip_over = 13.0;       // front lip covers the bezel this far (screen starts ~17 in)
-back_flat = 3.0;       // back rim: flat overhang (prints without support)
-back_over = 6.0;       // back rim: total reach over the tablet's back
+back_over = 5.0;       // back rim: reach in from the pocket wall (45 degree chamfer)
 back_skin = 1.6;       // back rim thickness above the 45 degree slope
 
 /* [Cutouts - tablet edges as in landscape] */
@@ -56,8 +56,9 @@ dt_fit = 0.1;          // total gap between the halves (all round the dovetail)
 key_len = 24.0;        // butterfly key length (half in each frame half)
 key_head = 5.0;        // key width at its ends
 key_neck = 2.5;        // key width at the seam
-key_depth = 3.5;       // key thickness = pocket depth into the back rim
-key_fit = 0.1;         // total gap around the key in its pocket
+key_depth = 3.0;       // pocket depth into the back rim
+key_fit = 0.1;         // pocket: total oversize over the nominal bow-tie
+key_clear = 0.1;       // key: undersize per side (total gap = key_fit + 2 * key_clear)
 
 $fn = 48;
 
@@ -69,8 +70,9 @@ oh = ph + 2 * wall;
 o_r = tab_r + wall;
 
 z_pocket0 = lip;
-z_back = lip + tab_t + play_t;   // tablet back / start of back lip
-z_slope = z_back + (back_over - back_flat);
+z_tab = lip + tab_t;             // tablet back (against the front lip); rim chamfer starts here at the wall
+z_back = z_tab + play_t;         // felt plane: the chamfer is play_t in from the wall here
+z_slope = z_tab + back_over;
 z_top = z_slope + back_skin;
 
 win_w = pw - 2 * lip_over;       // 221 x 151 window (screen ~211 x 141)
@@ -109,10 +111,10 @@ module frame_body(open) {
         // screen window, all the way through
         translate([0, 0, -1]) linear_extrude(z_top + 2) rrect(win_w, win_h, 3);
         // tablet pocket
-        translate([0, 0, z_pocket0]) linear_extrude(z_back - z_pocket0) rrect(pw, ph, tab_r);
-        // back opening: flat overhang, then 45 degree slope, then straight up
+        translate([0, 0, z_pocket0]) linear_extrude(z_tab - z_pocket0) rrect(pw, ph, tab_r);
+        // back opening: 45 degree chamfer straight off the pocket wall, then straight up
         hull() {
-            slab(back_flat, z_back - 0.01);
+            slab(0, z_tab - 0.01);
             slab(back_over, z_slope);
         }
         translate([0, 0, z_slope - 0.01])
@@ -121,11 +123,11 @@ module frame_body(open) {
         // the opening: wall removed between the lips, and no back rim on that
         // edge (it would be a full-width bridge; the side rims hold the tablet)
         if (open == "top") {
-            box(-pw / 2, pw / 2, 0, big + ph / 2, z_pocket0, z_back);
-            box(-pw / 2, pw / 2, ph / 2 - back_over - 1, big + ph / 2, z_back - 0.01, z_top + 1);
+            box(-pw / 2, pw / 2, 0, big + ph / 2, z_pocket0, z_tab);
+            box(-pw / 2, pw / 2, ph / 2 - back_over - 1, big + ph / 2, z_tab - 0.01, z_top + 1);
         } else {
-            box(0, big + pw / 2, -ph / 2, ph / 2, z_pocket0, z_back);
-            box(pw / 2 - back_over - 1, big + pw / 2, -ph / 2, ph / 2, z_back - 0.01, z_top + 1);
+            box(0, big + pw / 2, -ph / 2, ph / 2, z_pocket0, z_tab);
+            box(pw / 2 - back_over - 1, big + pw / 2, -ph / 2, ph / 2, z_tab - 0.01, z_top + 1);
         }
 
         // Surface Connect slot (left wall seen from the room = right edge seen from outside)
@@ -164,9 +166,9 @@ module split_cut(g) {
 // closed wall, half in each frame half; a printed key drops in (glued). It
 // locks the back of the seam, the lip dovetails lock the front.
 key_y = oh / 2 - 1.2 - (key_head + key_fit) / 2;   // key centre, |y|
-// rim's inner edge at the pocket floor (back rim: flat, then 45 degrees)
-key_rim_y = ph / 2 - back_flat - (z_top - key_depth - z_back);
-assert(key_rim_y - (key_y + (key_head + key_fit) / 2) >= 0.8, "key pocket breaks into the rim slope");
+// rim's inner edge at the key pocket floor (45 degree chamfer from the wall at z_tab)
+key_rim_y = ph / 2 - (z_top - key_depth - z_tab);
+assert(key_y - (key_head + key_fit) / 2 - key_rim_y >= 0.75, "key pocket breaks into the rim slope");
 
 module bowtie(g) {
     offset(delta = g) polygon([
@@ -181,7 +183,8 @@ module key_pockets(open) {
                 linear_extrude(key_depth + 1) bowtie(key_fit / 2);
 }
 
-module key() linear_extrude(key_depth - 0.2) bowtie(0);
+// slightly undersized all round so it drops in without wedging the halves apart
+module key() linear_extrude(key_depth - 0.2) bowtie(-key_clear);
 
 // half = -1 (the -x half, with the dovetails) or 1 (the +x half, with the sockets)
 module frame_half(open, half) {
