@@ -27,18 +27,18 @@ flange_h = 3.9;
 flange_chamfer = 0.5;
 
 /* [Boss] */
-// Symmetric 7-cornered outline, point up, from the hand drawing (README "Boss outline").
+// Symmetric 7-cornered outline, point up: drawn shape, face lengths solved from the caliper widths.
 // The bore sits at the outline's area centre.
 // The window is on the upper-left face and wraps over the point.
 // Each upper face, point to wall top
-boss_top_side = 8.5;
+boss_top_side = 8.79;
 // Each lower face, wall bottom to the bottom flat
-boss_low_side = 5.0;
+boss_low_side = 5.93;
 // Bottom flat
-boss_bottom = 8.0;
+boss_bottom = 7.37;
 // Across the side walls at their top and bottom ends; they close in slightly toward the bottom
-boss_width_top = 14.2;
-boss_width_bottom = 14.0;
+boss_width_top = 14.38;
+boss_width_bottom = 14.18;
 // Side wall length. Measured
 boss_wall = 6.0;
 // Rounding on the vertical corners (fit to the side lengths)
@@ -63,12 +63,12 @@ window_back = 11.09;
 window_angle = 180;
 
 /* [Bottom socket] */
-// Socket shape from below (the stem fits here). obround = elongated with rounded ends
+// Hollow from below (the stem's base fits here). Equal long and short sides = round
 bottom_shape = "obround"; // [obround, square]
-// Long side (obround: end to end; square: across flats)
-bottom_long = 8.8;
+// Long side (obround: end to end; square: across flats). ~10 hole on the lip face, from a photo
+bottom_long = 9.8;
 // Short side, across the straight sides
-bottom_short = 5.2;
+bottom_short = 9.8;
 // Corner radius for the square shape
 bottom_corner_r = 0.5;
 // Bevel at the socket entry
@@ -87,8 +87,8 @@ top_round_fit = 0.1;
 top_round_h = -1;
 
 /* [Print fit] */
-// Added to the hex size for printing (negative = smaller, so it slides into the handle)
-hex_fit = -0.15;
+// Added to the boss size for printing. 0: the measured part is already worn, so it reads small
+hex_fit = 0;
 // Added to the other hole sizes for printing (positive = looser)
 hole_fit = 0.2;
 
