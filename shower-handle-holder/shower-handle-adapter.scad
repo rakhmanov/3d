@@ -75,7 +75,7 @@ bottom_corner_r = 0.5;
 bottom_entry_chamfer = 0.8;
 // Slot depth from the bottom face. The bar stands 11.58 out of the bonnet; -1 = up to the window
 bottom_depth = 12.0;
-// Rotation relative to the window, degrees. 0 = long axis points at the window
+// Slot angle against the outline, degrees. 0 = long axis parallel to the bottom flat (wall to wall)
 bottom_rot = 0;
 
 /* [Top bore] */
@@ -209,7 +209,7 @@ module body() {
 module cuts() {
     f = hole_fit;
     rotate(frame_rot) translate([0, 0, flange_h]) linear_extrude(window_h) window_2d();
-    rotate([0, 0, window_angle]) {
+    rotate([0, 0, frame_rot]) {
         // Bottom socket with a bevelled entry
         rotate([0, 0, bottom_rot]) {
             translate([0, 0, -eps])
