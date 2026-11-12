@@ -75,7 +75,7 @@ bottom_corner_r = 0.5;
 bottom_entry_chamfer = 0.8;
 // Slot depth from the bottom face. The bar stands 11.58 out of the bonnet; -1 = up to the window
 bottom_depth = 12.0;
-// Slot angle against the window, degrees. 0 = the bar's long axis points at the window
+// Slot angle, degrees. 0 = the bar's long axis square to the upper-right face (marked on a render)
 bottom_rot = 0;
 // Boss wall thickness: above the lip the boss is a shell this thick, hollow up to the slot depth
 boss_shell = 2.0;
@@ -133,6 +133,8 @@ win_mid  = (win_a0 + win_a1) / 2;
 // Back wall square to the opening's centre line, window_back from the boss's far side or on the axis
 win_wall = window_back < 0 ? 0 : min([for (p = boss_pts) p * unit(win_mid)]) + window_back;
 frame_rot = window_angle - win_mid;
+// Stem slot axis in the outline frame: square to the face from the point to the right wall
+slot_axis = atan2(boss_pts[1][1] - boss_pts[0][1], boss_pts[1][0] - boss_pts[0][0]) + 90;
 boss_h   = total_h - flange_h;
 bot_depth = bottom_depth < 0 ? flange_h + window_h : bottom_depth;
 bore_h   = top_round_h  < 0 ? boss_h - window_h  : top_round_h;
@@ -213,7 +215,7 @@ module cuts() {
     rotate(frame_rot) translate([0, 0, flange_h]) linear_extrude(window_h) window_2d();
     if (boss_shell > 0)
         translate([0, 0, flange_h - eps]) linear_extrude(bot_depth - flange_h + eps) boss_profile(-boss_shell);
-    rotate([0, 0, window_angle]) {
+    rotate([0, 0, frame_rot + slot_axis]) {
         // Bottom socket with a bevelled entry
         rotate([0, 0, bottom_rot]) {
             translate([0, 0, -eps])
