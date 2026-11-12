@@ -19,11 +19,11 @@ Printable replacement for the small plastic or brass adapter between a shower or
 Bottom to top:
 - **Flange** with an **obround socket** (elongated, rounded ends) from below, long axis pointing at the window. The socket has a bevelled entry and goes up to the window ceiling.
 - **Boss**: a symmetric 7-cornered outline (see **Boss outline**), corners rounded 0.6, top edge rounded 1.0 where it goes into the handle. **Round bore** from the top, down to the window ceiling.
-- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face. Its floor is the flange top; its back wall is 11.09 from the far side, 3.07 from the centre, so it opens into the bottom socket but not the stem bore.
+- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face. Its floor is the flange top; its back wall is 11.09 from the far side, 3.51 from the centre, so it opens into the bottom socket but not the stem bore.
 
 ## Boss outline
 
-A symmetric 7-cornered outline, point up, built from the hand-drawn corner-to-corner sizes. The window is on the upper-left face and wraps over the point. The bore sits midway between the point and the bottom flat. Corners are rounded 0.6, so a caliper laid along a face reads its straight part, about 0.7 short of the corner-to-corner size.
+A symmetric 7-cornered outline, point up, built from the hand-drawn corner-to-corner sizes. The window is on the upper-left face and wraps over the point. The bore sits at the outline's area centre, so every face is 6.5 to 7.1 from it (point 7.7 above, bottom flat 6.5 below). Corners are rounded 0.6, so a caliper laid along a face reads its straight part, about 0.7 short of the corner-to-corner size.
 
 | Edge | Drawn (corner to corner) | Parameter | Straight part on the print |
 |---|---|---|---|
@@ -60,7 +60,7 @@ Helpful photos: one straight at the window, one straight at the side opposite it
 
 The render prints a summary to check before slicing:
 
-    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 127 deg wide x 2.6, back wall 3.07 from centre"
+    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 120 deg wide x 2.6, back wall 3.51 from centre"
 
 ## Fit tests before the full part
 

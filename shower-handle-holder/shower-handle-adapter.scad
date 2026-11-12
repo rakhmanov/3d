@@ -28,6 +28,7 @@ flange_chamfer = 0.5;
 
 /* [Boss] */
 // Symmetric 7-cornered outline, point up, from the hand drawing (README "Boss outline").
+// The bore sits at the outline's area centre.
 // The window is on the upper-left face and wraps over the point.
 // Each upper face, point to wall top
 boss_top_side = 8.25;
@@ -102,14 +103,19 @@ eps = 0.01;
 
 function unit(a) = [cos(a), sin(a)];
 function edge_dist(a, b) = abs(cross(b - a, -a)) / norm(b - a);
-// Sharp corners clockwise from the point, centred on the bore between point and bottom flat
-function boss_corners() =
+// Sharp corners clockwise from the point
+function boss_raw() =
     let(xu = boss_width_top / 2, xl = boss_width_bottom / 2, xb = boss_bottom / 2,
         yu = sqrt(pow(boss_wall, 2) - pow(xu - xl, 2)),
         yb = -sqrt(pow(boss_low_side, 2) - pow(xl - xb, 2)),
-        yp = yu + sqrt(pow(boss_top_side, 2) - pow(xu, 2)),
-        c  = (yp + yb) / 2)
-    [[0, yp - c], [xu, yu - c], [xl, -c], [xb, yb - c], [-xb, yb - c], [-xl, -c], [-xu, yu - c]];
+        yp = yu + sqrt(pow(boss_top_side, 2) - pow(xu, 2)))
+    [[0, yp], [xu, yu], [xl, 0], [xb, yb], [-xb, yb], [-xl, 0], [-xu, yu]];
+// Area centroid height of a polygon: the bore goes here, so the faces sit evenly round it
+function centroid_y(q) =
+    let(n = len(q), c = [for (i = [0 : n - 1]) q[i][0] * q[(i + 1) % n][1] - q[(i + 1) % n][0] * q[i][1]])
+    sum([for (i = [0 : n - 1]) (q[i][1] + q[(i + 1) % n][1]) * c[i]]) / (3 * sum(c));
+function sum(v) = len(v) == 0 ? 0 : v[0] + sum([for (i = [1 : 1 : len(v) - 1]) v[i]]);
+function boss_corners() = let(q = boss_raw(), cy = centroid_y(q)) [for (p = q) [p[0], p[1] - cy]];
 boss_pts = boss_corners();
 n_pts    = len(boss_pts);
 hex_r    = max([for (p = boss_pts) norm(p)]);
