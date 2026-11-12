@@ -19,25 +19,23 @@ Printable replacement for the small plastic or brass adapter between a shower or
 Bottom to top:
 - **Flange** with an **obround socket** (elongated, rounded ends) from below, long axis pointing at the window. The socket has a bevelled entry and goes up to the window ceiling.
 - **Boss**: an irregular 7-cornered outline (see **Boss outline**), corners rounded 0.6, top edge rounded 1.0 where it goes into the handle. **Round bore** from the top, down to the window ceiling.
-- **Window:** one side only, a 93 degree wedge from the point to three quarters down the next parallel flat. Its floor is the flange top; its back wall is 11.09 from the far side, 3.43 from the centre, so it opens into the bottom socket but not the stem bore.
+- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side flat; each side wall is square to its face. Its floor is the flange top; its back wall is 11.09 from the far side, 3.06 from the centre, so it opens into the bottom socket but not the stem bore.
 
 ## Boss outline
 
-Sides go clockwise from the point, looking down on the top. The window side is the last two rows. Calipers on rounded corners read each flat short, so the outline is a least-squares fit (sharp corners plus 0.6 mm rounding) to every reading at once; `boss_pts` holds its corners.
+Sides go clockwise from the point, looking down on the top; the window is on the last edge and wraps over the point. The outline matches the hand-drawn flat lengths (calipers on the original, corners rounded 0.6). The two side flats are not parallel: they spread about 4 degrees apart toward the flat bottom edge. `boss_pts` holds the sharp corners; the bore axis is the origin.
 
-| Side | Flat measured | Flat in model | Sharp edge | Width across, measured | Width across, model |
+| Side | Flat drawn | Flat in model | Sharp edge | Width across, model | Width across, calipers |
 |---|---|---|---|---|---|
-| Point to upper right | 7.7 | 7.82 | 8.53 | 15.04 to 15.10 | 15.21 |
-| Right (parallel pair) | 5.5 | 5.21 | 5.70 | 14.38 | 14.30 |
-| Lower right | 6.0 | 5.73 | 6.26 | 15.04 to 15.10 | 15.15 |
-| Bottom | 8.0 | 7.51 | 8.18 | 15.85 (point to this flat) | 15.71 |
-| Lower left | 5.5 | 5.20 | 5.69 | 15.04 to 15.10 | 15.14 |
-| Left (parallel pair), window ends 3/4 down | 5.5 | 5.18 | 5.66 | 14.38 | 14.30 |
-| Upper left to the point, window side | 8.0 | 8.11 | 8.84 | 15.04 to 15.10 | 15.19 |
+| Point to upper right (window starts 0.35 along) | 7.7 | 7.68 | 8.35 | 15.97 | 15.04 to 15.10 |
+| Right side | 5.5 | 5.46 | 5.96 | 14.42 | 14.38 |
+| Lower right | 6.0 | 5.96 | 6.50 | 15.56 | 15.04 to 15.10 |
+| Bottom (flat edge) | 8.0 | 7.96 | 8.68 | 16.02 | 15.85 (point to this flat) |
+| Lower left | 5.5 | 5.46 | 5.97 | 15.02 | 15.04 to 15.10 |
+| Left side (window ends 0.75 down) | 5.5 | 5.46 | 5.91 | 14.51 | 14.38 |
+| Upper left to the point, window side | 8.0 | 7.97 | 8.72 | 15.49 | 15.04 to 15.10 |
 
-The side lengths alone would give a part only 13.3 to 15.4 across, which the width readings rule out; rounded corners reconcile them. Fit residuals are up to 0.5 mm on flats (the bottom one) and 0.15 mm on widths. The bore sits at the average of the corners; if the real part's bore is off-centre, shift `boss_pts`.
-
-`cutaway = true` shows the section.
+The drawn flats win over the caliper widths: three widths come out 0.4 to 0.9 larger than read. If the part is loose in the handle, that is where to look. The printed part is 0.15 smaller across (`hex_fit`), so its flats read about 0.1 short of these.
 
 ## Measurement checklist
 
@@ -47,11 +45,11 @@ Calipers are best. Write down each number and put it into the matching parameter
 |---|---|---|---|
 | 1 | Flange outside diameter | `flange_d` | **22.0 measured** |
 | 2 | Flange (lip) thickness | `flange_h` | **3.9 measured** |
-| 3 | Boss outline: every flat, and widths across (see **Boss outline**). Corner rounding; top-edge rounding | `boss_pts`, `boss_corner_r`, `boss_top_round` | **fitted**, 0.6 fitted, **1.0 measured** |
+| 3 | Boss outline: every flat, and widths across (see **Boss outline**). Corner rounding; top-edge rounding | `boss_pts`, `boss_corner_r`, `boss_top_round` | **drawn flats**, 0.6 fitted, **1.0 measured** |
 | 4 | Overall height, flange bottom to boss top | `total_h` | **14.0 measured** |
 | 4a | Boss width at the flange vs at the top. The original looks skewed on purpose, to wedge into the handle | `hex_taper` | 0 |
 | 5 | Window height | `window_h` | 2.6 |
-| 6 | Window span (from the point to how far down the next parallel flat); depth = back wall to the far side (caliper jaw inside the window) | `window_end_frac`, `window_back` | **0.75 marked**, **11.09 measured** |
+| 6 | Window span: start along the face past the point, end down the side flat; depth = back wall to the far side (caliper jaw inside the window) | `window_start_frac`, `window_end_frac`, `window_back` | **0.35, 0.75 drawn**, **11.09 measured** |
 | 7 | Bottom socket length (end to end) and width (across the straight sides). Also measure the **stem** itself | `bottom_long`, `bottom_short` | 8.8, 5.2 |
 | 8 | Socket depth. Are the ends true half-circles? Take a photo straight into it | `bottom_depth`, `bottom_shape` | auto, obround |
 | 9 | Socket angle relative to the window (long axis pointing at it, or across it) | `bottom_rot` | 0 |
@@ -64,7 +62,7 @@ Helpful photos: one straight at the window, one straight at the side opposite it
 
 The render prints a summary to check before slicing:
 
-    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 93 deg wide x 2.6, back wall 3.43 from centre"
+    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 110 deg wide x 2.6, back wall 3.06 from centre"
 
 ## Fit tests before the full part
 

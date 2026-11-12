@@ -27,10 +27,10 @@ flange_h = 3.9;
 flange_chamfer = 0.5;
 
 /* [Boss] */
-// Sharp-corner outline, point up, fitted to the caliper readings (README "Boss outline").
+// Sharp-corner outline, point up, fitted to the drawn flat lengths (README "Boss outline").
 // The bore axis is the origin. Window side: from the point (first) down the last edge.
-boss_pts = [[-0.09, 8.92], [7.04, 4.23], [7.32, -1.46], [4.11, -6.84],
-            [-4.07, -6.74], [-7.04, -1.89], [-7.28, 3.77]];
+boss_pts = [[0.05, 9.00], [6.95, 4.30], [7.70, -1.61], [4.05, -6.99],
+            [-4.62, -7.22], [-6.89, -1.69], [-7.23, 4.20]];
 // Rounding on the vertical corners (fit to the side lengths)
 boss_corner_r = 0.6;
 // Rounding on the top edge, the end that goes into the handle. Measured
@@ -43,7 +43,9 @@ hex_taper = 0;
 /* [Side window] */
 // Window height, from the flange top up
 window_h = 2.6;
-// The opening runs from the point to this fraction down the next parallel flat
+// Opening starts this fraction along the first edge, past the point
+window_start_frac = 0.35;
+// and ends this fraction down the side flat on the other side. Side walls are square to their faces
 window_end_frac = 0.75;
 // Window back wall to the far side of the boss (the screw opening's depth). Measured
 window_back = 11.09;
@@ -94,13 +96,15 @@ function edge_dist(a, b) = abs(cross(b - a, -a)) / norm(b - a);
 n_pts    = len(boss_pts);
 hex_r    = max([for (p = boss_pts) norm(p)]);
 boss_inr = min([for (i = [0 : n_pts - 1]) edge_dist(boss_pts[i], boss_pts[(i + 1) % n_pts])]);
-// Window wedge in the outline's frame: from the point to window_end_frac down the last edge
+// Window in the outline's frame: from window_start_frac along the first edge, round past the
+// point, to window_end_frac down the side flat; each side wall is square to its face.
+win_start = boss_pts[0] + window_start_frac * (boss_pts[1] - boss_pts[0]);
 win_end  = boss_pts[n_pts - 1] + window_end_frac * (boss_pts[n_pts - 2] - boss_pts[n_pts - 1]);
-win_a0   = atan2(boss_pts[0][1], boss_pts[0][0]);
+win_a0   = atan2(win_start[1], win_start[0]);
 win_a1r  = atan2(win_end[1], win_end[0]);
 win_a1   = win_a1r < win_a0 ? win_a1r + 360 : win_a1r;
 win_mid  = (win_a0 + win_a1) / 2;
-// Back wall square to the wedge centre line, window_back from the boss's far side
+// Back wall square to the opening's centre line, window_back from the boss's far side
 win_wall = min([for (p = boss_pts) p * unit(win_mid)]) + window_back;
 frame_rot = window_angle - win_mid;
 boss_h   = total_h - flange_h;
@@ -142,11 +146,17 @@ module hex_boss(h) {
 }
 
 // Window wedge in the outline frame, cut back to its wall
-module window_2d() {
+// Half-plane of points p with (p - q) . n >= 0
+module half_plane(q, n) {
     big = 2 * flange_d;
+    translate(q) rotate(atan2(n[1], n[0])) translate([0, -big]) square([big, 2 * big]);
+}
+
+module window_2d() {
     intersection() {
-        polygon([[0, 0], big * unit(win_a0), big * unit(win_mid), big * unit(win_a1)]);
-        rotate(win_mid) translate([win_wall, -big]) square(2 * big);
+        half_plane(win_start, boss_pts[0] - boss_pts[1]);
+        half_plane(win_end, boss_pts[n_pts - 1] - boss_pts[n_pts - 2]);
+        half_plane(win_wall * unit(win_mid), unit(win_mid));
     }
 }
 
