@@ -59,6 +59,8 @@ window_start_frac = 0.35;
 window_end_frac = 0.75;
 // Window back wall to the boss's far side. -1 = open into the stem slot (back wall on the axis)
 window_back = -1;
+// Side edges lean this far from vertical, toward the left-wall end as they rise, for printing
+window_slant = 25;
 // Direction the window faces, degrees
 window_angle = 180;
 
@@ -74,11 +76,13 @@ bottom_corner_r = 0.5;
 // Bevel at the socket entry
 bottom_entry_chamfer = 0.8;
 // Slot depth from the bottom face. The bar stands 11.58 out of the bonnet; -1 = up to the window
-bottom_depth = 12.0;
+bottom_depth = 11.7;
 // Slot angle, degrees. 0 = the bar's long axis square to the upper-right face (marked on a render)
 bottom_rot = 0;
 // Boss wall thickness: shell this thick above the lip; the stem slot carries on through it, so the bar sits snug
 boss_shell = 2.5;
+// Height over which the hollow's walls lean in (45 deg or steeper) to meet the slot, for printing
+hollow_dome = 2.0;
 
 /* [Top bore] */
 // Round bore from the top: takes the stem tip. Stem measured 6.44; worn original 6.54 x 6.80
@@ -180,6 +184,13 @@ module half_plane(q, n) {
     translate(q) rotate(atan2(n[1], n[0])) translate([0, -big]) square([big, 2 * big]);
 }
 
+// Window cut, sheared along its face so the side edges lean by window_slant
+module window_3d() {
+    t = unit(win_mid + 90) * tan(window_slant);
+    multmatrix([[1, 0, t[0], 0], [0, 1, t[1], 0], [0, 0, 1, 0]])
+        linear_extrude(window_h) window_2d();
+}
+
 module window_2d() {
     intersection() {
         half_plane(win_start, boss_pts[0] - boss_pts[1]);
@@ -212,15 +223,26 @@ module body() {
 
 module cuts() {
     f = hole_fit;
-    rotate(frame_rot) translate([0, 0, flange_h]) linear_extrude(window_h) window_2d();
+    rotate(frame_rot) translate([0, 0, flange_h]) window_3d();
     if (boss_shell > 0)
-        translate([0, 0, flange_h - eps]) linear_extrude(bot_depth - flange_h + eps) boss_profile(-boss_shell);
+        hull() {
+            boss_slice(-boss_shell, flange_h - eps);
+            boss_slice(-boss_shell, bot_depth - hollow_dome);
+            rotate([0, 0, frame_rot + slot_axis + bottom_rot])
+                translate([0, 0, bot_depth - eps]) linear_extrude(eps) bottom_profile(0.05);
+        }
     rotate([0, 0, frame_rot + slot_axis]) {
         // Bottom socket with a bevelled entry
         rotate([0, 0, bottom_rot]) {
             translate([0, 0, -eps])
                 linear_extrude(bot_depth + eps)
                     bottom_profile(0);
+            // Domed slot ceiling: the rounded ends lean in at 45 deg to the screw hole
+            dr = (bottom_long + hole_fit - top_round_d - top_round_fit) / 2;
+            hull() {
+                translate([0, 0, bot_depth - eps]) linear_extrude(eps) bottom_profile(0);
+                translate([0, 0, bot_depth + dr + 0.1]) cylinder(h = eps, d = top_round_d + top_round_fit - 0.2);
+            }
             c = bottom_entry_chamfer;
             if (c > 0)
                 hull() {

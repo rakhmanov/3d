@@ -17,7 +17,7 @@ Printable replacement for the small plastic or brass adapter between a shower or
 ## Shape
 
 Bottom to top:
-- **Flange** with a **stem slot** from below: the cartridge stem is a flat bar 6.44 thick with rounded ends and a screw insert in its middle. The slot grips it tight in the lip (the original wore round here, which is why this part is being redrawn), its long axis square to the upper-right face. Above the lip the boss is a 2.5 shell (2.0 where the bar's ends touch it), hollow up to 12, since the bar stands 11.58 out of the bonnet. Bevelled entry. The reference parts in this folder have a different (6-cornered) shape, so none of their sizes are used.
+- **Flange** with a **stem slot** from below: the cartridge stem is a flat bar 6.44 thick with rounded ends and a screw insert in its middle. The slot grips it tight in the lip (the original wore round here, which is why this part is being redrawn), its long axis square to the upper-right face. Above the lip the boss is a 2.5 shell (2.0 where the bar's ends touch it), hollow up to 11.7, since the bar stands 11.58 out of the bonnet. Bevelled entry. The reference parts in this folder have a different (6-cornered) shape, so none of their sizes are used.
 - **Boss**: a symmetric 7-cornered outline (see **Boss outline**), corners rounded 0.6, top edge rounded 1.0 where it goes into the handle. **Round bore** from the top, down to the window ceiling.
 - **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face. Its floor is the flange top and it opens straight into the stem slot (its back wall is on the axis), with no wall left between them.
 
@@ -55,7 +55,7 @@ Calipers are best. Write down each number and put it into the matching parameter
 | 5 | Window height, from the lip top | `window_h` | **5.7 measured** |
 | 6 | Window span: start along the face past the point, end down the side flat; depth = back wall to the far side (caliper jaw inside the window) | `window_start_frac`, `window_end_frac`, `window_back` | **0.35, 0.75 drawn**, -1 (open into the slot; the 11.09 reading came from the worn part) |
 | 7 | **Stem bar** (not the worn hole): length end to end, and thickness | `bottom_long`, `bottom_short`, `hole_fit` | 10.0 (estimate: the worn hole is ~10 round), **6.44 measured**, +0.1 |
-| 8 | Slot depth: how far the bar reaches into the part. 11.58 measured from the bonnet face, if the lip sits on it | `bottom_depth`, `bottom_shape` | 12.0, obround |
+| 8 | Slot depth: how far the bar reaches into the part. 11.58 measured from the bonnet face, if the lip sits on it | `bottom_depth`, `bottom_shape` | 11.7, obround |
 | 9 | Slot angle: the bar's long axis is square to the upper-right face (point to right wall) | `bottom_rot` | **0 (marked on a render)** |
 | 9a | Boss wall thickness: above the lip the boss is a shell; the stem slot carries on through it, so the bar sits snug and the window screw presses it against the far wall | `boss_shell` | 2.5 |
 | 10 | Bevel size at the socket entry | `bottom_entry_chamfer` | 0.8 |
@@ -81,5 +81,7 @@ openscad -o hex-gauge.stl -D 'part="hex_gauge"' shower-handle-adapter.scad
 ```
 
 ## Printing
+
+Built to print lip down with no supports: the window's side edges lean 25 degrees (`window_slant`), and the ceiling inside is domed, the hollow and then the slot's rounded ends leaning in at 45 degrees to the screw hole (`hollow_dome`). The one flat ceiling left is the strip over the window, a bridge about 13 long. The cap around the top of the screw hole is thin (0.5 at the hole edge) because the dome rises to meet it.
 
 Print flange down with no supports, because the window ceiling bridges. The original is molded plastic, so PETG or ABS/ASA at 100 % infill is a good match. PLA creeps when warm and wet. Only the small ledge inside, where the round bore meets the bottom socket, is unsupported.
