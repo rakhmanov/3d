@@ -4,7 +4,7 @@ Printable replacement for the small plastic or brass adapter between a shower or
 
 ![preview](shower-handle-adapter.png)
 
-> **Status: mostly measured (2026-11-11).** Boss outline, flange, overall height, window depth and span, stem and the worn stem bore come from calipers on the original. Window height and the hollow's size and depth are still estimated; measure them (checklist below) before the final print.
+> **Status: mostly measured (2026-11-11).** Boss outline, flange, overall height, window depth and span, stem and the worn stem bore come from calipers on the original. Window height, the stem bar's length and the slot depth are still estimated; measure them (checklist below) before the final print.
 
 ## Reference photos
 
@@ -17,7 +17,7 @@ Printable replacement for the small plastic or brass adapter between a shower or
 ## Shape
 
 Bottom to top:
-- **Flange** with a **round hollow** about 10 across from below, with a bevelled entry, up to the window ceiling. The boss is a shell around it, like the brass part's underside.
+- **Flange** with a **stem slot** from below: the cartridge stem is a flat bar 6.44 thick with rounded ends and a screw insert in its middle. The slot grips it tight (the original wore round here, which is why this part is being redrawn) and runs 12 deep, since the bar stands 11.58 out of the bonnet; the boss is a shell around it. Bevelled entry. The reference parts in this folder have a different (6-cornered) shape, so none of their sizes are used.
 - **Boss**: a symmetric 7-cornered outline (see **Boss outline**), corners rounded 0.6, top edge rounded 1.0 where it goes into the handle. **Round bore** from the top, down to the window ceiling.
 - **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face. Its floor is the flange top; its back wall is 11.09 from the far side, 3.1 from the centre, so it opens into the hollow but not the stem bore.
 
@@ -55,8 +55,8 @@ Calipers are best. Write down each number and put it into the matching parameter
 | 4a | Boss width at the flange vs at the top. The original looks skewed on purpose, to wedge into the handle | `hex_taper` | 0 |
 | 5 | Window height | `window_h` | 2.6 |
 | 6 | Window span: start along the face past the point, end down the side flat; depth = back wall to the far side (caliper jaw inside the window) | `window_start_frac`, `window_end_frac`, `window_back` | **0.35, 0.75 drawn**, **11.09 measured** |
-| 7 | Hollow on the lip face, across in two directions. Also measure the **stem's base** | `bottom_long`, `bottom_short` | 9.8, 9.8 (+0.2 fit: ~10 from a photo) |
-| 8 | Socket depth. Are the ends true half-circles? Take a photo straight into it | `bottom_depth`, `bottom_shape` | auto, obround |
+| 7 | **Stem bar** (not the worn hole): length end to end, and thickness | `bottom_long`, `bottom_short`, `hole_fit` | 10.0 (estimate: the worn hole is ~10 round), **6.44 measured**, +0.1 |
+| 8 | Slot depth: how far the bar reaches into the part. 11.58 measured from the bonnet face, if the lip sits on it | `bottom_depth`, `bottom_shape` | 12.0, obround |
 | 9 | Socket angle relative to the window (long axis pointing at it, or across it) | `bottom_rot` | 0 |
 | 10 | Bevel size at the socket entry | `bottom_entry_chamfer` | 0.8 |
 | 11 | Top bore: takes the stem tip, so it must be tight. Stem 6.44; worn original bore 6.54 x 6.80 (worn oval) | `top_round_d`, `top_round_fit`, `top_round_h` | **6.44 + 0.1 measured**, auto |

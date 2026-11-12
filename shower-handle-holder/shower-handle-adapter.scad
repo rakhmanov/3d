@@ -63,18 +63,18 @@ window_back = 11.09;
 window_angle = 180;
 
 /* [Bottom socket] */
-// Hollow from below (the stem's base fits here). Equal long and short sides = round
+// Slot from below for the stem: a flat bar with rounded ends and a screw insert in the middle
 bottom_shape = "obround"; // [obround, square]
-// Long side (obround: end to end; square: across flats). ~10 hole on the lip face, from a photo
-bottom_long = 9.8;
-// Short side, across the straight sides
-bottom_short = 9.8;
+// Bar length, end to end. Estimate: the worn hole turned round at ~10, about the bar's length
+bottom_long = 10.0;
+// Bar thickness. Measured on the stem; this slot must be tight, the original wore here
+bottom_short = 6.44;
 // Corner radius for the square shape
 bottom_corner_r = 0.5;
 // Bevel at the socket entry
 bottom_entry_chamfer = 0.8;
-// Socket depth from the bottom face. -1 = auto: up to the window ceiling
-bottom_depth = -1;
+// Slot depth from the bottom face. The bar stands 11.58 out of the bonnet; -1 = up to the window
+bottom_depth = 12.0;
 // Rotation relative to the window, degrees. 0 = long axis points at the window
 bottom_rot = 0;
 
@@ -89,8 +89,8 @@ top_round_h = -1;
 /* [Print fit] */
 // Added to the boss size for printing. 0: the measured part is already worn, so it reads small
 hex_fit = 0;
-// Added to the other hole sizes for printing (positive = looser)
-hole_fit = 0.2;
+// Added to the stem slot for printing. Small: the slot must grip the bar
+hole_fit = 0.1;
 
 /* [Output] */
 // adapter = the real part. hex_gauge / bottom_gauge = thin, fast fit tests
