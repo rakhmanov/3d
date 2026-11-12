@@ -80,12 +80,13 @@ bottom_entry_chamfer = 0.8;
 top_round_h = 2.0;
 // Round top bore diameter. Equal to the flats, so only the round ends of the stem stop on the ledge
 top_round_d = 6.44;
-// Slot angle, degrees. 0 = the bar's long axis square to the upper-right face (marked on a render)
+// Slot angle, degrees. 0 = the stem's long (round) axis points at the top corner of the right side wall.
+// Test fit 2026-11-11: the old angle (square to the upper-right face) left the handle ~28 degrees off
 bottom_rot = 0;
 
 /* [Print fit] */
-// Added to the boss size for printing. 0: the measured part is already worn, so it reads small
-hex_fit = 0;
+// Added to the boss size for printing (across any two faces). At 0 the first print would not go into the handle
+hex_fit = -0.2;
 // Added to the stem slot for printing. Small: the slot must grip the bar
 hole_fit = 0.1;
 
@@ -128,8 +129,8 @@ win_mid  = (win_a0 + win_a1) / 2;
 // Back wall square to the opening's centre line, window_depth past the centre
 win_wall = -window_depth;
 frame_rot = window_angle - win_mid;
-// Stem slot axis in the outline frame: square to the face from the point to the right wall
-slot_axis = atan2(boss_pts[1][1] - boss_pts[0][1], boss_pts[1][0] - boss_pts[0][0]) + 90;
+// Stem slot long axis in the outline frame: through the corner at the top of the right side wall
+slot_axis = atan2(boss_pts[1][1], boss_pts[1][0]);
 boss_h   = total_h - flange_h;
 
 assert(hex_r * 2 < flange_d, "Boss corners overhang the flange");
