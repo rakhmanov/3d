@@ -27,10 +27,19 @@ flange_h = 3.9;
 flange_chamfer = 0.5;
 
 /* [Boss] */
-// Sharp-corner outline, point up, fitted to the drawn flat lengths (README "Boss outline").
-// The bore axis is the origin. Window side: from the point (first) down the last edge.
-boss_pts = [[0.17, 8.98], [7.19, 4.35], [7.19, -1.63], [3.83, -7.20],
-            [-4.90, -7.19], [-7.19, -1.62], [-7.19, 4.32]];
+// Symmetric 7-cornered outline, point up, from the hand drawing (README "Boss outline").
+// The window is on the upper-left face and wraps over the point.
+// Each upper face, point to wall top
+boss_top_side = 8.0;
+// Each lower face, wall bottom to the bottom flat
+boss_low_side = 5.0;
+// Bottom flat
+boss_bottom = 8.0;
+// Across the side walls at their top and bottom ends; they close in slightly toward the bottom
+boss_width_top = 14.2;
+boss_width_bottom = 14.0;
+// Side wall length. Measured
+boss_wall = 6.0;
 // Rounding on the vertical corners (fit to the side lengths)
 boss_corner_r = 0.6;
 // Rounding on the top edge, the end that goes into the handle. Measured
@@ -45,7 +54,7 @@ hex_taper = 0;
 window_h = 2.6;
 // Opening starts this fraction along the first edge, past the point
 window_start_frac = 0.35;
-// and ends this fraction down the side flat on the other side. Side walls are square to their faces
+// and ends this fraction down the side wall on the other side. Side walls are square to their faces
 window_end_frac = 0.75;
 // Window back wall to the far side of the boss (the screw opening's depth). Measured
 window_back = 11.09;
@@ -93,11 +102,20 @@ eps = 0.01;
 
 function unit(a) = [cos(a), sin(a)];
 function edge_dist(a, b) = abs(cross(b - a, -a)) / norm(b - a);
+// Sharp corners clockwise from the point, centred on the bore between point and bottom flat
+function boss_corners() =
+    let(xu = boss_width_top / 2, xl = boss_width_bottom / 2, xb = boss_bottom / 2,
+        yu = sqrt(pow(boss_wall, 2) - pow(xu - xl, 2)),
+        yb = -sqrt(pow(boss_low_side, 2) - pow(xl - xb, 2)),
+        yp = yu + sqrt(pow(boss_top_side, 2) - pow(xu, 2)),
+        c  = (yp + yb) / 2)
+    [[0, yp - c], [xu, yu - c], [xl, -c], [xb, yb - c], [-xb, yb - c], [-xl, -c], [-xu, yu - c]];
+boss_pts = boss_corners();
 n_pts    = len(boss_pts);
 hex_r    = max([for (p = boss_pts) norm(p)]);
 boss_inr = min([for (i = [0 : n_pts - 1]) edge_dist(boss_pts[i], boss_pts[(i + 1) % n_pts])]);
 // Window in the outline's frame: from window_start_frac along the first edge, round past the
-// point, to window_end_frac down the side flat; each side wall is square to its face.
+// point, to window_end_frac down the side wall; each side wall is square to its face.
 win_start = boss_pts[0] + window_start_frac * (boss_pts[1] - boss_pts[0]);
 win_end  = boss_pts[n_pts - 1] + window_end_frac * (boss_pts[n_pts - 2] - boss_pts[n_pts - 1]);
 win_a0   = atan2(win_start[1], win_start[0]);
