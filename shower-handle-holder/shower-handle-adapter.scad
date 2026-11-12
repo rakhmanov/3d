@@ -30,7 +30,7 @@ flange_chamfer = 0.5;
 // Symmetric 7-cornered outline, point up, from the hand drawing (README "Boss outline").
 // The window is on the upper-left face and wraps over the point.
 // Each upper face, point to wall top
-boss_top_side = 8.0;
+boss_top_side = 8.25;
 // Each lower face, wall bottom to the bottom flat
 boss_low_side = 5.0;
 // Bottom flat
