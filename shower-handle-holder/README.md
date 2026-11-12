@@ -4,7 +4,7 @@ Printable replacement for the small plastic or brass adapter between a shower or
 
 ![preview](shower-handle-adapter.png)
 
-> **Status: mostly measured (2026-11-11).** Boss outline, flange, overall height, window depth and span, stem and the worn stem bore come from calipers on the original. Window height, the stem bar's length and the slot depth are still estimated; measure them (checklist below) before the final print.
+> **Status: mostly measured (2026-11-11).** Boss outline, flange, overall height, window depth and span, stem and the worn stem bore come from calipers on the original. The stem bar's length and the slot depth are still estimated; measure them (checklist below) before the final print.
 
 ## Reference photos
 
@@ -53,7 +53,7 @@ Calipers are best. Write down each number and put it into the matching parameter
 | 3 | Boss outline, corner to corner (see **Boss outline**). Corner rounding; top-edge rounding | `boss_top_side`, `boss_wall`, `boss_low_side`, `boss_bottom`, `boss_width_top`, `boss_width_bottom`, `boss_corner_r`, `boss_top_round` | **8.79, 6.0, 5.93, 7.37, 14.38, 14.18 from calipers**, 0.6, **1.0 measured** |
 | 4 | Overall height, flange bottom to boss top | `total_h` | **14.0 measured** |
 | 4a | Boss width at the flange vs at the top. The original looks skewed on purpose, to wedge into the handle | `hex_taper` | 0 |
-| 5 | Window height | `window_h` | 2.6 |
+| 5 | Window height, from the lip top | `window_h` | **5.7 measured** |
 | 6 | Window span: start along the face past the point, end down the side flat; depth = back wall to the far side (caliper jaw inside the window) | `window_start_frac`, `window_end_frac`, `window_back` | **0.35, 0.75 drawn**, **11.09 measured** |
 | 7 | **Stem bar** (not the worn hole): length end to end, and thickness | `bottom_long`, `bottom_short`, `hole_fit` | 10.0 (estimate: the worn hole is ~10 round), **6.44 measured**, +0.1 |
 | 8 | Slot depth: how far the bar reaches into the part. 11.58 measured from the bonnet face, if the lip sits on it | `bottom_depth`, `bottom_shape` | 12.0, obround |
@@ -67,7 +67,7 @@ Helpful photos: one straight at the window, one straight at the side opposite it
 
 The render prints a summary to check before slicing:
 
-    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 118 deg wide x 2.6, back wall 3.1 from centre"
+    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 118 deg wide x 5.7, back wall 3.1 from centre"
 
 ## Fit tests before the full part
 

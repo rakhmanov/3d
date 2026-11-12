@@ -51,8 +51,8 @@ total_h = 14.0;
 hex_taper = 0;
 
 /* [Side window] */
-// Window height, from the flange top up
-window_h = 2.6;
+// Window height, from the flange top up. Measured
+window_h = 5.7;
 // Opening starts this fraction along the first edge, past the point
 window_start_frac = 0.35;
 // and ends this fraction down the side wall on the other side. Side walls are square to their faces
