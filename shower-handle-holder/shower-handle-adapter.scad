@@ -29,8 +29,8 @@ flange_chamfer = 0.5;
 /* [Boss] */
 // Sharp-corner outline, point up, fitted to the drawn flat lengths (README "Boss outline").
 // The bore axis is the origin. Window side: from the point (first) down the last edge.
-boss_pts = [[0.05, 9.00], [6.95, 4.30], [7.70, -1.61], [4.05, -6.99],
-            [-4.62, -7.22], [-6.89, -1.69], [-7.23, 4.20]];
+boss_pts = [[0.17, 8.98], [7.19, 4.35], [7.19, -1.63], [3.83, -7.20],
+            [-4.90, -7.19], [-7.19, -1.62], [-7.19, 4.32]];
 // Rounding on the vertical corners (fit to the side lengths)
 boss_corner_r = 0.6;
 // Rounding on the top edge, the end that goes into the handle. Measured

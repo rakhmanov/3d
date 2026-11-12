@@ -19,23 +19,23 @@ Printable replacement for the small plastic or brass adapter between a shower or
 Bottom to top:
 - **Flange** with an **obround socket** (elongated, rounded ends) from below, long axis pointing at the window. The socket has a bevelled entry and goes up to the window ceiling.
 - **Boss**: an irregular 7-cornered outline (see **Boss outline**), corners rounded 0.6, top edge rounded 1.0 where it goes into the handle. **Round bore** from the top, down to the window ceiling.
-- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side flat; each side wall is square to its face. Its floor is the flange top; its back wall is 11.09 from the far side, 3.06 from the centre, so it opens into the bottom socket but not the stem bore.
+- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side flat; each side wall is square to its face. Its floor is the flange top; its back wall is 11.09 from the far side, 3.01 from the centre, so it opens into the bottom socket but not the stem bore.
 
 ## Boss outline
 
-Sides go clockwise from the point, looking down on the top; the window is on the last edge and wraps over the point. The outline matches the hand-drawn flat lengths (calipers on the original, corners rounded 0.6). The two side flats are not parallel: they spread about 4 degrees apart toward the flat bottom edge. `boss_pts` holds the sharp corners; the bore axis is the origin.
+Sides go clockwise from the point, looking down on the top; the window is on the last edge and wraps over the point. The outline matches the hand-drawn flat lengths (calipers on the original, corners rounded 0.6), with the two side walls parallel, 14.38 apart and level, and the bottom flat square to them. `boss_pts` holds the sharp corners; the bore axis is the origin.
 
 | Side | Flat drawn | Flat in model | Sharp edge | Width across, model | Width across, calipers |
 |---|---|---|---|---|---|
-| Point to upper right (window starts 0.35 along) | 7.7 | 7.68 | 8.35 | 15.97 | 15.04 to 15.10 |
-| Right side | 5.5 | 5.46 | 5.96 | 14.42 | 14.38 |
-| Lower right | 6.0 | 5.96 | 6.50 | 15.56 | 15.04 to 15.10 |
-| Bottom (flat edge) | 8.0 | 7.96 | 8.68 | 16.02 | 15.85 (point to this flat) |
-| Lower left | 5.5 | 5.46 | 5.97 | 15.02 | 15.04 to 15.10 |
-| Left side (window ends 0.75 down) | 5.5 | 5.46 | 5.91 | 14.51 | 14.38 |
-| Upper left to the point, window side | 8.0 | 7.97 | 8.72 | 15.49 | 15.04 to 15.10 |
+| Point to upper right (window starts 0.35 along) | 7.7 | 7.70 | 8.41 | 16.15 | 15.04 to 15.10 |
+| Right wall | 5.5 | 5.49 | 5.99 | 14.38 | 14.38 |
+| Lower right | 6.0 | 5.99 | 6.50 | 15.29 | 15.04 to 15.10 |
+| Bottom (flat edge) | 8.0 | 8.00 | 8.74 | 16.05 | 15.85 (point to this flat) |
+| Lower left | 5.5 | 5.50 | 6.02 | 15.48 | 15.04 to 15.10 |
+| Left wall (window ends 0.75 down) | 5.5 | 5.50 | 5.94 | 14.38 | 14.38 |
+| Upper left to the point, window side | 8.0 | 8.00 | 8.71 | 15.53 | 15.04 to 15.10 |
 
-The drawn flats win over the caliper widths: three widths come out 0.4 to 0.9 larger than read. If the part is loose in the handle, that is where to look. The printed part is 0.15 smaller across (`hex_fit`), so its flats read about 0.1 short of these.
+The drawn flats win over the caliper widths, which come out 0.2 to 1.1 larger than read. If the part is loose in the handle, that is where to look. The printed part is 0.15 smaller across (`hex_fit`), so its flats read about 0.1 short of these.
 
 ## Measurement checklist
 
@@ -62,7 +62,7 @@ Helpful photos: one straight at the window, one straight at the side opposite it
 
 The render prints a summary to check before slicing:
 
-    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 110 deg wide x 2.6, back wall 3.06 from centre"
+    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 111 deg wide x 2.6, back wall 3.01 from centre"
 
 ## Fit tests before the full part
 
