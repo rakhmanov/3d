@@ -75,8 +75,10 @@ bottom_corner_r = 0.5;
 bottom_entry_chamfer = 0.8;
 // Slot depth from the bottom face. The bar stands 11.58 out of the bonnet; -1 = up to the window
 bottom_depth = 12.0;
-// Slot angle against the outline, degrees. 0 = long axis parallel to the bottom flat (wall to wall)
+// Slot angle against the window, degrees. 0 = the bar's long axis points at the window
 bottom_rot = 0;
+// Boss wall thickness: above the lip the boss is a shell this thick, hollow up to the slot depth
+boss_shell = 2.0;
 
 /* [Top bore] */
 // Round bore from the top: takes the stem tip. Stem measured 6.44; worn original 6.54 x 6.80
@@ -209,7 +211,9 @@ module body() {
 module cuts() {
     f = hole_fit;
     rotate(frame_rot) translate([0, 0, flange_h]) linear_extrude(window_h) window_2d();
-    rotate([0, 0, frame_rot]) {
+    if (boss_shell > 0)
+        translate([0, 0, flange_h - eps]) linear_extrude(bot_depth - flange_h + eps) boss_profile(-boss_shell);
+    rotate([0, 0, window_angle]) {
         // Bottom socket with a bevelled entry
         rotate([0, 0, bottom_rot]) {
             translate([0, 0, -eps])

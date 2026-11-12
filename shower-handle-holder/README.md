@@ -17,7 +17,7 @@ Printable replacement for the small plastic or brass adapter between a shower or
 ## Shape
 
 Bottom to top:
-- **Flange** with a **stem slot** from below: the cartridge stem is a flat bar 6.44 thick with rounded ends and a screw insert in its middle. The slot grips it tight (the original wore round here, which is why this part is being redrawn) and runs 12 deep, since the bar stands 11.58 out of the bonnet; the boss is a shell around it. Bevelled entry. The reference parts in this folder have a different (6-cornered) shape, so none of their sizes are used.
+- **Flange** with a **stem slot** from below: the cartridge stem is a flat bar 6.44 thick with rounded ends and a screw insert in its middle. The slot grips it tight in the lip (the original wore round here, which is why this part is being redrawn), its long axis pointing at the window. Above the lip the boss is an even 2.0 shell, hollow up to 12, since the bar stands 11.58 out of the bonnet. Bevelled entry. The reference parts in this folder have a different (6-cornered) shape, so none of their sizes are used.
 - **Boss**: a symmetric 7-cornered outline (see **Boss outline**), corners rounded 0.6, top edge rounded 1.0 where it goes into the handle. **Round bore** from the top, down to the window ceiling.
 - **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face. Its floor is the flange top and it opens straight into the stem slot (its back wall is on the axis), with no wall left between them.
 
@@ -56,7 +56,8 @@ Calipers are best. Write down each number and put it into the matching parameter
 | 6 | Window span: start along the face past the point, end down the side flat; depth = back wall to the far side (caliper jaw inside the window) | `window_start_frac`, `window_end_frac`, `window_back` | **0.35, 0.75 drawn**, -1 (open into the slot; the 11.09 reading came from the worn part) |
 | 7 | **Stem bar** (not the worn hole): length end to end, and thickness | `bottom_long`, `bottom_short`, `hole_fit` | 10.0 (estimate: the worn hole is ~10 round), **6.44 measured**, +0.1 |
 | 8 | Slot depth: how far the bar reaches into the part. 11.58 measured from the bonnet face, if the lip sits on it | `bottom_depth`, `bottom_shape` | 12.0, obround |
-| 9 | Slot angle: the bar runs wall to wall, parallel to the bottom flat | `bottom_rot` | **0 (marked on a render)** |
+| 9 | Slot angle: the bar's long axis points at the window | `bottom_rot` | **0 (marked on a render)** |
+| 9a | Boss wall thickness: above the lip the boss is an even shell | `boss_shell` | 2.0 (the most that still clears the bar) |
 | 10 | Bevel size at the socket entry | `bottom_entry_chamfer` | 0.8 |
 | 11 | Top bore: takes the stem tip, so it must be tight. Stem 6.44; worn original bore 6.54 x 6.80 (worn oval) | `top_round_d`, `top_round_fit`, `top_round_h` | **6.44 + 0.1 measured**, auto |
 | 12 | Stem length out of the cartridge, as a cross-check | (check) | 11.58 measured |
