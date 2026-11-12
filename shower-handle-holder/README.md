@@ -19,21 +19,21 @@ Printable replacement for the small plastic or brass adapter between a shower or
 Bottom to top:
 - **Flange** with an **obround socket** (elongated, rounded ends) from below, long axis pointing at the window. The socket has a bevelled entry and goes up to the window ceiling.
 - **Boss**: a symmetric 7-cornered outline (see **Boss outline**), corners rounded 0.6, top edge rounded 1.0 where it goes into the handle. **Round bore** from the top, down to the window ceiling.
-- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face. Its floor is the flange top; its back wall is 11.09 from the far side, 3.51 from the centre, so it opens into the bottom socket but not the stem bore.
+- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face. Its floor is the flange top; its back wall is 11.09 from the far side, 3.42 from the centre, so it opens into the bottom socket but not the stem bore.
 
 ## Boss outline
 
-A symmetric 7-cornered outline, point up, built from the hand-drawn corner-to-corner sizes. The window is on the upper-left face and wraps over the point. The bore sits at the outline's area centre, so every face is 6.5 to 7.1 from it (point 7.7 above, bottom flat 6.5 below). Corners are rounded 0.6, so a caliper laid along a face reads its straight part, about 0.7 short of the corner-to-corner size.
+A symmetric 7-cornered outline, point up, built from the hand-drawn corner-to-corner sizes. The window is on the upper-left face and wraps over the point. The bore sits at the outline's area centre, so every face is 6.6 to 7.2 from it (point 8.0 above, bottom flat 6.6 below). Corners are rounded 0.6, so a caliper laid along a face reads its straight part, about 0.7 short of the corner-to-corner size.
 
 | Edge | Drawn (corner to corner) | Parameter | Straight part on the print |
 |---|---|---|---|
-| Each upper face, point to wall top | 8.25 | `boss_top_side` | 7.5 |
+| Each upper face, point to wall top | 8.5 | `boss_top_side` | 7.7 |
 | Each side wall | 6.0 | `boss_wall` | 5.4 |
 | Each lower face | 5.0 | `boss_low_side` | 4.4 |
 | Bottom flat | 8.0 | `boss_bottom` | 7.3 |
 | Across the walls at their top / bottom ends | 14.2 / 14.0 | `boss_width_top`, `boss_width_bottom` | 14.03 across the walls |
 
-Widths across on the print (0.15 under nominal for the slide-in fit, `hex_fit`): 14.03 across the upper faces, 14.63 across the lower faces, 13.94 point to bottom flat. These are smaller than the earlier caliper readings (15.04 to 15.10, and 15.85 point to flat), which came from a warped photo. If the print is loose in the handle, check those.
+Widths across on the print (0.15 under nominal for the slide-in fit, `hex_fit`): 14.23 across the upper faces, 14.64 across the lower faces, 14.39 point to bottom flat. These are smaller than the earlier caliper readings (15.04 to 15.10, and 15.85 point to flat), which came from a warped photo. If the print is loose in the handle, check those.
 
 ## Measurement checklist
 
@@ -43,7 +43,7 @@ Calipers are best. Write down each number and put it into the matching parameter
 |---|---|---|---|
 | 1 | Flange outside diameter | `flange_d` | **22.0 measured** |
 | 2 | Flange (lip) thickness | `flange_h` | **3.9 measured** |
-| 3 | Boss outline, corner to corner (see **Boss outline**). Corner rounding; top-edge rounding | `boss_top_side`, `boss_wall`, `boss_low_side`, `boss_bottom`, `boss_width_top`, `boss_width_bottom`, `boss_corner_r`, `boss_top_round` | **8.25, 6.0, 5.0, 8.0, 14.2, 14.0 drawn**, 0.6, **1.0 measured** |
+| 3 | Boss outline, corner to corner (see **Boss outline**). Corner rounding; top-edge rounding | `boss_top_side`, `boss_wall`, `boss_low_side`, `boss_bottom`, `boss_width_top`, `boss_width_bottom`, `boss_corner_r`, `boss_top_round` | **8.5, 6.0, 5.0, 8.0, 14.2, 14.0 drawn**, 0.6, **1.0 measured** |
 | 4 | Overall height, flange bottom to boss top | `total_h` | **14.0 measured** |
 | 4a | Boss width at the flange vs at the top. The original looks skewed on purpose, to wedge into the handle | `hex_taper` | 0 |
 | 5 | Window height | `window_h` | 2.6 |
@@ -60,7 +60,7 @@ Helpful photos: one straight at the window, one straight at the side opposite it
 
 The render prints a summary to check before slicing:
 
-    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 120 deg wide x 2.6, back wall 3.51 from centre"
+    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 120 deg wide x 2.6, back wall 3.42 from centre"
 
 ## Fit tests before the full part
 
