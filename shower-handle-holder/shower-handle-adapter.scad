@@ -77,8 +77,8 @@ bottom_entry_chamfer = 0.8;
 bottom_depth = 12.0;
 // Slot angle, degrees. 0 = the bar's long axis square to the upper-right face (marked on a render)
 bottom_rot = 0;
-// Boss wall thickness: above the lip the boss is a shell this thick, hollow up to the slot depth
-boss_shell = 2.0;
+// Boss wall thickness: shell this thick above the lip; the stem slot carries on through it, so the bar sits snug
+boss_shell = 2.5;
 
 /* [Top bore] */
 // Round bore from the top: takes the stem tip. Stem measured 6.44; worn original 6.54 x 6.80
