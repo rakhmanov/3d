@@ -6,6 +6,8 @@
 // Boss, window depth, height, stem and worn bore measured with calipers 2026-11-11;
 // the rest is still estimated from photos (README.md). Print flange-down, no supports.
 //
+// Top 2 mm of the hole is round (the flats' width): the stem end seats on its ledge.
+//
 // Section through the window (window points at -X, on a slanted boss face):
 //
 //        _____          _____
@@ -57,8 +59,9 @@ window_start_frac = 0.35;
 window_end_frac = 0.75;
 // How far the window cuts past the centre, into and across the stem slot
 window_depth = 2.0;
-// Side edges lean in by this much going up. 0: any lean pulls the top of the window off the slot
-window_taper = 0;
+// Side walls lean in going up, degrees from vertical, so the boss overhangs them at an angle
+// instead of standing square over the opening. The top edge stays put; the window widens at the flange
+window_flare = 12;
 // Direction the window faces, degrees
 window_angle = 180;
 
@@ -73,6 +76,10 @@ bottom_short = 6.44;
 bottom_corner_r = 1.0;
 // Bevel at the socket entry
 bottom_entry_chamfer = 0.8;
+// Top of the hole: round for this height, so the stem end sits on the ledge where the slot steps in
+top_round_h = 2.0;
+// Round top bore diameter. Equal to the flats, so only the round ends of the stem stop on the ledge
+top_round_d = 6.44;
 // Slot angle, degrees. 0 = the bar's long axis square to the upper-right face (marked on a render)
 bottom_rot = 0;
 
@@ -126,11 +133,13 @@ slot_axis = atan2(boss_pts[1][1] - boss_pts[0][1], boss_pts[1][0] - boss_pts[0][
 boss_h   = total_h - flange_h;
 
 assert(hex_r * 2 < flange_d, "Boss corners overhang the flange");
+assert(top_round_h < total_h - flange_h - window_h, "Round top bore runs into the window");
 assert(bottom_long + 2 * bottom_entry_chamfer < 2 * boss_inr - 1, "Bottom socket leaves a too-thin wall under the hex");
 
 echo(str("Adapter: flange ", flange_d, " x ", flange_h, ", boss ", n_pts, " corners, r ", boss_corner_r,
          ", top round ", boss_top_round, ", taper ", hex_taper, ", height ", boss_h, ", total ", total_h,
-         ", stem slot ", bottom_long + hole_fit, " x ", bottom_short + hole_fit, ", window ", round(win_a1 - win_a0), " deg wide x ", window_h,
+         ", stem slot ", bottom_long + hole_fit, " x ", bottom_short + hole_fit,
+         ", top bore ", top_round_d + hole_fit, " x ", top_round_h, ", window ", round(win_a1 - win_a0), " deg wide x ", window_h,
          ", depth ", window_depth, " past centre"));
 
 module chamfered_disc(d, h, c) {
@@ -203,12 +212,14 @@ module body() {
 module cuts() {
     f = hole_fit;
     rotate(frame_rot) translate([0, 0, flange_h]) hull() {
-        linear_extrude(eps) window_2d(0);
-        translate([0, 0, window_h - eps]) linear_extrude(eps) window_2d(window_h * tan(window_taper));
+        linear_extrude(eps) window_2d(-window_h * tan(window_flare));
+        translate([0, 0, window_h - eps]) linear_extrude(eps) window_2d(0);
     }
-    // Stem slot straight through, the bar's own shape, with a bevelled entry
+    // Round top bore; the stem seats against its ledge
+    translate([0, 0, total_h - top_round_h - eps]) cylinder(h = top_round_h + 1, d = top_round_d + f);
+    // Stem slot up to the round top bore, the bar's own shape, with a bevelled entry
     rotate([0, 0, frame_rot + slot_axis + bottom_rot]) {
-            translate([0, 0, -eps]) linear_extrude(total_h + 1) bottom_profile(0);
+            translate([0, 0, -eps]) linear_extrude(total_h - top_round_h + eps) bottom_profile(0);
             c = bottom_entry_chamfer;
             if (c > 0)
                 hull() {

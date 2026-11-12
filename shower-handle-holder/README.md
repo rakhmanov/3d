@@ -17,9 +17,9 @@ Printable replacement for the small plastic or brass adapter between a shower or
 ## Shape
 
 Bottom to top:
-- **Stem slot** straight through the part: the cartridge stem is a double-D (a round shaft about 10 across with two flats 6.44 apart) with a screw insert in its middle. The slot is the stem's own shape and grips it tight (the original wore round here, which is why this part is being redrawn), its flats square to the upper-right face. Bevelled entry from below. The reference parts in this folder have a different (6-cornered) shape, so none of their sizes are used.
+- **Stem slot** straight through the part: the cartridge stem is a double-D (a round shaft about 10 across with two flats 6.44 apart) with a screw insert in its middle. The slot is the stem's own shape and grips it tight (the original wore round here, which is why this part is being redrawn), its flats square to the upper-right face. Bevelled entry from below. The top 2 mm of the hole is round instead, 6.54 across (`top_round_d` + fit, the same as the flats), so the stem's round ends stop on a flat ledge 12 above the flange bottom and the metal shaft seats against it. The reference parts in this folder have a different (6-cornered) shape, so none of their sizes are used.
 - **Boss**: a symmetric 7-cornered outline (see **Boss outline**), corners rounded 0.6, top edge rounded 1.0 where it goes into the handle.
-- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face. Its floor is the flange top and it opens straight into the stem slot (its back wall is on the axis), with no wall left between them.
+- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face at the top and leans in 12 degrees going up, so the opening is wider at the flange. Its floor is the flange top and it opens straight into the stem slot (its back wall is on the axis), with no wall left between them.
 
 ## Boss outline
 
@@ -57,6 +57,7 @@ Calipers are best. Write down each number and put it into the matching parameter
 | 7 | **Stem bar** (not the worn hole): length end to end, and thickness | `bottom_long`, `bottom_short`, `hole_fit` | 10.0 (estimate: the worn hole is ~10 round), **6.44 measured**, +0.1 |
 | 8 | Stem section: round diameter and across the flats. The slot runs straight through | `bottom_long`, `bottom_short`, `bottom_shape` | 10.0 estimated, **6.44 measured**, double_d |
 | 9 | Slot angle: the bar's long axis is square to the upper-right face (point to right wall) | `bottom_rot` | **0 (marked on a render)** |
+| 9a | Round top bore: diameter and height. The stem end seats on the ledge below it | `top_round_d`, `top_round_h` | 6.44, 2.0 |
 | 10 | Bevel size at the socket entry | `bottom_entry_chamfer` | 0.8 |
 | 12 | Stem length out of the cartridge, as a cross-check | (check) | 11.58 measured |
 | 13 | Anything not drawn here | (tell me) | |
@@ -65,7 +66,7 @@ Helpful photos: one straight at the window, one straight at the side opposite it
 
 The render prints a summary to check before slicing:
 
-    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem slot 10.1 x 6.54, window 118 deg wide x 5.7, depth 2 past centre"
+    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem slot 10.1 x 6.54, top bore 6.54 x 2, window 118 deg wide x 5.7, depth 2 past centre"
 
 ## Fit tests before the full part
 
@@ -80,6 +81,6 @@ openscad -o hex-gauge.stl -D 'part="hex_gauge"' shower-handle-adapter.scad
 
 ## Printing
 
-Built to print lip down with no supports, from simple straight cuts. The stem slot runs straight through, and the window side walls are vertical, opening straight into the slot (`window_taper` 0: leaning them in pulls the top of the window off the slot). The one flat ceiling is the strip over the window, a bridge about 12 long.
+Built to print lip down with no supports, from simple straight cuts. The stem slot runs up to the round top bore, and the window opens straight into the slot. Its side walls lean in 12 degrees going up (`window_flare`): the top edge is where it was, the opening widens toward the flange, so the boss steps out over the window at an angle instead of standing square over it. The flat ceilings are the strip over the window, a bridge about 12 long, and the ledge under the round top bore: two small crescents, at most 1.8 deep, at the slot's round ends.
 
 Print flange down with no supports, because the window ceiling bridges. The original is molded plastic, so PETG or ABS/ASA at 100 % infill is a good match. PLA creeps when warm and wet.
