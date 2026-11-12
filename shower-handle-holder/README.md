@@ -19,7 +19,7 @@ Printable replacement for the small plastic or brass adapter between a shower or
 Bottom to top:
 - **Flange** with a **stem slot** from below: the cartridge stem is a flat bar 6.44 thick with rounded ends and a screw insert in its middle. The slot grips it tight (the original wore round here, which is why this part is being redrawn) and runs 12 deep, since the bar stands 11.58 out of the bonnet; the boss is a shell around it. Bevelled entry. The reference parts in this folder have a different (6-cornered) shape, so none of their sizes are used.
 - **Boss**: a symmetric 7-cornered outline (see **Boss outline**), corners rounded 0.6, top edge rounded 1.0 where it goes into the handle. **Round bore** from the top, down to the window ceiling.
-- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face. Its floor is the flange top; its back wall is 11.09 from the far side, 3.1 from the centre, so it opens into the hollow but not the stem bore.
+- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face. Its floor is the flange top and it opens straight into the stem slot (its back wall is on the axis), with no wall left between them.
 
 ## Boss outline
 
@@ -38,7 +38,6 @@ A symmetric 7-cornered outline, point up, in the shape of the hand drawing (wall
 | Across the upper faces and across the lower faces | 15.04 to 15.10 | 15.06 |
 | Across the walls | 14.38 | 14.37 |
 | Point to bottom flat | 15.85 | 15.78 |
-| Window back wall to far side | 11.09 | 11.04 |
 
 The original is worn, so it reads small; `hex_fit` is 0 (no slide-in allowance). Print `hex_gauge` first: if it is loose in the handle, raise `hex_fit` to 0.1 or 0.2.
 
@@ -54,7 +53,7 @@ Calipers are best. Write down each number and put it into the matching parameter
 | 4 | Overall height, flange bottom to boss top | `total_h` | **14.0 measured** |
 | 4a | Boss width at the flange vs at the top. The original looks skewed on purpose, to wedge into the handle | `hex_taper` | 0 |
 | 5 | Window height, from the lip top | `window_h` | **5.7 measured** |
-| 6 | Window span: start along the face past the point, end down the side flat; depth = back wall to the far side (caliper jaw inside the window) | `window_start_frac`, `window_end_frac`, `window_back` | **0.35, 0.75 drawn**, **11.09 measured** |
+| 6 | Window span: start along the face past the point, end down the side flat; depth = back wall to the far side (caliper jaw inside the window) | `window_start_frac`, `window_end_frac`, `window_back` | **0.35, 0.75 drawn**, -1 (open into the slot; the 11.09 reading came from the worn part) |
 | 7 | **Stem bar** (not the worn hole): length end to end, and thickness | `bottom_long`, `bottom_short`, `hole_fit` | 10.0 (estimate: the worn hole is ~10 round), **6.44 measured**, +0.1 |
 | 8 | Slot depth: how far the bar reaches into the part. 11.58 measured from the bonnet face, if the lip sits on it | `bottom_depth`, `bottom_shape` | 12.0, obround |
 | 9 | Slot angle: the bar runs wall to wall, parallel to the bottom flat | `bottom_rot` | **0 (marked on a render)** |
@@ -67,7 +66,7 @@ Helpful photos: one straight at the window, one straight at the side opposite it
 
 The render prints a summary to check before slicing:
 
-    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 118 deg wide x 5.7, back wall 3.1 from centre"
+    ECHO: "Adapter: flange 22 x 3.9, boss 7 corners, r 0.6, top round 1, taper 0, height 10.1, total 14, stem bore 6.54, window 118 deg wide x 5.7, back wall 0 from centre"
 
 ## Fit tests before the full part
 

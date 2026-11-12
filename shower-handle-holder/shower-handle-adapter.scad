@@ -57,8 +57,8 @@ window_h = 5.7;
 window_start_frac = 0.35;
 // and ends this fraction down the side wall on the other side. Side walls are square to their faces
 window_end_frac = 0.75;
-// Window back wall to the far side of the boss (the screw opening's depth). Measured
-window_back = 11.09;
+// Window back wall to the boss's far side. -1 = open into the stem slot (back wall on the axis)
+window_back = -1;
 // Direction the window faces, degrees
 window_angle = 180;
 
@@ -128,8 +128,8 @@ win_a0   = atan2(win_start[1], win_start[0]);
 win_a1r  = atan2(win_end[1], win_end[0]);
 win_a1   = win_a1r < win_a0 ? win_a1r + 360 : win_a1r;
 win_mid  = (win_a0 + win_a1) / 2;
-// Back wall square to the opening's centre line, window_back from the boss's far side
-win_wall = min([for (p = boss_pts) p * unit(win_mid)]) + window_back;
+// Back wall square to the opening's centre line, window_back from the boss's far side or on the axis
+win_wall = window_back < 0 ? 0 : min([for (p = boss_pts) p * unit(win_mid)]) + window_back;
 frame_rot = window_angle - win_mid;
 boss_h   = total_h - flange_h;
 bot_depth = bottom_depth < 0 ? flange_h + window_h : bottom_depth;
