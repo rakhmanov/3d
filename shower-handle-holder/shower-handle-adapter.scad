@@ -59,8 +59,8 @@ window_start_frac = 0.35;
 window_end_frac = 0.75;
 // Window back wall to the boss's far side. -1 = open into the stem slot (back wall on the axis)
 window_back = -1;
-// Side edges lean this far from vertical, toward the left-wall end as they rise, for printing
-window_slant = 25;
+// Both side edges lean in by this much as they rise, so the window prints without supports
+window_taper = 25;
 // Direction the window faces, degrees
 window_angle = 180;
 
@@ -184,17 +184,17 @@ module half_plane(q, n) {
     translate(q) rotate(atan2(n[1], n[0])) translate([0, -big]) square([big, 2 * big]);
 }
 
-// Window cut, sheared along its face so the side edges lean by window_slant
-module window_3d() {
-    t = unit(win_mid + 90) * tan(window_slant);
-    multmatrix([[1, 0, t[0], 0], [0, 1, t[1], 0], [0, 0, 1, 0]])
-        linear_extrude(window_h) window_2d();
-}
+module slot_2d() { rotate(frame_rot + slot_axis + bottom_rot) bottom_profile(0); }
+module slot_2d_at(z) { translate([0, 0, z]) linear_extrude(eps) slot_2d(); }
+module hollow_section() { hull() { boss_profile(-boss_shell); slot_2d(); } }
 
-module window_2d() {
+// Window outline, its two side walls moved in by d
+module window_2d(d) {
+    n0 = boss_pts[0] - boss_pts[1];
+    n1 = boss_pts[n_pts - 1] - boss_pts[n_pts - 2];
     intersection() {
-        half_plane(win_start, boss_pts[0] - boss_pts[1]);
-        half_plane(win_end, boss_pts[n_pts - 1] - boss_pts[n_pts - 2]);
+        half_plane(win_start + d * n0 / norm(n0), n0);
+        half_plane(win_end + d * n1 / norm(n1), n1);
         half_plane(win_wall * unit(win_mid), unit(win_mid));
     }
 }
@@ -223,13 +223,16 @@ module body() {
 
 module cuts() {
     f = hole_fit;
-    rotate(frame_rot) translate([0, 0, flange_h]) window_3d();
+    rotate(frame_rot) translate([0, 0, flange_h]) hull() {
+        linear_extrude(eps) window_2d(0);
+        translate([0, 0, window_h - eps]) linear_extrude(eps) window_2d(window_h * tan(window_taper));
+    }
+    // Hollow: one convex shape round the slot and the shell, roof leaning in to the slot
     if (boss_shell > 0)
         hull() {
-            boss_slice(-boss_shell, flange_h - eps);
-            boss_slice(-boss_shell, bot_depth - hollow_dome);
-            rotate([0, 0, frame_rot + slot_axis + bottom_rot])
-                translate([0, 0, bot_depth - eps]) linear_extrude(eps) bottom_profile(0.05);
+            translate([0, 0, flange_h - eps]) linear_extrude(eps) hollow_section();
+            translate([0, 0, bot_depth - hollow_dome]) linear_extrude(eps) hollow_section();
+            slot_2d_at(bot_depth - eps);
         }
     rotate([0, 0, frame_rot + slot_axis]) {
         // Bottom socket with a bevelled entry

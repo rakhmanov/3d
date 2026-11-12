@@ -82,6 +82,6 @@ openscad -o hex-gauge.stl -D 'part="hex_gauge"' shower-handle-adapter.scad
 
 ## Printing
 
-Built to print lip down with no supports: the window's side edges lean 25 degrees (`window_slant`), and the ceiling inside is domed, the hollow and then the slot's rounded ends leaning in at 45 degrees to the screw hole (`hollow_dome`). The one flat ceiling left is the strip over the window, a bridge about 13 long. The cap around the top of the screw hole is thin (0.5 at the hole edge) because the dome rises to meet it.
+Built to print lip down with no supports, from simple convex cuts. Both window side edges lean in by 25 degrees as they rise (`window_taper`), so the window is narrower at the top. Inside, one hollow wraps the stem slot and the shell, its roof leans in at 45 degrees onto the slot (`hollow_dome`), and the slot's rounded ends lean in at 45 degrees to the screw hole. The one flat ceiling left is the strip over the window, a bridge about 10 long. The cap around the top of the screw hole is thin (0.5 at the hole edge) because the dome rises to meet it.
 
 Print flange down with no supports, because the window ceiling bridges. The original is molded plastic, so PETG or ABS/ASA at 100 % infill is a good match. PLA creeps when warm and wet. Only the small ledge inside, where the round bore meets the bottom socket, is unsupported.
