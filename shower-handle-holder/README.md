@@ -51,6 +51,7 @@ All in mm. Each value is a parameter at the top of `shower-handle-adapter.scad`.
 | Stem round diameter | `bottom_long` | 10.0 | **estimate** (worn bore is ~10 round) |
 | Stem across the flats | `bottom_short` | 6.44 | calipers |
 | Slot angle: long axis through the top corner of the right side wall | `bottom_rot` | 0 | test fit |
+| Whole part turned so the slot long axis lies along Y | `part_angle` | 90 degrees | orientation only |
 | Round top bore: diameter, height | `top_round_d`, `top_round_h` | 6.44, 2.0 | same as the flats |
 | Bevel at the slot entry | `bottom_entry_chamfer` | 0.8 | |
 | Print allowance on the slot and bore; on the boss | `hole_fit`, `hex_fit` | 0.1, -0.2 | boss: test fit |

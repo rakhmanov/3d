@@ -8,7 +8,7 @@
 //
 // Top 2 mm of the hole is round (the flats' width): the stem end seats on its ledge.
 //
-// Section through the window (window points at -X, on a slanted boss face):
+// Section through the window (window points about -X, on a slanted boss face):
 //
 //        _____          _____
 //       |     |        |     |  <- stem slot: the stem's double-D shape, up to the round top bore
@@ -62,8 +62,6 @@ window_depth = 2.0;
 // Side walls lean in going up, degrees from vertical, so the boss overhangs them at an angle
 // instead of standing square over the opening. The top edge stays put; the window widens at the flange
 window_flare = 12;
-// Direction the window faces, degrees
-window_angle = 180;
 
 /* [Bottom socket] */
 // Stem slot, up to the round top bore: the stem is a double-D, a round shaft with two flats
@@ -83,6 +81,10 @@ top_round_d = 6.44;
 // Slot angle, degrees. 0 = the stem's long (round) axis points at the top corner of the right side wall.
 // Test fit 2026-11-11: the old angle (square to the upper-right face) left the handle ~28 degrees off
 bottom_rot = 0;
+
+/* [Orientation] */
+// Whole part turned so the stem slot's long (round) axis points this way, degrees. 90 = along Y
+part_angle = 90;
 
 /* [Print fit] */
 // Added to the boss size for printing (across any two faces). At 0 the first print would not go into the handle
@@ -128,9 +130,11 @@ win_a1   = win_a1r < win_a0 ? win_a1r + 360 : win_a1r;
 win_mid  = (win_a0 + win_a1) / 2;
 // Back wall square to the opening's centre line, window_depth past the centre
 win_wall = -window_depth;
-frame_rot = window_angle - win_mid;
 // Stem slot long axis in the outline frame: through the corner at the top of the right side wall
 slot_axis = atan2(boss_pts[1][1], boss_pts[1][0]);
+// Outline turned so the slot lands on part_angle; the window faces wherever that puts it
+frame_rot = part_angle - slot_axis - bottom_rot;
+window_angle = frame_rot + win_mid;
 boss_h   = total_h - flange_h;
 
 assert(hex_r * 2 < flange_d, "Boss corners overhang the flange");
@@ -150,7 +154,7 @@ module chamfered_disc(d, h, c) {
     }
 }
 
-// Boss outline grown by g, turned so the window faces window_angle
+// Boss outline grown by g, turned so the stem slot lands on part_angle
 module boss_profile(g) {
     rc = boss_corner_r;
     rotate(frame_rot) offset(r = rc) offset(delta = g + hex_fit / 2 - rc) polygon(boss_pts);
