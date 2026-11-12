@@ -8,15 +8,13 @@
 //
 // Section through the window (window points at -X, on a slanted boss face):
 //
-//              top_round_d
-//             |<------>|
-//        _____|        |_____
-//       |     |        |     |  <- round bore from the top, down to the window
+//        _____          _____
+//       |     |        |     |  <- stem slot: the stem's double-D shape, straight through
 //   ____|     |        |     |
 //  |window               |___|  <- window: one side only, floor = flange top,
-//  |_______    ______    |____     back wall window_back from the far face
-//  |_______|  |      |   |____|  <- flange, obround socket from below
-//            /________\          (long axis along the window), bevelled entry
+//  |_______              |____     opens into the slot so the screw reaches the bar
+//  |_______|  |      |   |____|  <- flange
+//            /________\          bevelled entry from below
 
 /* [Flange] */
 // Flange outer diameter. Measured
@@ -57,40 +55,26 @@ window_h = 5.7;
 window_start_frac = 0.35;
 // and ends this fraction down the side wall on the other side. Side walls are square to their faces
 window_end_frac = 0.75;
-// Window back wall to the boss's far side. -1 = open into the stem slot (back wall on the axis)
-window_back = -1;
-// Both side edges lean in by this much as they rise, so the window prints without supports
-window_taper = 25;
+// How far the window cuts past the centre, into and across the stem slot
+window_depth = 2.0;
+// Side edges lean in by this much going up. 0: any lean pulls the top of the window off the slot
+window_taper = 0;
 // Direction the window faces, degrees
 window_angle = 180;
 
 /* [Bottom socket] */
-// Slot from below for the stem: a flat bar with rounded ends and a screw insert in the middle
-bottom_shape = "obround"; // [obround, square]
-// Bar length, end to end. Estimate: the worn hole turned round at ~10, about the bar's length
+// Stem slot, straight through: the stem is a double-D, a round shaft with two flats
+bottom_shape = "double_d"; // [double_d, rect, obround]
+// Round diameter of the stem. Estimate: the worn hole turned round at ~10
 bottom_long = 10.0;
-// Bar thickness. Measured on the stem; this slot must be tight, the original wore here
+// Across the flats. Measured on the stem; this slot must be tight, the original wore here
 bottom_short = 6.44;
-// Corner radius for the square shape
-bottom_corner_r = 0.5;
+// Corner radius for the rect shape; the bar's corners are only slightly rounded
+bottom_corner_r = 1.0;
 // Bevel at the socket entry
 bottom_entry_chamfer = 0.8;
-// Slot depth from the bottom face. The bar stands 11.58 out of the bonnet; -1 = up to the window
-bottom_depth = 11.7;
 // Slot angle, degrees. 0 = the bar's long axis square to the upper-right face (marked on a render)
 bottom_rot = 0;
-// Boss wall thickness: shell this thick above the lip; the stem slot carries on through it, so the bar sits snug
-boss_shell = 2.5;
-// Height over which the hollow's walls lean in (45 deg or steeper) to meet the slot, for printing
-hollow_dome = 2.0;
-
-/* [Top bore] */
-// Round bore from the top: takes the stem tip. Stem measured 6.44; worn original 6.54 x 6.80
-top_round_d = 6.44;
-// Clearance on the stem bore only. Keep it tight: this is where the original wore
-top_round_fit = 0.1;
-// Bore depth from the top. -1 = auto: down to the window ceiling, so it meets the square
-top_round_h = -1;
 
 /* [Print fit] */
 // Added to the boss size for printing. 0: the measured part is already worn, so it reads small
@@ -134,23 +118,20 @@ win_a0   = atan2(win_start[1], win_start[0]);
 win_a1r  = atan2(win_end[1], win_end[0]);
 win_a1   = win_a1r < win_a0 ? win_a1r + 360 : win_a1r;
 win_mid  = (win_a0 + win_a1) / 2;
-// Back wall square to the opening's centre line, window_back from the boss's far side or on the axis
-win_wall = window_back < 0 ? 0 : min([for (p = boss_pts) p * unit(win_mid)]) + window_back;
+// Back wall square to the opening's centre line, window_depth past the centre
+win_wall = -window_depth;
 frame_rot = window_angle - win_mid;
 // Stem slot axis in the outline frame: square to the face from the point to the right wall
 slot_axis = atan2(boss_pts[1][1] - boss_pts[0][1], boss_pts[1][0] - boss_pts[0][0]) + 90;
 boss_h   = total_h - flange_h;
-bot_depth = bottom_depth < 0 ? flange_h + window_h : bottom_depth;
-bore_h   = top_round_h  < 0 ? boss_h - window_h  : top_round_h;
 
 assert(hex_r * 2 < flange_d, "Boss corners overhang the flange");
-assert(bore_h + window_h >= boss_h - eps || bore_h + window_h < boss_h - 1, "Top bore stops less than 1 mm short of the window");
 assert(bottom_long + 2 * bottom_entry_chamfer < 2 * boss_inr - 1, "Bottom socket leaves a too-thin wall under the hex");
 
 echo(str("Adapter: flange ", flange_d, " x ", flange_h, ", boss ", n_pts, " corners, r ", boss_corner_r,
          ", top round ", boss_top_round, ", taper ", hex_taper, ", height ", boss_h, ", total ", total_h,
-         ", stem bore ", top_round_d + top_round_fit, ", window ", round(win_a1 - win_a0), " deg wide x ", window_h,
-         ", back wall ", round(win_wall * 100) / 100, " from centre"));
+         ", stem slot ", bottom_long + hole_fit, " x ", bottom_short + hole_fit, ", window ", round(win_a1 - win_a0), " deg wide x ", window_h,
+         ", depth ", window_depth, " past centre"));
 
 module chamfered_disc(d, h, c) {
     hull() {
@@ -184,9 +165,6 @@ module half_plane(q, n) {
     translate(q) rotate(atan2(n[1], n[0])) translate([0, -big]) square([big, 2 * big]);
 }
 
-module slot_2d() { rotate(frame_rot + slot_axis + bottom_rot) bottom_profile(0); }
-module slot_2d_at(z) { translate([0, 0, z]) linear_extrude(eps) slot_2d(); }
-module hollow_section() { hull() { boss_profile(-boss_shell); slot_2d(); } }
 
 // Window outline, its two side walls moved in by d
 module window_2d(d) {
@@ -199,15 +177,16 @@ module window_2d(d) {
     }
 }
 
-module rounded_square(af, r) {
-    offset(r = r) square(af - 2 * r, center = true);
-}
-
 // Bottom socket outline, grown by g on every side
 module bottom_profile(g) {
     f = hole_fit;
-    if (bottom_shape == "square")
-        offset(delta = g) rounded_square(bottom_long + f, bottom_corner_r);
+    if (bottom_shape == "double_d")
+        intersection() {
+            circle(d = bottom_long + f + 2 * g);
+            square([bottom_long + f + 2 * g, bottom_short + f + 2 * g], center = true);
+        }
+    else if (bottom_shape == "rect")
+        offset(delta = g) offset(r = bottom_corner_r) square([bottom_long + f, bottom_short + f] - 2 * [1, 1] * bottom_corner_r, center = true);
     else
         obround(bottom_long + f + 2 * g, bottom_short + f + 2 * g);
 }
@@ -227,36 +206,16 @@ module cuts() {
         linear_extrude(eps) window_2d(0);
         translate([0, 0, window_h - eps]) linear_extrude(eps) window_2d(window_h * tan(window_taper));
     }
-    // Hollow: one convex shape round the slot and the shell, roof leaning in to the slot
-    if (boss_shell > 0)
-        hull() {
-            translate([0, 0, flange_h - eps]) linear_extrude(eps) hollow_section();
-            translate([0, 0, bot_depth - hollow_dome]) linear_extrude(eps) hollow_section();
-            slot_2d_at(bot_depth - eps);
-        }
-    rotate([0, 0, frame_rot + slot_axis]) {
-        // Bottom socket with a bevelled entry
-        rotate([0, 0, bottom_rot]) {
-            translate([0, 0, -eps])
-                linear_extrude(bot_depth + eps)
-                    bottom_profile(0);
-            // Domed slot ceiling: the rounded ends lean in at 45 deg to the screw hole
-            dr = (bottom_long + hole_fit - top_round_d - top_round_fit) / 2;
-            hull() {
-                translate([0, 0, bot_depth - eps]) linear_extrude(eps) bottom_profile(0);
-                translate([0, 0, bot_depth + dr + 0.1]) cylinder(h = eps, d = top_round_d + top_round_fit - 0.2);
-            }
+    // Stem slot straight through, the bar's own shape, with a bevelled entry
+    rotate([0, 0, frame_rot + slot_axis + bottom_rot]) {
+            translate([0, 0, -eps]) linear_extrude(total_h + 1) bottom_profile(0);
             c = bottom_entry_chamfer;
             if (c > 0)
                 hull() {
                     translate([0, 0, -eps]) linear_extrude(eps) bottom_profile(c);
                     translate([0, 0, c]) linear_extrude(eps) bottom_profile(0);
                 }
-        }
     }
-    // Top bore
-    translate([0, 0, total_h - bore_h])
-        cylinder(h = bore_h + 1, d = top_round_d + top_round_fit);
 }
 
 module shower_handle_adapter() {
