@@ -10,7 +10,7 @@ Slide-in frame for a 1st-gen Surface Go (245 x 175 x 8.3 mm) used as a shop-wind
 | Portrait frame | [surface-go-window-frame-portrait.stl](portrait/surface-go-window-frame-portrait.stl) | [bottom](portrait/surface-go-window-frame-portrait-bottom.stl) + [top](portrait/surface-go-window-frame-portrait-top.stl) | opens on the short top edge, charger slot at the bottom |
 | Butterfly key (halves only) | | [surface-go-window-frame-key.stl](surface-go-window-frame-key.stl) | locks the seam from the back: 1 for landscape, 2 for portrait |
 
-Each frame is 254 x 184 x 17 mm, about 70 g of PETG. That's too tight for a 256 mm bed (Bambu A1/P1/X1): the slicer won't place it once a brim or the purge area is involved. So each frame also comes as two halves, about 133 x 184 mm each, printed one at a time. A dovetail in the front lip above and below the screen locks them together, and you glue them. The tape is permanent, so print the frame for the orientation you want; a second frame is needed to switch.
+Each frame is 254 x 184 x 18 mm, about 70 g of PETG. That's too tight for a 256 mm bed (Bambu A1/P1/X1): the slicer won't place it once a brim or the purge area is involved. So each frame also comes as two halves, about 133 x 184 mm each, printed one at a time. A dovetail in the 3 mm front lip, centred on the border above and below the screen, locks them together, and you glue them. The tape is permanent, so print the frame for the orientation you want; a second frame is needed to switch.
 
 ## Print
 
@@ -19,7 +19,7 @@ Each frame is 254 x 184 x 17 mm, about 70 g of PETG. That's too tight for a 256 
 - Matte black PETG, or ASA on an enclosed printer. Avoid PLA in a sunny window.
 - 4 walls (perimeters) and 30% gyroid infill for strength.
 - The fit is deliberately loose (1 mm each side, 1 mm front to back), so it fits without a test print.
-- Halves: turn on elephant-foot compensation (about 0.15 mm; Bambu Studio has it under Quality). The dovetails sit in the first 2 mm, where the first layer spreads, and `dt_fit` leaves only 0.05 mm per side.
+- Halves: turn on elephant-foot compensation (about 0.15 mm; Bambu Studio has it under Quality). The dovetails start on the first layer, where it spreads, and `dt_fit` leaves only 0.05 mm per side.
 
 ## Assemble (two halves)
 

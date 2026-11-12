@@ -37,7 +37,7 @@ tab_r = 5.0;           // pocket corner radius (keep <= tablet's corner radius)
 
 /* [Frame] */
 wall = 3.5;            // side wall thickness (3.5 keeps the frame inside a 256 mm bed)
-lip = 2.0;             // front lip thickness (glass side)
+lip = 3.0;             // front lip thickness (glass side); also the dovetail depth on the open edge
 lip_over = 13.0;       // front lip covers the bezel this far (screen starts ~17 in)
 back_over = 5.0;       // back rim: reach in from the pocket wall (45 degree chamfer)
 back_skin = 1.6;       // back rim thickness above the 45 degree slope
@@ -140,26 +140,28 @@ module frame_body(open) {
 
 // --- split into two halves (seam at x = 0, frame coordinates) --------------
 // A 256 mm bed can't really take the 254 mm frame, so each frame also comes as
-// two halves. A dovetail on the -x half sits in the middle of the front lip band
-// above and below the screen window and locks into the +x half. The lip is the
-// face on the bed, so the dovetails print flat; the VHB tape also spans the seam.
-dt_y = (win_h / 2 + ph / 2) / 2;   // centre of the lip band
-assert(dt_y + dt_head / 2 <= ph / 2 - 1.5, "dovetail too close to the pocket edge");
+// two halves. A dovetail on the -x half locks into the +x half above and below
+// the screen, in the front lip only, centred on the border (window edge to
+// outside edge). Its head stays clear of the side wall's inner face, so the
+// socket in the other half is open above (no roof). The lip is the face
+// on the bed, so the dovetails print flat; above the lip the seam is straight,
+// and on a closed wall the butterfly key locks the back of it.
+dt_y = (win_h / 2 + oh / 2) / 2;                // dovetail centre, |y|: middle of the border
+assert(dt_y + dt_head / 2 <= ph / 2 - 0.2, "dovetail runs under the side wall (roofed socket)");
 assert(dt_y - dt_head / 2 >= win_h / 2 + 1.5, "dovetail too close to the screen window");
 
-module minus_x_region() {
-    translate([-ow, -oh]) square([ow, 2 * oh]);
+module dovetails() {
     for (s = [1, -1])
         polygon([[-1, s * dt_y - dt_neck / 2], [0, s * dt_y - dt_neck / 2],
                  [dt_len, s * dt_y - dt_head / 2], [dt_len, s * dt_y + dt_head / 2],
                  [0, s * dt_y + dt_neck / 2], [-1, s * dt_y + dt_neck / 2]]);
 }
 
-// The -x side of the cut, grown by g. Dovetails only in the front lip (on the
-// bed); above it the seam is straight, so nothing hangs over the pocket.
+// The -x side of the cut, grown by g: a straight seam the full height, plus
+// the dovetail tongues in the front lip.
 module split_cut(g) {
-    translate([0, 0, -1]) linear_extrude(lip + 1) offset(delta = g) minus_x_region();
     translate([-ow, -oh, -1]) cube([ow + g, 2 * oh, z_top + 2]);
+    translate([0, 0, -1]) linear_extrude(lip + 1) offset(delta = g) dovetails();
 }
 
 // Butterfly keys: a bow-tie pocket in the room face of the back rim over each
