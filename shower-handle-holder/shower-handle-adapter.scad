@@ -3,15 +3,15 @@
 // License: CC BY-NC 4.0
 // https://creativecommons.org/licenses/by-nc/4.0/
 //
-// Boss, window depth, height, stem and worn bore measured with calipers 2026-11-11;
-// the rest is still estimated from photos (README.md). Print flange-down, no supports.
+// Measured with calipers 2026-11-11, except the stem's round diameter (estimated from the
+// worn bore) and the window span (marked on a render). Print flange-down, no supports.
 //
 // Top 2 mm of the hole is round (the flats' width): the stem end seats on its ledge.
 //
 // Section through the window (window points at -X, on a slanted boss face):
 //
 //        _____          _____
-//       |     |        |     |  <- stem slot: the stem's double-D shape, straight through
+//       |     |        |     |  <- stem slot: the stem's double-D shape, up to the round top bore
 //   ____|     |        |     |
 //  |window               |___|  <- window: one side only, floor = flange top,
 //  |_______              |____     opens into the slot so the screw reaches the bar
@@ -66,7 +66,7 @@ window_flare = 12;
 window_angle = 180;
 
 /* [Bottom socket] */
-// Stem slot, straight through: the stem is a double-D, a round shaft with two flats
+// Stem slot, up to the round top bore: the stem is a double-D, a round shaft with two flats
 bottom_shape = "double_d"; // [double_d, rect, obround]
 // Round diameter of the stem. Estimate: the worn hole turned round at ~10
 bottom_long = 10.0;
