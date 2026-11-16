@@ -44,7 +44,7 @@ Every `.scad` file in this folder has its settings at the top. `fan-duct-reducer
 
 Each render prints a summary line like this:
 
-    ECHO: "Inner: 127.5 -> 95.1 mm, outer: 133.5 -> 101.1 mm, height: 52 mm, taper: 43.6 deg from vertical"
+    ECHO: "Inner: 127.5 -> 95.1 mm, outer: 133.5 -> 101.1 mm, height: 52 mm, taper: 43.6196 deg from vertical"
 
 Check it before printing. You get a `WARNING` if the taper is too steep to print without supports, and an error if the small end can't be made with the chosen wall.
 

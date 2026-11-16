@@ -9,9 +9,9 @@ Printable replacement for the small plastic or brass adapter between a shower or
 ## Shape
 
 Bottom to top:
-- **Stem slot** from the bottom up to the round top bore: the cartridge stem is a double-D (a round shaft about 10 across with two flats 6.44 apart) with a screw insert in its middle. The slot is the stem's own shape and grips it tight (the original wore round here, which is why this part is being redrawn), its long (round) axis pointing at the corner at the top of the right side wall (the first test print, with the flats square to the upper-right face, turned the handle about 28 degrees off). Bevelled entry from below. The top 2 mm of the hole is round instead, 6.54 across (`top_round_d` + fit, the same as the flats), so the stem's round ends stop on a flat ledge 12 above the flange bottom and the metal shaft seats against it.
+- **Stem slot** from the bottom up to the round top bore: the cartridge stem is a double-D (a round shaft about 10 across with two flats 6.44 apart) with a screw insert in its middle. The slot is the stem's own shape and grips it tight (the original wore round here, which is why this part is being redrawn), its long (round) axis pointing at the corner at the top of the right side wall (the first test print, with the flats square to the upper-right face, turned the handle about 28 degrees off). The whole part is turned (`part_angle`) so this long axis lies along Y in the file, which sets where the window faces (see below). Bevelled entry from below. The top 2 mm of the hole is round instead, 6.54 across (`top_round_d` + fit, the same as the flats), so the stem's round ends stop on a flat ledge 12 above the flange bottom and the metal shaft seats against it.
 - **Boss**: a symmetric 7-cornered outline (see **Boss outline**), corners rounded 0.6, top edge rounded 1.0 where it goes into the handle.
-- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face at the top and leans in 12 degrees going up, so the opening is wider at the flange. Its floor is the flange top and it opens straight into the stem slot (its back wall is on the axis), with no wall left between them.
+- **Window:** one side only, from 0.35 along the upper-right face, over the point, to 0.75 down the left side wall; each side wall of the window is square to its face at the top and leans in 12 degrees going up, so the opening is wider at the flange. Its floor is the flange top and it opens straight into the stem slot (its back wall is on the axis), with no wall left between them. With the slot along Y the window faces about -X (192 degrees from +X); it is derived from `part_angle`, so turning the part moves it with the boss.
 
 ## Boss outline
 
@@ -51,7 +51,7 @@ All in mm. Each value is a parameter at the top of `shower-handle-adapter.scad`.
 | Stem round diameter | `bottom_long` | 10.0 | **estimate** (worn bore is ~10 round) |
 | Stem across the flats | `bottom_short` | 6.44 | calipers |
 | Slot angle: long axis through the top corner of the right side wall | `bottom_rot` | 0 | test fit |
-| Whole part turned so the slot long axis lies along Y | `part_angle` | 90 degrees | orientation only |
+| Whole part turned so the slot long axis lies along Y (window then faces about -X, derived) | `part_angle` | 90 degrees | orientation only |
 | Round top bore: diameter, height | `top_round_d`, `top_round_h` | 6.44, 2.0 | same as the flats |
 | Bevel at the slot entry | `bottom_entry_chamfer` | 0.8 | |
 | Print allowance on the slot and bore; on the boss | `hole_fit`, `hex_fit` | 0.1, -0.2 | boss: test fit |

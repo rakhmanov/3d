@@ -31,7 +31,7 @@ Each frame is 254 x 184 x 18 mm, about 70 g of PETG. That's too tight for a 256 
 ## Mount
 
 1. Clean the glass with isopropyl alcohol.
-2. Run 12 mm VHB tape (e.g. 3M 5952, black) round the front face. The flat strip is 16 mm wide, all four sides.
+2. Run 12 mm VHB tape (e.g. 3M 5952, black) round the front face. The flat strip is 16.5 mm wide (`wall` + `lip_over`), all four sides.
 3. Use a level, press the frame onto the glass hard for 30 s, and wait 24 h before loading the tablet.
 4. Stick 1 mm self-adhesive felt on the back rim's 45 degree chamfer, along both side walls and the bottom wall, pushed down against the pocket wall. The chamfer only touches the tablet at its rounded back edge, so felt on the tablet's flat back would miss it. Felt on the chamfer takes up the slack so the tablet doesn't rattle. If it still rattles, use 2 mm felt or foam.
 5. Slide the tablet in from the top, screen towards the glass, and plug in the charger through the slot.

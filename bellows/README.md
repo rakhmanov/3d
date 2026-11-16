@@ -2,6 +2,10 @@
 
 ![preview](bellows.png)
 
+## v1: sharp folds ([bellows.scad](bellows.scad))
+
+5 folds of 4 mm, 0.8 mm wall (0.57 mm through the 45 degree slopes), sharp creases. Fits the Zerno Z1 (58.5 mm diameter, funnel cap insert). In TPU it tears at the narrow rings, which is what v2 and v3 try to fix.
+
 ## v2: rounded folds ([bellows-v2.scad](bellows-v2.scad))
 
 Same fit as v1 (diameter, cap hole and funnel insert), but with rounded folds, a 0.7 mm wall

@@ -1,13 +1,13 @@
 # 3D Design Repository
 
-Designes are shared here under CC BY-NC 4.0 License, unless stated otherwise in the source file header.
+Designs are shared here under CC BY-NC 4.0 License, unless stated otherwise in the source file header.
 
 * [Zerno Z1 Purging Bellows](./bellows)
 * [Nema motor spacer](./nema-spacer)
 * [Duct reducer](./fan-duct-reducer): parametric, any two sizes (presets: 6" to 5", 5" to 4")
 * [Mounting bracket](./mounting-bracket)
 * [Spacer insert](./spacer-insert)
-* [Surface Go window frame](./surface-go-window-frame): Surface Go frame that sticks to a shop window, landscape or portrait
+* [Surface Go window frame](./surface-go-window-frame): Surface Go frame that sticks to a shop window, landscape or portrait, one piece or two halves for a 256 mm bed
 * [Shower handle adapter](./shower-handle-holder): replacement valve-stem-to-handle adapter (measured)
 * [Battery holder](./battery-holder): desk tray for 9V, coin cells, AA and AAA
 
