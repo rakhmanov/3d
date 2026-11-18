@@ -26,6 +26,7 @@ use <a6300-camera.scad>
 
 show_part = false;
 show_arm = true;
+arm_mount = true;   // the box gets the screw bosses when used with the arm (the switch must then move)
 // "print": the real (mirrored) part, upside down on its top block. "display": as it sits on the camera
 arm_orient = "print"; // ["print", "display"]
 

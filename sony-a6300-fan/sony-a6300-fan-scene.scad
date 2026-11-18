@@ -11,6 +11,8 @@ include <sony-a6300-fan-arm.scad>
 
 show_part = false;
 show_arm = false;
+arm_mount = false;        // no holder for now: the tilted-up screen holds the box
+show_arm_in_scene = false;
 show_camera = true;
 show_cable = true;
 // Cut away the box front to show the parts inside
@@ -78,7 +80,7 @@ module wires() {
     yb = usb_pcb_y - usb_pcb[2] - 0.8;   // behind the board
     py = sw_back - sw_pins;                       // switch pin tips
     yf = box_d - front - fan_t + 3;
-    dz = sw_zc + 7;                               // diodes lie in the chamber, above the switch
+    dz = sw_zc - 9;                               // diodes lie in the chamber, below the switch
     run([[wall + usb_pcb[1] - 2.54, yb, usb_zc + 3.8], [sw_xc - 1.25, yb, usb_zc + 3.8], [sw_xc - 1.25, py, sw_zc]], "#b02020");    // VBUS -> common
     run([[sw_xc + 3.75, py, sw_zc], [wall + bay_w + 3, yf, sw_zc], [fan_x + 3, yf, fan_zc + 2]], "#b02020");                     // H -> fan +
     run([[sw_xc - 3.75, py, sw_zc], [sw_xc - 3.75, py, dz], [wall + bay_w + 2, py, dz]], "#b02020");                             // L -> diodes
@@ -110,6 +112,6 @@ module fan_box_assembly() {
 
 // ---------- scene ----------
 mirror([0, 1, 0]) {
-    translate([box_x, 0, box_z]) { fan_box_assembly(); color("#e6e6e6") arm(); }
+    translate([box_x, 0, box_z]) { fan_box_assembly(); if (show_arm_in_scene) color("#e6e6e6") arm(); }
     if (show_camera) a6300(lcd_tilt);
 }

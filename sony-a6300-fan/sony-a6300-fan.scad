@@ -59,18 +59,21 @@ usb_thin = 0.6;   // plug overmold stops this far from the receptacle mouth: kee
 
 /* [Switch: SS13D07 mini slide switch, 1P3T: High / Off / Low] */
 // Body 12.7 x 4.5 x 4.7 (XKB SS13D07L4B / ROCPU SS-13D07 listings), "L4" = 4 mm knob, 2 mm per step.
-// Knob cross-section estimated. In the front face just left of the fan, low (away from the eyepiece,
-// below the arm's screw tab), sliding sideways (L left, Off middle, H right). Body in a printed cradle
+// Knob cross-section estimated. In the front face just left of the fan, in the top band the tilted
+// screen never covers, sliding sideways (L left, Off middle, H right). Body in a printed cradle
 // on the inside of the front plate, knob ~2.4 mm proud
 sw_body = [12.7, 4.5, 4.7];   // along the slide, across, height into the box
 sw_knob = [1.5, 2.0, 4.0];    // along, across, height above the body
 sw_step = 2.0;
 sw_pins = 3.3;
 sw_rim = 1.2;                 // cradle walls
-sw_zc = 11;                   // switch centre height
+sw_from_top = 7;              // switch centre below the box top (inside the ~14.5 mm uncovered band)
 sw_slot = [sw_knob[0] + 2 * sw_step + 0.5, sw_knob[1] + 0.5];   // along, across
 
 /* [Arm mount: the shoe arm (sony-a6300-fan-arm.scad) screws to the front face] */
+// Off by default: for now the tilted-up screen holds the box (see HANDOFF.md). The arm file turns it on,
+// and then the switch has to move out of the way of the screw bosses
+arm_mount = false;
 // The arm's tab sits on the front face in the top band the screen never reaches (14.5-15 mm under
 // the eyepiece), left of the fan, held by 2 x M3 screws into heat-set inserts in bosses behind the front plate
 arm_xc = 37;          // tab centre in box X: right above the shoe (camera x 41, box placed at x 4)
@@ -102,9 +105,12 @@ usb_yc = (air_gap + 0.3 + usb_rec[2] / 2 + usb_pcb[2] + box_d - front - 0.5 - us
 usb_pcb_y = usb_yc - usb_rec[2] / 2;               // component face of the PCB
 usb_top = usb_z0 + usb_pcb[0];
 sw_xc = fan_x - 1 - sw_body[0] / 2 - sw_rim;      // just left of the fan
+sw_zc = box_h - sw_from_top;
 assert(sw_xc - sw_body[0] / 2 - sw_rim > sec_x, "switch cradle hits the bay divider");
-assert(sw_zc + sw_body[1] / 2 + sw_rim < box_h - screw_z[1] - boss_d / 2 - 0.5, "switch cradle hits the arm's screw bosses");
-assert(sw_zc - sw_body[1] / 2 - sw_rim > slant(box_d - front) + floor_t, "switch cradle hits the floor");
+if (arm_mount && abs(sw_xc - arm_xc) < sw_body[0] / 2 + sw_rim + boss_d / 2 && sw_zc - sw_body[1] / 2 - sw_rim < box_h - screw_z[0] + boss_d / 2)
+    echo("WARNING: switch and the arm's screw bosses overlap: move one of them before printing with the arm");
+assert(sw_zc + sw_body[1] / 2 + sw_rim < box_h - wall_top, "switch cradle hits the top wall");
+assert(sw_from_top + sw_slot[1] / 2 < tab_band, "switch is below the band the screen leaves uncovered");
 n_x = floor((box_w - 6 + rib) / rib_pitch);
 n_z = floor((box_h - 6 + rib) / rib_pitch);
 slot_s = (box_w - 6 - (n_x * rib_pitch - rib)) / 2;
@@ -165,7 +171,7 @@ module box() {
                 translate([fan_x - 0.2, air_gap - 0.2, fan_zc - fan / 2 - 0.2]) cube([fan + 0.4, fan_t + 0.4, fan + 0.4]);
             }
             // screw bosses for the arm's tab, behind the front plate
-            for (z = screw_z) translate([arm_xc, box_d - front + 0.01, box_h - z]) rotate([90, 0, 0])
+            if (arm_mount) for (z = screw_z) translate([arm_xc, box_d - front + 0.01, box_h - z]) rotate([90, 0, 0])
                 cylinder(d = boss_d, h = insert_l + 1.5 - front, $fn = 32);
             // slide switch cradle on the inside of the bay's front plate
             translate([sw_xc - sw_body[0] / 2 - sw_rim, box_d - front - 3, sw_zc - sw_body[1] / 2 - sw_rim])
@@ -193,7 +199,7 @@ module box() {
         for (m = [["L", -1], ["H", 1]]) translate([sw_xc + m[1] * (sw_slot[0] / 2 + 2.2), box_d + 0.01, sw_zc])
             rotate([90, 0, 0]) linear_extrude(0.41) text(m[0], size = 2.6, halign = "center", valign = "center", font = "Liberation Sans:style=Bold");
         // heat-set insert holes from the front face
-        for (z = screw_z) translate([arm_xc, box_d + 0.01, box_h - z]) rotate([90, 0, 0]) cylinder(d = insert_d, h = insert_l, $fn = 24);
+        if (arm_mount) for (z = screw_z) translate([arm_xc, box_d + 0.01, box_h - z]) rotate([90, 0, 0]) cylinder(d = insert_d, h = insert_l, $fn = 24);
         // bottom bevel across the full depth: 0 at the plate, slant_rise at the outside face
         rotate([90, 0, 90]) translate([0, 0, -1]) linear_extrude(box_w + 2)
             polygon([[-1, -1], [box_d + 1, -1], [box_d + 1, slant(box_d + 1)], [-1, slant(-1)]]);

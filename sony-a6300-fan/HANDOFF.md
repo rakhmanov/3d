@@ -32,11 +32,9 @@ It needs 5 V from USB-C and has Low / Off / High.
    screen, open at both sides. The renders don't show this: `a6300-camera.scad` draws the screen flipped flat
    because its linkage isn't modelled.
    Consequences:
-   - **Switch.** It sits low on the front next to the fan (`sw_zc = 11`), where the screen hides it. It must
-     move: to the left side (cable side), or into the top band.
-     - The left side is out with the current USB-C board: the Adafruit 4090 is 20.3 mm tall and the
-       switch needs about 15 mm more.
-     - So the left side needs a smaller board with the connector on its short edge and 5.1 kΩ on CC1/CC2.
+   - **Switch.** Moved into the top band, left of the fan, 7 mm below the top (`sw_from_top`). There the
+     screen doesn't cover it, and it is about 7 mm right of the eyepiece's edge. Check on the camera that a
+     finger reaches it without touching the eyepiece cup.
    - **Fan intake.** Only the top ~13 mm of the grille is in free air. The rest draws through the wedge under
      the screen. Airflow will be lower than the fan's rating, by an unknown amount. Keep the grille above
      the line where the screen rests.
@@ -46,22 +44,21 @@ It needs 5 V from USB-C and has Low / Off / High.
    than 5.2 mm from the plate: on the right end and along the bottom. Keep them away from the wedge under
    the screen so the fan doesn't pull its own warm air back in.
 3. **Holding it on the camera is not settled.**
+   - **The screen limits how the box goes in.** In the photos the screen is tilted up as far as it goes, and
+     that still doesn't leave room to push the box straight toward the plate. So the box goes in sideways
+     or with the screen down. Once it's in, flip the screen up and it clamps the box.
    - **Current plan, no holder:** the tilted-up screen presses the box against the plate, and the recess
-     walls and the eyepiece stop it moving sideways and up. That means shooting with the screen up.
+     walls and the eyepiece stop it moving sideways and up. You shoot with the screen up. The arm's screw
+     bosses are off (`arm_mount = false`).
      - **Risk:** it falls out when the screen is moved.
      - **Cheap backup:** a thin micro-suction or removable adhesive pad on the box's back feet, or a cord
        to a strap lug.
    - **Option: screwed shoe arm** (`sony-a6300-fan-arm.scad`). The foot goes in the flash shoe, a bridge
-     runs over the top, and a tab screws to the box's front in the top band (2 × M3 into heat-set inserts).
-     It works, but it's two parts and screws.
-   - **Option, not built yet: one-piece slide-in.** The arm is part of the box: the front plate continues
-     up as a flat strip, then a bridge and a foot.
-     - **How it goes on:** the shoe and the recess are entered in the same direction. Push the whole thing
-       toward the lens; the foot slides into the shoe as the box seats on the plate, and the plate is the
-       stop.
-     - **Printing:** front face down, arm flat on the bed, bridge rising as a column. The foot needs a 45°
-       lead-in. The bridge's layers run across its load, so make it thick (about 12 × 6).
-     - **Needs checking:** that the screen can be held out of the way while sliding it in.
+     runs over the top, and a tab screws to the box's front in the top band. The arm file turns the
+     bosses on, but they collide with the switch's new spot (the file warns). One of them must move first.
+   - **Ruled out: a one-piece slide-in** (arm built into the box, pushed toward the lens so the foot enters
+     the shoe as the box seats). The screen can't get far enough out of the way. A one-piece holder would
+     need a sideways entry, e.g. a dovetail.
 4. **Positions read from photos are ±2 mm.** Shoe centre ~41 mm from the eyepiece-side end, flash and MENU
    buttons ~62 and ~73 mm, recess right edge ~87 mm. They matter for the arm only.
 5. **Fan noise and airflow aren't verified.**
@@ -89,9 +86,8 @@ Render with the CI image (see the repo's AGENTS.md). Preview mode (no `--render`
 
 1. Model the screen in its shooting position: a keep-out solid from the cardboard test, or the real linkage
    (hinge positions and arm length, 5 caliper numbers). Make the scene check that nothing sits behind it.
-2. Move the outlets out of the recess and keep the grille above the screen line. Then move the switch:
-   left side with a smaller USB-C board, or the top band.
+2. Move the outlets out of the recess and keep the grille above the screen line.
 3. Print the fit-test shell; check the fit and that the screen holds it.
-4. Decide on holding: no holder plus a backup pad, the screwed arm, or the one-piece slide-in.
+4. Decide on holding: no holder plus a backup pad, or the screwed arm (move the switch or the bosses).
 5. Print the box, wire it, and test: 4K, Auto Pwr OFF Temp = High, dummy battery. Log the time to the overheat
    warning with and without the fan, at the same room temperature.
