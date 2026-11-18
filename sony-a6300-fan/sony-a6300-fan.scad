@@ -23,9 +23,11 @@ fan_holes = fan == 40 ? 32 : 24;
 fan_screw_d = fan == 40 ? 3.4 : 3.2;   // clearance for the fan screws (M3 self-tapping into the 3007 frame)
 
 /* [Box] */
+// Overall height at the back, from the cardboard test on the camera (2026-11-18): 35 (36 just squeezes in)
+box_h_set = 35;
 wall = 1.6;
 // Fan to back plate gap, also the height of the exhaust band in every wall
-air_gap = 4.0;
+air_gap = 4.4;   // box 13.0 deep: the screen allows ~14 (cardboard test), 1 mm kept as margin
 // Electronics bay inner width (USB-C board is 13.97 deep from the wall)
 bay_w = 15.5;
 // Exhaust ribs
@@ -34,9 +36,12 @@ rib_pitch = 7;
 // Minimum box width. 74 = the LCD's width, so the box covers the whole pocket the screen leaves.
 // The fan sits centred in the space right of the bay; the rest is a closed plenum that makes the
 // air sweep the plate sideways to the exhaust ribs. 0 = just wide enough for the fan
-box_w_min = 74;
-// Slant on the bottom-front edge for the tilted screen
-screen_chamfer = 2.5;
+box_w_min = 80;
+// The bottom is bevelled across the full depth to clear the screen's hinge arm: 0 at the plate,
+// slant_rise up at the outside face (cardboard test: 35 against the plate, 32.5-33 outside).
+// More rise = more clearance. The inside floor follows the bevel
+slant_rise = 2.5;
+floor_t = 1.2;
 
 /* [USB-C: Adafruit 4090 "USB Type C Breakout Board - Downstream Connection"] */
 // From the Eagle board file: 20.32 x 13.97 PCB, connector centred on a long edge,
@@ -53,43 +58,59 @@ usb_thin = 0.6;   // plug overmold stops this far from the receptacle mouth: kee
 
 /* [Switch: SS13D07 mini slide switch, 1P3T: High / Off / Low] */
 // Body 12.7 x 4.5 x 4.7 (XKB SS13D07L4B / ROCPU SS-13D07 listings), "L4" = 4 mm knob, 2 mm per step.
-// Knob cross-section estimated. Body sits in a printed cradle against the inside of the left wall,
-// knob pokes ~2.4 mm out through a slot: thumbnail-operated
-sw_body = [12.7, 4.5, 4.7];   // along the slide (vertical), across, height into the bay
+// Knob cross-section estimated. In the bay's front face, sliding sideways (L left, H right, Off in
+// the middle), body in a printed cradle on the inside of the front plate, knob ~2.4 mm proud.
+// (Moved off the side wall: board + switch stacked need 38 mm, the box may only be 36.)
+sw_body = [12.7, 4.5, 4.7];   // along the slide, across, height into the box
 sw_knob = [1.5, 2.0, 4.0];    // along, across, height above the body
 sw_step = 2.0;
 sw_pins = 3.3;
-sw_rim = 1.2;                 // cradle side walls; the box's top wall caps it, a thin ledge holds it below
-sw_ledge = 0.8;
+sw_rim = 1.2;                 // cradle walls
 sw_slot = [sw_knob[0] + 2 * sw_step + 0.5, sw_knob[1] + 0.5];   // along, across
 
+/* [Arm mount: the shoe arm (sony-a6300-fan-arm.scad) screws to the front face] */
+// The arm's tab sits on the front face in the top band the screen never reaches (14.5-15 mm under
+// the eyepiece), left of the fan, held by 2 x M3 screws into heat-set inserts in bosses behind the front plate
+arm_xc = 37;          // tab centre in box X: right above the shoe (camera x 41, box placed at x 4)
+tab_band = 14.5;      // top band height on the front face
+screw_z = [4, 11];    // screw heights below the box top
+insert_d = 4.0;       // M3 x 4 heat-set insert hole
+insert_l = 5.0;
+boss_d = 7.5;
+
 show_part = true;
+// "print": the real (mirrored) part, front face down on the bed. "display": as it sits on the camera
+orient = "print"; // ["print", "display"]
 $fn = 64;
 
 // ---------- derived ----------
 front = wall;
 box_d = front + fan_t + air_gap;
-bay_need = 0.5 + usb_pcb[0] + 0.3 + sw_ledge + sw_body[0] + 0.2;  // USB-C board below the switch cradle
-inner_h = max(fan + 0.6, bay_need);
-box_h = inner_h + 2 * wall;
+box_h = box_h_set;
+inner_h = box_h - 2 * wall;
 sec_x = wall + bay_w + wall;                        // fan section starts right of the divider
 box_w = max(sec_x + fan + 0.6 + wall, box_w_min);
-fan_x = sec_x + (box_w - wall - sec_x - fan) / 2;   // fan's left edge, centred in its section
-fan_zc = box_h / 2;
-side_yc = (air_gap + box_d - front) / 2;          // middle of the solid part of the left wall
-usb_zc = wall + 0.5 + usb_pcb[0] / 2;
+fan_x = box_w - wall - 0.3 - fan;                   // fan at the right end: the plenum left of it is where the arm comes down
+fan_zc = box_h - wall - 0.3 - fan / 2;              // fan at the top: room for the bottom slant
+assert(inner_h >= fan + 0.6, "box too short for the fan");
+function slant(y) = slant_rise * (y + 0.5) / (box_d + 0.5);   // starts 0.5 behind the plate: no knife edge at the back corner
+usb_z0 = slant(box_d - front) + floor_t + 0.3;    // board bottom, above the bevelled floor
+usb_zc = usb_z0 + usb_pcb[0] / 2;
 usb_yc = (air_gap + 0.3 + usb_rec[2] / 2 + usb_pcb[2] + box_d - front - 0.5 - usb_rec[2] / 2) / 2;
 usb_pcb_y = usb_yc - usb_rec[2] / 2;               // component face of the PCB
-sw_zc = box_h - wall - 0.2 - sw_body[0] / 2;
+usb_top = usb_z0 + usb_pcb[0];
+sw_xc = wall + bay_w / 2;
+sw_zc = (usb_top + 0.5 + box_h - wall) / 2;        // above the USB-C board, in the bay's front face
+assert(sw_zc - sw_body[1] / 2 - sw_rim >= usb_top + 0.3 && sw_zc + sw_body[1] / 2 + sw_rim <= box_h - wall + 0.01, "switch does not fit above the USB-C board");
 n_x = floor((box_w - 6 + rib) / rib_pitch);
 n_z = floor((box_h - 6 + rib) / rib_pitch);
+slot_s = (box_w - 6 - (n_x * rib_pitch - rib)) / 2;
 exit_area = 2 * (n_x + n_z) * (rib_pitch - rib) * air_gap;
 fan_free = PI * (pow(fan / 2 - 1, 2) - pow(fan * 0.2, 2));
-chamfer_max = fan_zc - (fan / 2 - 1);
+assert(arm_xc - boss_d / 2 > sec_x && arm_xc + boss_d / 2 < fan_x, "arm screw bosses must sit in the plenum between the bay and the fan");
 
 echo(str("Box W x H x D = ", box_w, " x ", box_h, " x ", box_d, " mm, fan ", fan, "x", fan, "x", fan_t));
 echo(str("Exhaust ", round(exit_area), " mm2 vs fan free area ", round(fan_free), " mm2"));
-if (screen_chamfer > chamfer_max) echo(str("WARNING: screen_chamfer > ", chamfer_max, " notches the grille"));
 
 // ---------- part ----------
 module front_face_2d() {
@@ -109,7 +130,8 @@ module front_face_2d() {
 
 module slots_x(z0) {
     s = (box_w - 6 - (n_x * rib_pitch - rib)) / 2;
-    for (i = [0 : n_x - 1]) translate([3 + s + i * rib_pitch, -1, z0 - 1]) cube([rib_pitch - rib, air_gap + 1, wall + 2]);
+    for (i = [0 : n_x - 1]) let(x = 3 + s + i * rib_pitch)
+        translate([x, -1, z0 - 1]) cube([rib_pitch - rib, air_gap + 1, wall + 2]);
 }
 module slots_z(x0) {
     s = (box_h - 6 - (n_z * rib_pitch - rib)) / 2;
@@ -124,15 +146,27 @@ module rrect_x(w_y, h_z, len, r = 1) {  // rounded rectangle prism along X, cent
 module box() {
     difference() {
         union() {
-            translate([0, box_d, 0]) rotate([90, 0, 0]) linear_extrude(front) front_face_2d();
+            // one solid shell: block minus the open-backed cavity minus the front openings (no seams)
             difference() {
-                cube([box_w, box_d - front, box_h]);
-                translate([wall, -1, wall]) cube([box_w - 2 * wall, box_d, box_h - 2 * wall]);
+                cube([box_w, box_d, box_h]);
+                translate([wall, -1, wall]) cube([box_w - 2 * wall, box_d - front + 1, box_h - 2 * wall]);
+                translate([0, box_d + 1, 0]) rotate([90, 0, 0]) linear_extrude(front + 1.01)
+                    difference() { square([box_w, box_h]); front_face_2d(); }
             }
             translate([wall + bay_w, 0, 0]) cube([wall, box_d - front, box_h]);   // bay / fan divider
-            // slide switch cradle on the inside of the left wall
-            translate([wall - 0.01, side_yc - sw_body[1] / 2 - sw_rim, sw_zc - sw_body[0] / 2 - sw_ledge])
-                cube([sw_body[2] - 1, sw_body[1] + 2 * sw_rim, box_h - wall - (sw_zc - sw_body[0] / 2 - sw_ledge) + 0.01]);
+            // inside floor following the bevel (thinner where the fan's bottom edge sits)
+            difference() {
+                rotate([90, 0, 90]) translate([0, 0, wall - 0.01]) linear_extrude(box_w - 2 * wall + 0.02)
+                    polygon([[0, -1], [box_d - front + 0.01, slant(box_d - front) - 1],
+                             [box_d - front + 0.01, slant(box_d - front) + floor_t], [0, floor_t]]);
+                translate([fan_x - 0.2, air_gap - 0.2, fan_zc - fan / 2 - 0.2]) cube([fan + 0.4, fan_t + 0.4, fan + 0.4]);
+            }
+            // screw bosses for the arm's tab, behind the front plate
+            for (z = screw_z) translate([arm_xc, box_d - front + 0.01, box_h - z]) rotate([90, 0, 0])
+                cylinder(d = boss_d, h = insert_l + 1.5 - front, $fn = 32);
+            // slide switch cradle on the inside of the bay's front plate
+            translate([sw_xc - sw_body[0] / 2 - sw_rim, box_d - front - 3, sw_zc - sw_body[1] / 2 - sw_rim])
+                cube([sw_body[0] + 2 * sw_rim, 3 + 0.01, sw_body[1] + 2 * sw_rim]);
             // USB-C board posts from the front wall, pins through the board's 2.5 mm holes
             for (s = [-1, 1]) translate([wall + usb_hole_in, box_d - front + 0.01, usb_zc + s * usb_hole_dx / 2])
                 rotate([90, 0, 0]) {
@@ -149,16 +183,21 @@ module box() {
         // USB-C: shell opening, and the outside counterbore down to a thin wall
         translate([-1, usb_yc, usb_zc]) rrect_x(usb_rec[2] + 0.4, usb_rec[0] + 0.4, wall + 2, 1.2);
         translate([-1, usb_yc, usb_zc]) rrect_x(usb_cbore[1], usb_cbore[0], 1 + wall - usb_thin, 2.5);
-        // slide switch: knob slot, and the body pocket inside the cradle
-        translate([-1, side_yc - sw_slot[1] / 2, sw_zc - sw_slot[0] / 2]) cube([wall + 2, sw_slot[1], sw_slot[0]]);
-        translate([wall - 0.01, side_yc - sw_body[1] / 2 - 0.1, sw_zc - sw_body[0] / 2 - 0.1]) cube([sw_body[2] + 1, sw_body[1] + 0.2, sw_body[0] + 0.3]);
-        // H above the slot, L below (engraved 0.4 mm)
-        for (m = [["H", 1], ["L", -1]]) translate([0.4, side_yc, sw_zc + m[1] * (sw_slot[0] / 2 + 1.9)])
-            rotate([90, 0, -90]) mirror([1, 0, 0]) linear_extrude(1) text(m[0], size = 2.4, halign = "center", valign = "center", font = "Liberation Sans:style=Bold");
-        // slant on the bottom-front edge
+        // slide switch: knob slot through the front plate, body pocket in the cradle
+        translate([sw_xc - sw_slot[0] / 2, box_d - front - 1, sw_zc - sw_slot[1] / 2]) cube([sw_slot[0], front + 2, sw_slot[1]]);
+        translate([sw_xc - sw_body[0] / 2 - 0.1, box_d - front - 3.5, sw_zc - sw_body[1] / 2 - 0.1]) cube([sw_body[0] + 0.2, 3.5 + 0.01, sw_body[1] + 0.2]);
+        // L left of the slot, H right (engraved 0.4 mm into the front face)
+        for (m = [["L", -1], ["H", 1]]) translate([sw_xc + m[1] * (sw_slot[0] / 2 + 2.2), box_d + 0.01, sw_zc])
+            rotate([90, 0, 0]) linear_extrude(0.41) text(m[0], size = 2.6, halign = "center", valign = "center", font = "Liberation Sans:style=Bold");
+        // heat-set insert holes from the front face
+        for (z = screw_z) translate([arm_xc, box_d + 0.01, box_h - z]) rotate([90, 0, 0]) cylinder(d = insert_d, h = insert_l, $fn = 24);
+        // bottom bevel across the full depth: 0 at the plate, slant_rise at the outside face
         rotate([90, 0, 90]) translate([0, 0, -1]) linear_extrude(box_w + 2)
-            polygon([[box_d - screen_chamfer - 1, -1], [box_d + 1, -1], [box_d + 1, screen_chamfer + 1]]);
+            polygon([[-1, -1], [box_d + 1, -1], [box_d + 1, slant(box_d + 1)], [-1, slant(-1)]]);
     }
 }
 
-if (show_part) mirror([0, 1, 0]) color("WhiteSmoke") box();
+// The modules are drawn with the operator at +Y; the real part is their mirror image.
+if (show_part) color("WhiteSmoke")
+    if (orient == "print") translate([0, 0, box_d]) rotate([90, 0, 0]) mirror([0, 1, 0]) box();
+    else mirror([0, 1, 0]) box();

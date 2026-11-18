@@ -7,25 +7,19 @@
 // left-aligned with the LCD. The screen is drawn at the smallest tilt that clears the box
 // (override with -D lcd_tilt=...).
 
-include <sony-a6300-fan.scad>
-use <a6300-camera.scad>
+include <sony-a6300-fan-arm.scad>
 
 show_part = false;
+show_arm = false;
 show_camera = true;
 show_cable = true;
 // Cut away the box front to show the parts inside
 cutaway = false;
 
-ec = a6300_eyecup();
 hinge = a6300_lcd_hinge();
-box_x = 3;
-box_z = ec[2] - 0.5 - box_h;
 
-// The screen's back face swings out from the hinge. It must pass below the box's bottom-front edge
-function clear_angle(y, z) = z <= hinge[1] ? 90 : atan(y / (z - hinge[1]));
-tilt_min = max(clear_angle(box_d, box_z + screen_chamfer), clear_angle(box_d - screen_chamfer, box_z));
-lcd_tilt = min(90, ceil(tilt_min) + 2);
-echo(str("Box bottom ", box_z, " mm above the camera base; screen must tilt >= ", round(tilt_min), " deg to clear it"));
+// The screen's real linkage is not modelled yet (see README): draw it flipped flat out of the way
+lcd_tilt = 90;
 
 // ---------- parts (box coordinates) ----------
 // Noctua: beige frame, brown impeller. 3007: black frame and impeller
@@ -48,14 +42,15 @@ module fan_model() {
     }
 }
 
-// SS13D07 slide switch in its cradle, knob shown in the High position
+// SS13D07 slide switch in its cradle behind the bay's front plate, knob shown at High (right)
 sw_pos = 1;   // 1 = High, 0 = Off, -1 = Low
+sw_back = box_d - front - sw_body[2];
 module slide_switch() {
-    translate([wall, side_yc, sw_zc]) {
-        color("#b9bcc2") translate([0, -sw_body[1] / 2, -sw_body[0] / 2]) cube([0.4, sw_body[1], sw_body[0]]);       // metal cover
-        color("#1a1a1a") translate([0.4, -sw_body[1] / 2, -sw_body[0] / 2]) cube([sw_body[2] - 0.4, sw_body[1], sw_body[0]]);
-        color("#1a1a1a") translate([-sw_knob[2], -sw_knob[1] / 2, sw_pos * sw_step - sw_knob[0] / 2]) cube([sw_knob[2], sw_knob[1], sw_knob[0]]);
-        color("#c8a24a") for (i = [0 : 3]) translate([sw_body[2], -0.3, (i - 1.5) * 2.5 - 0.4]) cube([sw_pins, 0.6, 0.8]);
+    translate([sw_xc, 0, sw_zc]) {
+        color("#b9bcc2") translate([-sw_body[0] / 2, box_d - front - 0.4, -sw_body[1] / 2]) cube([sw_body[0], 0.4, sw_body[1]]);   // metal cover
+        color("#1a1a1a") translate([-sw_body[0] / 2, sw_back, -sw_body[1] / 2]) cube([sw_body[0], sw_body[2] - 0.4, sw_body[1]]);
+        color("#1a1a1a") translate([sw_pos * sw_step - sw_knob[0] / 2, box_d - front, -sw_knob[1] / 2]) cube([sw_knob[0], sw_knob[2], sw_knob[1]]);
+        color("#c8a24a") for (i = [0 : 3]) translate([(i - 1.5) * 2.5 - 0.3, sw_back - sw_pins, -0.4]) cube([0.6, sw_pins, 0.8]);
     }
 }
 
@@ -81,15 +76,14 @@ module adafruit_4090() {  // PCB parallel to the front face, receptacle through 
 module wires() {
     module run(pts, c) color(c) for (i = [0 : len(pts) - 2]) hull() { translate(pts[i]) sphere(d = 1.2, $fn = 8); translate(pts[i + 1]) sphere(d = 1.2, $fn = 8); }
     yb = usb_pcb_y - usb_pcb[2] - 0.8;   // behind the board
-    pin_x = wall + sw_body[2] + sw_pins;
+    py = sw_back - sw_pins;                       // switch pin tips
     yf = box_d - front - fan_t + 3;
-    dx = wall + bay_w - 2.2;   // diodes stand along the divider
-    run([[wall + usb_pcb[1] - 2.54, yb, usb_zc + 3.8], [pin_x, yb, sw_zc - 1.25]], "#b02020");                       // VBUS -> common
-    run([[pin_x, side_yc, sw_zc + 3.75], [wall + bay_w, yf, sw_zc + 3.75], [fan_x + 3, yf, fan_zc + 2]], "#b02020"); // H -> fan +
-    run([[pin_x, side_yc, sw_zc - 3.75], [dx, side_yc, sw_zc - 3.75], [dx, side_yc, sw_zc - 4.5]], "#b02020");        // L -> diodes
-    diode([dx, side_yc, sw_zc - 10]);
-    diode([dx, side_yc, sw_zc - 16]);
-    run([[dx, side_yc, sw_zc - 16], [dx, side_yc, sw_zc - 17.5], [wall + bay_w, yf, fan_zc - 3], [fan_x + 3, yf, fan_zc + 2]], "#b02020"); // diodes -> fan +
+    dz = sw_zc - 6;                               // diodes lie in the plenum, left of the fan
+    run([[wall + usb_pcb[1] - 2.54, yb, usb_zc + 3.8], [sw_xc - 1.25, yb, usb_top + 1], [sw_xc - 1.25, py, sw_zc]], "#b02020");    // VBUS -> common
+    run([[sw_xc + 3.75, py, sw_zc], [wall + bay_w + 3, yf, sw_zc], [fan_x + 3, yf, fan_zc + 2]], "#b02020");                     // H -> fan +
+    run([[sw_xc - 3.75, py, sw_zc], [sw_xc - 3.75, py, dz], [wall + bay_w + 2, py, dz]], "#b02020");                             // L -> diodes
+    translate([wall + bay_w + 2, py, dz]) rotate([0, 90, 0]) { diode([0, 0, 0]); diode([0, 0, 6]); }
+    run([[wall + bay_w + 14, py, dz], [fan_x + 3, yf, fan_zc - 2]], "#b02020");                                                  // diodes -> fan +
     run([[wall + usb_pcb[1] - 2.54, yb, usb_zc - 3.8], [wall + bay_w, box_d - front - fan_t + 5, fan_zc - 2], [fan_x + 3, box_d - front - fan_t + 5, fan_zc - 2]], "#202020"); // GND -> fan
 }
 
@@ -116,6 +110,6 @@ module fan_box_assembly() {
 
 // ---------- scene ----------
 mirror([0, 1, 0]) {
-    translate([box_x, 0, box_z]) fan_box_assembly();
+    translate([box_x, 0, box_z]) { fan_box_assembly(); color("#e6e6e6") arm(); }
     if (show_camera) a6300(lcd_tilt);
 }
