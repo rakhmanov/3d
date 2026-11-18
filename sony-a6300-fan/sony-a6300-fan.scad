@@ -26,6 +26,7 @@ fan_screw_d = fan == 40 ? 3.4 : 3.2;   // clearance for the fan screws (M3 self-
 // Overall height at the back, from the cardboard test on the camera (2026-11-18): 35 (36 just squeezes in)
 box_h_set = 35;
 wall = 1.6;
+wall_top = 1.2;       // thinner top wall lets the fan sit higher, which leaves room for a steeper bevel
 // Fan to back plate gap, also the height of the exhaust band in every wall
 air_gap = 4.4;   // box 13.0 deep: the screen allows ~14 (cardboard test), 1 mm kept as margin
 // Electronics bay inner width (USB-C board is 13.97 deep from the wall)
@@ -40,7 +41,7 @@ box_w_min = 80;
 // The bottom is bevelled across the full depth to clear the screen's hinge arm: 0 at the plate,
 // slant_rise up at the outside face (cardboard test: 35 against the plate, 32.5-33 outside).
 // More rise = more clearance. The inside floor follows the bevel
-slant_rise = 2.5;
+slant_rise = 3.0;   // ~3.3 is the most before the bevel reaches the fan's bottom front corner
 floor_t = 1.2;
 
 /* [USB-C: Adafruit 4090 "USB Type C Breakout Board - Downstream Connection"] */
@@ -58,14 +59,15 @@ usb_thin = 0.6;   // plug overmold stops this far from the receptacle mouth: kee
 
 /* [Switch: SS13D07 mini slide switch, 1P3T: High / Off / Low] */
 // Body 12.7 x 4.5 x 4.7 (XKB SS13D07L4B / ROCPU SS-13D07 listings), "L4" = 4 mm knob, 2 mm per step.
-// Knob cross-section estimated. In the bay's front face, sliding sideways (L left, H right, Off in
-// the middle), body in a printed cradle on the inside of the front plate, knob ~2.4 mm proud.
-// (Moved off the side wall: board + switch stacked need 38 mm, the box may only be 36.)
+// Knob cross-section estimated. In the front face just left of the fan, low (away from the eyepiece,
+// below the arm's screw tab), sliding sideways (L left, Off middle, H right). Body in a printed cradle
+// on the inside of the front plate, knob ~2.4 mm proud
 sw_body = [12.7, 4.5, 4.7];   // along the slide, across, height into the box
 sw_knob = [1.5, 2.0, 4.0];    // along, across, height above the body
 sw_step = 2.0;
 sw_pins = 3.3;
 sw_rim = 1.2;                 // cradle walls
+sw_zc = 11;                   // switch centre height
 sw_slot = [sw_knob[0] + 2 * sw_step + 0.5, sw_knob[1] + 0.5];   // along, across
 
 /* [Arm mount: the shoe arm (sony-a6300-fan-arm.scad) screws to the front face] */
@@ -87,11 +89,11 @@ $fn = 64;
 front = wall;
 box_d = front + fan_t + air_gap;
 box_h = box_h_set;
-inner_h = box_h - 2 * wall;
+inner_h = box_h - wall - wall_top;
 sec_x = wall + bay_w + wall;                        // fan section starts right of the divider
 box_w = max(sec_x + fan + 0.6 + wall, box_w_min);
 fan_x = box_w - wall - 0.3 - fan;                   // fan at the right end: the plenum left of it is where the arm comes down
-fan_zc = box_h - wall - 0.3 - fan / 2;              // fan at the top: room for the bottom slant
+fan_zc = box_h - wall_top - 0.3 - fan / 2;          // fan at the top: room for the bottom bevel
 assert(inner_h >= fan + 0.6, "box too short for the fan");
 function slant(y) = slant_rise * (y + 0.5) / (box_d + 0.5);   // starts 0.5 behind the plate: no knife edge at the back corner
 usb_z0 = slant(box_d - front) + floor_t + 0.3;    // board bottom, above the bevelled floor
@@ -99,9 +101,10 @@ usb_zc = usb_z0 + usb_pcb[0] / 2;
 usb_yc = (air_gap + 0.3 + usb_rec[2] / 2 + usb_pcb[2] + box_d - front - 0.5 - usb_rec[2] / 2) / 2;
 usb_pcb_y = usb_yc - usb_rec[2] / 2;               // component face of the PCB
 usb_top = usb_z0 + usb_pcb[0];
-sw_xc = wall + bay_w / 2;
-sw_zc = (usb_top + 0.5 + box_h - wall) / 2;        // above the USB-C board, in the bay's front face
-assert(sw_zc - sw_body[1] / 2 - sw_rim >= usb_top + 0.3 && sw_zc + sw_body[1] / 2 + sw_rim <= box_h - wall + 0.01, "switch does not fit above the USB-C board");
+sw_xc = fan_x - 1 - sw_body[0] / 2 - sw_rim;      // just left of the fan
+assert(sw_xc - sw_body[0] / 2 - sw_rim > sec_x, "switch cradle hits the bay divider");
+assert(sw_zc + sw_body[1] / 2 + sw_rim < box_h - screw_z[1] - boss_d / 2 - 0.5, "switch cradle hits the arm's screw bosses");
+assert(sw_zc - sw_body[1] / 2 - sw_rim > slant(box_d - front) + floor_t, "switch cradle hits the floor");
 n_x = floor((box_w - 6 + rib) / rib_pitch);
 n_z = floor((box_h - 6 + rib) / rib_pitch);
 slot_s = (box_w - 6 - (n_x * rib_pitch - rib)) / 2;
@@ -149,7 +152,7 @@ module box() {
             // one solid shell: block minus the open-backed cavity minus the front openings (no seams)
             difference() {
                 cube([box_w, box_d, box_h]);
-                translate([wall, -1, wall]) cube([box_w - 2 * wall, box_d - front + 1, box_h - 2 * wall]);
+                translate([wall, -1, wall]) cube([box_w - 2 * wall, box_d - front + 1, box_h - wall - wall_top]);
                 translate([0, box_d + 1, 0]) rotate([90, 0, 0]) linear_extrude(front + 1.01)
                     difference() { square([box_w, box_h]); front_face_2d(); }
             }
@@ -175,9 +178,9 @@ module box() {
                 }
         }
         // exhaust band along the back edge of all four walls, plus the divider (bay air out the left)
-        for (z0 = [0, box_h - wall]) slots_x(z0);
+        for (z0 = [0, box_h - wall_top]) slots_x(z0);
         for (x0 = [0, box_w - wall]) slots_z(x0);
-        translate([wall + bay_w - 1, -1, wall]) cube([wall + 2, air_gap + 1, box_h - 2 * wall]);
+        translate([wall + bay_w - 1, -1, wall]) cube([wall + 2, air_gap + 1, box_h - wall - wall_top]);
         // fan wires into the bay
         translate([wall + bay_w - 1, box_d - front - fan_t, fan_zc - 4]) cube([wall + 2, fan_t, 8]);
         // USB-C: shell opening, and the outside counterbore down to a thin wall

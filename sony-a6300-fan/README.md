@@ -6,6 +6,10 @@ cable side and has a thumbnail slide switch: Low / Off / High. A second part, an
 shoe, holds it. The box size comes from a cardboard test on the real camera; the arm position from
 caliper readings and photos (±2 mm). **Not printed yet.**
 
+**Status and known problems: see [HANDOFF.md](HANDOFF.md).** In short: the tilted screen covers the lower front
+(the switch is currently placed there and has to move), the exhaust slots mostly face the recess walls, and how
+the box is held is open (current plan: the screen pressing it in place).
+
 | On the camera | Inside (front cut away) | Side | Arm and shoe |
 |---|---|---|---|
 | ![](scene-iso.png) | ![](scene-cutaway.png) | ![](scene-side.png) | ![](scene-mount.png) |
@@ -26,7 +30,7 @@ caliper readings and photos (±2 mm). **Not printed yet.**
 | Fan, ball-bearing alternative | GDSTIME 3007 5V dual ball (Amazon) | 30 × 30 × 7 | 9000 rpm, 4.1 CFM, "25 dBA ±10 %", 0.15 A. Longest life, but more bearing tick and hum |
 | Fan, best (if you find it) | Sunon MF30060V2-1000U-A99 | 30 × 30 × 6.5, fits the same box | 3.7 CFM at 15.7 dB(A). Distributors only (DigiKey, Mouser), often out of stock |
 | USB-C | **Adafruit 4090**, "USB Type C Breakout Board – Downstream Connection" | PCB 20.32 × 13.97 × 1.6, connector centred on the long edge, 2 × Ø2.5 holes 15.24 apart, 2.54 in from the connector edge | Numbers from Adafruit's Eagle board file. 5.1 kΩ on CC1 and CC2 (R1, R2), so C-to-C chargers give 5 V. Solder the wires to VBUS/GND, no header |
-| Switch | **SS13D07 mini slide switch, 1P3T** (3 positions, "L4" = 4 mm knob), e.g. XKB SS13D07L4B | Body 12.7 × 4.5 × 4.7, knob 4 mm, 2 mm per step | Sits in a printed cradle behind the electronics bay's front face and slides sideways; the knob pokes ~2.4 mm out. L and H engraved beside the slot |
+| Switch | **SS13D07 mini slide switch, 1P3T** (3 positions, "L4" = 4 mm knob), e.g. XKB SS13D07L4B | Body 12.7 × 4.5 × 4.7, knob 4 mm, 2 mm per step | Sits in a printed cradle behind the front face, low and just left of the fan, and slides sideways; the knob pokes ~2.4 mm out. L and H engraved beside the slot |
 | Low-speed diodes | 2 × 1N4001 (or 1N4007) | DO-41, 5 × 2.7 mm | ~0.8 V drop each, nearly independent of current, so the fan still starts on Low |
 | Fixing | 2 printed pins through the board holes (heat-staked), or M2.5 screws into the posts | | |
 
@@ -57,16 +61,18 @@ Tools: soldering iron, calipers, M3 tap or screwdriver.
 
     front (operator side)
       ┌──────┬────────────┬───────────┐
-      │ L◦H  │     ◉ ◉ ←arm tab        │   switch in the bay's front face, arm screws in the top band
+      │      │     ◉ ◉ ←arm tab        │   arm screws in the top band
     ▭─┤ bay  │  chamber   │  ( fan )  │   USB-C out of the left wall; fan top right, blowing onto the plate
-      └──────┴────────────┴───────────┘   bottom bevelled from 0 at the plate to 2.5 mm at the front
+      │      │      L◦H   │           │   switch low, next to the fan (away from the eyepiece)
+      └──────┴────────────┴───────────┘   bottom bevelled from 0 at the plate to 3 mm at the front
     back edge of all 4 walls: ribbed exhaust band, as tall as the fan-to-plate gap
 
 **80 × 35 × 13 mm**, exhaust 715 mm² vs 503 mm² fan opening.
 
 - **Size, from the cardboard test on the camera:** 35 mm tall against the plate (36 just squeezes in) and 32.5 mm at the
-  front: the bottom is bevelled straight from the plate (`slant_rise = 2.5`) to clear the screen's hinge arm, and the
-  inside floor follows it. The screen leaves about 14 mm of depth, so the box is 13.0 (1.6 front + 7 fan + 4.4 gap). The
+  front in the test; the box goes to 32 (`slant_rise = 3`, about the most before the bevel reaches the fan). The
+  bottom is bevelled straight from the plate to clear the screen's hinge arm, and the inside floor follows it.
+  The top wall is 1.2 mm so the fan sits as high as possible. The screen leaves about 14 mm of depth, so the box is 13.0 (1.6 front + 7 fan + 4.4 gap). The
   recess is about 84 mm wide; the box is 80, placed 1 mm from its left edge.
 - **Layout:** the electronics bay is on the left (cable side), the fan in the top right corner (room for the bevel
   below it), and the closed chamber between them makes the air sweep the plate before it leaves through the ribs.
@@ -84,7 +90,8 @@ Tools: soldering iron, calipers, M3 tap or screwdriver.
   the screen back, to the right toward the buttons, and left through the bay. None of it goes back into the intake.
 - **USB-C:** the board stands parallel to the front face on two posts from the front wall. Outside, the left wall is
   counterbored down to 0.6 mm around the opening so the plug's overmold sits in it and the plug reaches full depth.
-- **Switch:** in the bay's front face, above the USB-C board (the box is too short to stack both on the side wall). The knob sticks out ~2.4 mm.
+- **Switch:** in the front face just left of the fan, low down, so your finger stays away from the eyepiece and its
+  rubber cup, and below the arm's screws. The knob sticks out ~2.4 mm.
 - **Eye sensor:** it sits on the eyepiece, right above the box. Set *FINDER/MONITOR → Monitor (manual)*.
 - **Mounting: shoe arm** ([sony-a6300-fan-arm.scad](sony-a6300-fan-arm.scad), [close-up](scene-mount.png)).
   A foot (ISO 518, 18.4 × 16 × 1.9 mm) slides into the camera's shoe from the back, a bridge crosses the top

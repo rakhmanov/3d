@@ -78,8 +78,8 @@ module wires() {
     yb = usb_pcb_y - usb_pcb[2] - 0.8;   // behind the board
     py = sw_back - sw_pins;                       // switch pin tips
     yf = box_d - front - fan_t + 3;
-    dz = sw_zc - 6;                               // diodes lie in the plenum, left of the fan
-    run([[wall + usb_pcb[1] - 2.54, yb, usb_zc + 3.8], [sw_xc - 1.25, yb, usb_top + 1], [sw_xc - 1.25, py, sw_zc]], "#b02020");    // VBUS -> common
+    dz = sw_zc + 7;                               // diodes lie in the chamber, above the switch
+    run([[wall + usb_pcb[1] - 2.54, yb, usb_zc + 3.8], [sw_xc - 1.25, yb, usb_zc + 3.8], [sw_xc - 1.25, py, sw_zc]], "#b02020");    // VBUS -> common
     run([[sw_xc + 3.75, py, sw_zc], [wall + bay_w + 3, yf, sw_zc], [fan_x + 3, yf, fan_zc + 2]], "#b02020");                     // H -> fan +
     run([[sw_xc - 3.75, py, sw_zc], [sw_xc - 3.75, py, dz], [wall + bay_w + 2, py, dz]], "#b02020");                             // L -> diodes
     translate([wall + bay_w + 2, py, dz]) rotate([0, 90, 0]) { diode([0, 0, 0]); diode([0, 0, 6]); }
