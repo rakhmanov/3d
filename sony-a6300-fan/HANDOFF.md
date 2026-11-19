@@ -29,11 +29,23 @@ It needs 5 V from USB-C and has Low / Off / High.
   clearance `+0.4 mm`.
 - **Unblocked exhaust and open grille in `sony-a6300-fan.scad`.** Fan shifted left (`fan_x = 42.1`) to open
   a `6 mm` right exhaust duct; left, top, and right walls keep a solid `5.6 mm` back rim inside the `5.2 mm`
-  recess, while `495 mm²` of unblocked exhaust (`249 mm²` side/top at `Y = 5.6..11.4` + `246 mm²` bottom-back
-  at `Y = 0..4.4` behind the hinge-arm baffle; `453 mm²` with `arm_mount = true`) matches the `503 mm²` fan
-  free area. Single-ring open grille leaves the upper blade arc open; lower bay divider stops at `usb_zc`.
+  recess, while `467 mm²` of unblocked exhaust (`221 mm²` side/top at `Y = 5.6..11.4` + `246 mm²` bottom-back
+  at `Y = 0..4.4` behind the hinge-arm baffle) matches the `503 mm²` fan free area (small top-right hole `tx_r`
+  removed). Single-ring open grille leaves the upper blade arc open; lower bay divider stops at `usb_zc`.
+- **Tool-free pin-and-socket slide-on shoe arm (`sony-a6300-fan-arm.scad` + `sony-a6300-fan.scad`).** `arm_mount = true`
+  by default. A `6.0 × 6.0 × 4.2 mm` locating lug with a flat horizontal load-bearing top shelf (`3.4 mm` bearing
+  inside the socket + `0.6 mm` top/side tip lead-in chamfers) and a 45° bottom ramp engages a `6.5 × 6.5 × 4.6 mm`
+  open-backed front socket on `-Y` shoe slide-in in pure vertical shear with zero screws or heat-set inserts.
+  The arm prints lying flat on its back (`+Y` tab/bridge/top-block face on the bed, `-Y` up) with continuous XY
+  fibers around the bridge-to-tab corner and a 45° rear foot taper (`~10.1 mm` full-width rail / `13.25 mm` total
+  lip/floor engagement), eliminating the old `3.2 mm` foot overhangs and `18.8 mm` cold-shoe ceiling bridge (`0`
+  faces flatter than 45°, manifold). The switch was relocated to `sw_xc = 23.65` (`X_cam ≈ 27.7`) with hard
+  `assert`s preventing overlap; `tab_above_lcd = +2.5 mm` at 65° / `+7.0 mm` at 90° (`13.15 mm` clear of flash
+  button), and full `467 mm²` exhaust is preserved (socket collar stops `1.15 mm` below the top wall). Brainstormed
+  alternatives and 3-criterion rankings are saved in `dev/MOUNTING-NOTES.md`.
 - **Front-scribed fit-test shell (`dev/sony-a6300-fan-fit-test.scad`).** Adds front-face 45° V-grooves for
-  the `14.5 mm` screen-free band, switch slot outline, and fan grille circle alongside the side depth V-grooves.
+  the `14.5 mm` screen-free band, switch slot outline, arm-socket pocket outline, and fan grille circle alongside
+  the side depth V-grooves.
 - **Printability.** Box, arm and fit-test shell export manifold and print without supports. Checked with
   `tools/stl-check.py`.
 
@@ -44,26 +56,25 @@ It needs 5 V from USB-C and has Low / Off / High.
    `lcd_tb`); at `90°`, `16.5 mm` / `22.9 mm` is clear above the screen. The rest draws through the
    open-sided wedge behind the screen, so airflow will be lower than the fan's rating by an unknown amount.
    Consequences:
-   - **Switch.** Placed in the top band, left of the fan (`sw_from_top = 7`, `6.3 mm` above the screen at
-     `65°`), about `7.5 mm` right of the rubber eyecup (`3.1 mm` proud of it). Check with the fit-test shell
-     that a finger reaches it comfortably past the eyecup and diopter wheel.
+   - **Switch.** Placed in the top band left of the arm tab & socket (`sw_xc = 23.65`, `X_cam ≈ 27.7`,
+     `sw_from_top = 7`, `6.3 mm` above the screen at `65°`), `~7.3 mm` below the rubber eyecup (`3.1 mm` box
+     front / `~5.5 mm` knob tip proud of it) and clear of the arm tab. Check with the fit-test shell that a
+     thumb reaches it comfortably under the eyecup.
 2. **Exhaust blockage is fixed in CAD, but airflow/recirculation isn't tested on hardware.** Side and top
    outlets now sit past the `5.2 mm` recess (`Y = 5.6..11.4`) and the `10` bottom-back slots sit behind the
    solid bevel that baffles them from the front intake wedge; thermal performance and lack of warm-air
    recirculation remain to be measured on the camera.
-3. **Holding it on the camera is not settled.**
-   - **The screen limits how the box goes in.** In the photos the screen is tilted up as far as it goes, and
-     that still doesn't leave room to push the box straight toward the plate. So the box goes in sideways
-     or with the screen down. Once it's in, flip the screen up and it clamps the box.
-   - **Current plan, no holder:** the tilted-up screen presses the box against the plate, and the recess
-     walls and the eyepiece stop it moving sideways and up. You shoot with the screen up. The arm's screw
-     bosses are off (`arm_mount = false`).
-     - **Risk:** it falls out when the screen is moved.
-     - **Cheap backup:** a thin micro-suction or removable adhesive pad on the box's back feet, or a cord
-       to a strap lug.
-   - **Option: screwed shoe arm** (`sony-a6300-fan-arm.scad`). The foot goes in the flash shoe, a bridge
-     runs over the top, and a tab screws to the box's front in the top band. The arm file turns the
-     bosses on, but they collide with the switch's new spot (the file warns). One of them must move first.
+3. **Holding it on the camera works on paper (Option #1), but friction/alignment need a real-camera check.**
+   - **Orthogonal entry constraint.** Because the tilted-up screen blocks pushing the box straight forward (`-Y`)
+     once tilted, the box enters from the side or with the screen lowered; meanwhile, a hot-shoe foot enters
+     `-Y` inside the top `14.5 mm` screen-free band. See `dev/MOUNTING-NOTES.md` for all 5 ranked options.
+   - **Primary design (Option #1): tool-free pin-and-socket slide-on shoe arm** (`arm_mount = true`, zero screws
+     or inserts; previous switch/boss collision resolved). Unproven on real hardware: shoe-spring friction
+     retention (`foot_rib_h = 0.2 mm` tapered underside ribs + `0.8 mm` entry chamfers) and lug-to-socket X
+     alignment (`shoe` centre is `~41 mm ±1.5 mm` from photos).
+   - **Zero-hardware fallback (Option #2):** the same box works without the arm using thin (`~0.5 mm`)
+     micro-suction / washable silicone pads on the back rim plus the tilted-up screen clamp (`arm_mount = false`
+     optional, or simply omit the arm).
    - **Ruled out: a one-piece slide-in** (arm built into the box, pushed toward the lens so the foot enters
      the shoe as the box seats). The screen can't get far enough out of the way. A one-piece holder would
      need a sideways entry, e.g. a dovetail.
@@ -86,18 +97,19 @@ It needs 5 V from USB-C and has Low / Off / High.
 | File | Role |
 |---|---|
 | `sony-a6300-fan.scad` | Box. All parameters at the top. `orient = "print"` (front face down) or `"display"` |
-| `sony-a6300-fan-arm.scad` | Optional screwed shoe arm. Includes the box file for shared numbers |
-| `dev/sony-a6300-fan-fit-test.scad` | 1.2 mm shell with the box's outside shape, side depth V-grooves, and front scribe V-grooves. Print this before the box |
+| `sony-a6300-fan-arm.scad` | Tool-free pin-and-socket slide-on shoe arm. Includes the box file for shared numbers |
+| `dev/sony-a6300-fan-fit-test.scad` | 1.2 mm shell with the box's outside shape, side depth V-grooves, and front scribe V-grooves (band, switch, arm pocket, grille). Print this before the box |
 | `dev/sony-a6300-fan-scene.scad` | Display only: box, arm, parts and wires on the camera, plus LCD clearance checks. `-D cutaway=true` |
 | `dev/a6300-camera.scad` | Display model: Sony's dimensions, caliper measurements, and photo-fitted dual-hinge LCD linkage |
+| `dev/MOUNTING-NOTES.md` | Five brainstormed tool-free mounting options, physical constraints, and 3-criterion ranking |
 
 Render with the CI image (see the repo's AGENTS.md). Preview mode (no `--render`) keeps the colours.
 
 ## Next steps
 
-1. Print the fit-test shell (`dev/sony-a6300-fan-fit-test.scad`, ~15 min) and check it on the camera: recess fit,
-   bottom-bevel clearance against the hinge arm, that the tilted screen clamps the box without crossing the
-   front scribe line, switch reach beside the eyecup/diopter, and the photo-fitted linkage clearances.
-2. Decide on holding: no holder plus a backup pad, or the screwed arm (move the switch or the bosses).
-3. Order parts, print the box, wire it, and test: 4K, Auto Pwr OFF Temp = High, dummy battery. Log the time
-   to the overheat warning with and without the fan, at the same room temperature.
+1. Print `dev/sony-a6300-fan-fit-test.scad` (~15 min) and `sony-a6300-fan-arm.scad` to verify recess fit,
+   bevel/hinge clearance, shoe friction fit (`foot_rib_h`), lug-to-socket alignment (`arm_xc`) against the
+   front pocket scribe marks, and switch thumb reach under the eyecup.
+2. Adjust `arm_xc` or `foot_rib_h` if needed (or switch to the micro-suction fallback in `dev/MOUNTING-NOTES.md`).
+3. Order parts (no M3 arm screws/inserts needed), print the box, wire it, and test: 4K, Auto Pwr OFF Temp = High,
+   dummy battery. Log the time to the overheat warning with and without the fan, at the same room temperature.

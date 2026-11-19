@@ -11,7 +11,7 @@ include <../sony-a6300-fan-arm.scad>
 
 show_part = false;
 show_arm = false;
-arm_mount = false;        // no holder for now: the tilted-up screen holds the box
+arm_mount = true;         // pin-and-socket collar on the box front (matches default box)
 show_arm_in_scene = false;
 show_camera = true;
 show_cable = true;
@@ -82,10 +82,10 @@ module wires() {
     yf = box_d - front - fan_t + 3;
     dz = sw_zc - 9;                               // diodes lie in the chamber, below the switch
     run([[wall + usb_pcb[1] - 2.54, yb, usb_zc + 3.8], [sw_xc - 1.25, yb, usb_zc + 3.8], [sw_xc - 1.25, py, sw_zc]], "#b02020");    // VBUS -> common
-    run([[sw_xc + 3.75, py, sw_zc], [fan_x - 1, yf, sw_zc], [fan_x + 3, yf, fan_zc + 2]], "#b02020");                              // H -> fan +
-    run([[sw_xc - 3.75, py, sw_zc], [sw_xc - 3.75, py, dz], [wall + bay_w + 2, py, dz]], "#b02020");                             // L -> diodes
-    translate([wall + bay_w + 2, py, dz]) rotate([0, 90, 0]) { diode([0, 0, 0]); diode([0, 0, 6]); }
-    run([[wall + bay_w + 14, py, dz], [fan_x + 3, yf, fan_zc - 2]], "#b02020");                                                  // diodes -> fan +
+    run([[sw_xc + 3.75, py, sw_zc], [sw_xc + 3.75, 5.5, 22.0], [fan_x - 1, 5.5, 22.0], [fan_x + 3, yf, fan_zc + 2]], "#b02020");   // H -> fan + (clears socket)
+    run([[sw_xc - 3.75, py, sw_zc], [sw_xc - 3.75, py, dz], [20.5, py, dz]], "#b02020");                                          // L -> diodes
+    translate([20.5, py, dz]) rotate([0, 90, 0]) { diode([0, 0, 0]); diode([0, 0, 6]); }
+    run([[32.5, py, dz], [fan_x + 3, yf, fan_zc - 2]], "#b02020");                                                                // diodes -> fan +
     run([[wall + usb_pcb[1] - 2.54, yb, usb_zc - 3.8], [wall + bay_w - 1, yb, fan_zc - 2], [fan_x + 3, box_d - front - fan_t + 5, fan_zc - 2]], "#202020"); // GND -> fan
 }
 
@@ -119,6 +119,7 @@ max_z = max(tb[1], tf[1]);
 front_clear = min_y - box_d;
 bevel_clear = (box_z + slant(box_d)) - a6300_lcd_arm_top_z(box_d, lcd_tilt);
 sw_clear = (box_z + sw_zc - sw_slot[1] / 2) - max_z;
+tab_clear = (box_z + t_z0) - max_z;
 grille_top = box_z + fan_zc + (fan - 2) / 2;
 grille_above_tf = grille_top - max_z;
 grille_above_tb = grille_top - tb[1];
@@ -126,12 +127,14 @@ pose90 = a6300_lcd_pose(90);
 front_clear_90 = min(pose90[2][0], pose90[3][0]) - box_d;
 echo(str("Clearances at lcd_tilt=", lcd_tilt, " (arm=", pose[6], "): front=", round(front_clear * 10) / 10,
          " mm, bevel=", round(bevel_clear * 10) / 10, " mm, switch_above_lcd=", round(sw_clear * 10) / 10,
-         " mm; grille above lcd_tf/tb=", round(grille_above_tf * 10) / 10, "/", round(grille_above_tb * 10) / 10,
+         " mm, tab_above_lcd=", round(tab_clear * 10) / 10, " mm; grille above lcd_tf/tb=",
+         round(grille_above_tf * 10) / 10, "/", round(grille_above_tb * 10) / 10,
          " mm (front at 90 deg=", round(front_clear_90 * 10) / 10, " mm)"));
 if (lcd_tilt >= 45) {
     assert(front_clear >= 0, "box front collides with tilted LCD");
     assert(bevel_clear >= 0, "box bottom bevel collides with LCD hinge arm");
     assert(sw_clear > 0, "switch slot sits below the tilted LCD top edge");
+    assert(tab_clear > 0, "arm tab hits tilted LCD");
 }
 
 // ---------- scene ----------

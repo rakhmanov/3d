@@ -62,9 +62,10 @@ module fit_test() {
             for (y = [2 : 2 : box_d - 2]) side_vgroove(s[0], s[1], y, mark, 4, box_h - 4);
             side_vgroove(s[0], s[1], 5.3, 0.55, slant(5.3) + 0.8, box_h - 1);
         }
-        // front-face reference 45-deg V-grooves: uncovered top band line, switch slot outline, fan grille circle
+        // front-face reference 45-deg V-grooves: uncovered top band line, switch & arm pocket outlines, fan grille circle
         front_hgroove(2, box_w - 2, box_h - tab_band, mark - 0.04);
         front_rect_vgroove(sw_xc, sw_zc, sw_slot[0], sw_slot[1], mark);
+        if (arm_mount) front_rect_vgroove(arm_xc, pin_z0 + pin_h / 2, sock_w, sock_h, mark);
         let(r = (fan - 2) / 2)
         translate([fan_x + fan / 2, box_d + 0.02, fan_zc]) rotate([90, 0, 0]) rotate_extrude($fn = 64)
             polygon([[r - mark - 0.02, 0], [r, mark + 0.02], [r + mark + 0.02, 0]]);
