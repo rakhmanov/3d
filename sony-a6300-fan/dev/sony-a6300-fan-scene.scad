@@ -3,11 +3,11 @@
 // License: CC BY-NC 4.0
 // https://creativecommons.org/licenses/by-nc/4.0/
 //
-// Box from sony-a6300-fan.scad, camera from a6300-camera.scad. The box sits under the eyecup,
-// left-aligned with the LCD. The screen is drawn at the smallest tilt that clears the box
+// Box from ../sony-a6300-fan.scad, camera from a6300-camera.scad. The box sits under the eyecup,
+// left-aligned with the LCD. The screen is drawn on its dual-hinge linkage at a typical shooting tilt
 // (override with -D lcd_tilt=...).
 
-include <sony-a6300-fan-arm.scad>
+include <../sony-a6300-fan-arm.scad>
 
 show_part = false;
 show_arm = false;
@@ -20,8 +20,8 @@ cutaway = false;
 
 hinge = a6300_lcd_hinge();
 
-// The screen's real linkage is not modelled yet (see README): draw it flipped flat out of the way
-lcd_tilt = 90;
+// Typical shooting tilt on the dual-hinge linkage (arm stops at 54 deg; screen tilts to 65 deg)
+lcd_tilt = 65;
 
 // ---------- parts (box coordinates) ----------
 // Noctua: beige frame, brown impeller. 3007: black frame and impeller
@@ -82,11 +82,11 @@ module wires() {
     yf = box_d - front - fan_t + 3;
     dz = sw_zc - 9;                               // diodes lie in the chamber, below the switch
     run([[wall + usb_pcb[1] - 2.54, yb, usb_zc + 3.8], [sw_xc - 1.25, yb, usb_zc + 3.8], [sw_xc - 1.25, py, sw_zc]], "#b02020");    // VBUS -> common
-    run([[sw_xc + 3.75, py, sw_zc], [wall + bay_w + 3, yf, sw_zc], [fan_x + 3, yf, fan_zc + 2]], "#b02020");                     // H -> fan +
+    run([[sw_xc + 3.75, py, sw_zc], [fan_x - 1, yf, sw_zc], [fan_x + 3, yf, fan_zc + 2]], "#b02020");                              // H -> fan +
     run([[sw_xc - 3.75, py, sw_zc], [sw_xc - 3.75, py, dz], [wall + bay_w + 2, py, dz]], "#b02020");                             // L -> diodes
     translate([wall + bay_w + 2, py, dz]) rotate([0, 90, 0]) { diode([0, 0, 0]); diode([0, 0, 6]); }
     run([[wall + bay_w + 14, py, dz], [fan_x + 3, yf, fan_zc - 2]], "#b02020");                                                  // diodes -> fan +
-    run([[wall + usb_pcb[1] - 2.54, yb, usb_zc - 3.8], [wall + bay_w, box_d - front - fan_t + 5, fan_zc - 2], [fan_x + 3, box_d - front - fan_t + 5, fan_zc - 2]], "#202020"); // GND -> fan
+    run([[wall + usb_pcb[1] - 2.54, yb, usb_zc - 3.8], [wall + bay_w - 1, yb, fan_zc - 2], [fan_x + 3, box_d - front - fan_t + 5, fan_zc - 2]], "#202020"); // GND -> fan
 }
 
 module usb_c_cable() {
@@ -108,6 +108,30 @@ module fan_box_assembly() {
     adafruit_4090();
     wires();
     if (show_cable) usb_c_cable();
+}
+
+// ---------- clearance checks ----------
+pose = a6300_lcd_pose(lcd_tilt);
+tb = pose[2];
+tf = pose[3];
+min_y = min(tb[0], tf[0]);
+max_z = max(tb[1], tf[1]);
+front_clear = min_y - box_d;
+bevel_clear = (box_z + slant(box_d)) - a6300_lcd_arm_top_z(box_d, lcd_tilt);
+sw_clear = (box_z + sw_zc - sw_slot[1] / 2) - max_z;
+grille_top = box_z + fan_zc + (fan - 2) / 2;
+grille_above_tf = grille_top - max_z;
+grille_above_tb = grille_top - tb[1];
+pose90 = a6300_lcd_pose(90);
+front_clear_90 = min(pose90[2][0], pose90[3][0]) - box_d;
+echo(str("Clearances at lcd_tilt=", lcd_tilt, " (arm=", pose[6], "): front=", round(front_clear * 10) / 10,
+         " mm, bevel=", round(bevel_clear * 10) / 10, " mm, switch_above_lcd=", round(sw_clear * 10) / 10,
+         " mm; grille above lcd_tf/tb=", round(grille_above_tf * 10) / 10, "/", round(grille_above_tb * 10) / 10,
+         " mm (front at 90 deg=", round(front_clear_90 * 10) / 10, " mm)"));
+if (lcd_tilt >= 45) {
+    assert(front_clear >= 0, "box front collides with tilted LCD");
+    assert(bevel_clear >= 0, "box bottom bevel collides with LCD hinge arm");
+    assert(sw_clear > 0, "switch slot sits below the tilted LCD top edge");
 }
 
 // ---------- scene ----------

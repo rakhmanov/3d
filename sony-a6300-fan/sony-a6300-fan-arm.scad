@@ -22,7 +22,7 @@
 //               ▕ └────────────┘
 
 include <sony-a6300-fan.scad>
-use <a6300-camera.scad>
+use <dev/a6300-camera.scad>
 
 show_part = false;
 show_arm = true;

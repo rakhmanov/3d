@@ -6,21 +6,19 @@ cable side and has a thumbnail slide switch: Low / Off / High. A second part, an
 shoe, holds it. The box size comes from a cardboard test on the real camera; the arm position from
 caliper readings and photos (±2 mm). **Not printed yet.**
 
-**Status and known problems: see [HANDOFF.md](HANDOFF.md).** In short: the tilted screen covers the lower front
-(the switch now sits above it, in the top band), the exhaust slots mostly face the recess walls, and how
-the box is held is open (current plan: the tilted-up screen clamps it in place).
+**Status and known problems: see [HANDOFF.md](HANDOFF.md).** The camera's dual-hinge screen linkage is now modelled and checked in the scene, and the exhaust outlets are moved outside the 5.2 mm recess (`495 mm²` unblocked vs `503 mm²` fan free area). How the box is held remains open (current plan: the tilted-up screen clamps it in place).
 
 | On the camera | Inside (front cut away) | Side | Arm and shoe |
 |---|---|---|---|
-| ![](scene-iso.png) | ![](scene-cutaway.png) | ![](scene-side.png) | ![](scene-mount.png) |
+| ![](dev/scene-iso.png) | ![](dev/scene-cutaway.png) | ![](dev/scene-side.png) | ![](dev/scene-mount.png) |
 
 | File | What |
 |---|---|
 | [sony-a6300-fan.scad](sony-a6300-fan.scad) | The printable box ([preview](sony-a6300-fan.png)). Parameters at the top |
 | [sony-a6300-fan-arm.scad](sony-a6300-fan-arm.scad) | Second printable part: the shoe arm ([preview](sony-a6300-fan-arm.png)). Screws to the box's front face. `top_mount = "shoe"`, `"quarter"` or `"none"` |
-| [sony-a6300-fan-fit-test.scad](sony-a6300-fan-fit-test.scad) | Thin shell with the box's outside shape, to try on the camera first |
-| [sony-a6300-fan-scene.scad](sony-a6300-fan-scene.scad) | Display only: the box and arm on the camera with the fan, switch, diodes, USB-C board, wires and cable. `-D cutaway=true` |
-| [a6300-camera.scad](a6300-camera.scad) | Display model of the a6300 from Sony's dimensions plus measurements of a real body. The screen's tilt linkage is not modelled (drawn flipped flat) |
+| [dev/sony-a6300-fan-fit-test.scad](dev/sony-a6300-fan-fit-test.scad) | Thin shell with the box's outside shape and front-face V-groove scribe marks (`14.5 mm` band, switch slot, fan grille), to try on the camera first |
+| [dev/sony-a6300-fan-scene.scad](dev/sony-a6300-fan-scene.scad) | Display only: the box and arm on the camera with the fan, switch, diodes, USB-C board, wires and cable. `-D cutaway=true` |
+| [dev/a6300-camera.scad](dev/a6300-camera.scad) | Display model of the a6300 from Sony's dimensions plus measurements of a real body and a photo-fitted dual-hinge LCD linkage (arm stops at `~54°`, ±1–2 mm) |
 
 ## Parts
 
@@ -60,21 +58,22 @@ Tools: soldering iron, calipers, M3 tap or screwdriver.
 ## The box
 
     front (operator side)
-      ┌──────┬────────────┬───────────┐
-      │      │     L◦H    │           │   switch in the top band, next to the fan
-    ▭─┤ bay  │  chamber   │  ( fan )  │   USB-C out of the left wall; fan top right, blowing onto the plate
-      └──────┴────────────┴───────────┘   bottom bevelled from 0 at the plate to 3 mm at the front
-    back edge of all 4 walls: ribbed exhaust band, as tall as the fan-to-plate gap
+      ┌──────┬──────────┬──────────┬───┐
+      │      │     L◦H  │          │   │   switch in the top band, left of the fan; 6 mm right duct
+    ▭─┤ bay  │ chamber  │  ( fan ) │   │   USB-C out of the left wall; fan blows onto the plate
+      └──────┴──────────┴──────────┴───┘   bottom bevelled from 0 at the plate to 3 mm at the front
+    solid back rim on left/top/right inside the 5.2 mm recess; exhaust windows outside the recess + bottom-back ribs
 
-**80 × 35 × 13 mm**, exhaust 715 mm² vs 503 mm² fan opening.
+**80 × 35 × 13 mm**, unblocked exhaust 495 mm² (side/top 249 + bottom-back 246; 453 mm² with `arm_mount`) vs 503 mm² fan free area.
 
 - **Size, from the cardboard test on the camera:** 35 mm tall against the plate (36 just squeezes in) and 32.5 mm at the
   front in the test; the box goes to 32 (`slant_rise = 3`, about the most before the bevel reaches the fan). The
   bottom is bevelled straight from the plate to clear the screen's hinge arm, and the inside floor follows it.
   The top wall is 1.2 mm so the fan sits as high as possible. The screen leaves about 14 mm of depth, so the box is 13.0 (1.6 front + 7 fan + 4.4 gap). The
   recess is about 84 mm wide; the box is 80, placed 1 mm from its left edge.
-- **Layout:** the electronics bay is on the left (cable side), the fan in the top right corner (room for the bevel
-  below it), and the closed chamber between them makes the air sweep the plate before it leaves through the ribs.
+- **Layout:** the electronics bay is on the left (cable side) with a lower divider stopping at the USB-C centre (`usb_zc`) so
+  the upper bay stays open for wiring and upper-left exhaust; the fan sits at `X = 42.1..72.1` leaving a 6 mm exhaust duct along the
+  right wall; the open chamber between bay and fan makes the air sweep the plate. The grille uses a single slim mid-radius ring and 3 × 1.4 mm spokes so the uncovered upper blade arc stays open.
 - **Noise is mostly speed.** Sofasco's datasheet for its 3007 family (same size, sleeve bearing) shows it clearly:
   12000 rpm 35 dBA, 10000 rpm 31, 8000 rpm 26, 6000 rpm 22 (1.6 CFM). The bearing type adds tick or hum on top of that.
   So a hydraulic bearing plus a lower speed is the quiet combination.
@@ -83,16 +82,17 @@ Tools: soldering iron, calipers, M3 tap or screwdriver.
   If it won't start on Low, use one diode (~4.2 V) or a Schottky 1N5819 pair (~4.2 V, 0.4 V each).
   Diodes beat a resistor here: a resistor drops more voltage when the fan pulls its higher starting current.
   Mount the fan with the label side (the outlet) toward the camera.
-- **Airflow:** blowing onto the plate cools better than sucking air off it. The air spreads along the plate
-  and leaves at the perimeter, so the exits are a band along the back edge of every wall, with solid
-  corners as feet. Higher openings are useless because the fan frame blocks them. Warm air leaves up under the eyecup, down over
-  the screen back, to the right toward the buttons, and left through the bay. None of it goes back into the intake.
+- **Airflow:** blowing onto the plate cools better than sucking air off it. Because the camera's recess is 5.2 mm deep, the left,
+  top, and right walls keep a solid 5.6 mm back rim inside the recess; unblocked exhaust windows sit outside the recess (`Y = 5.6..11.4`
+  from the plate) on the right wall (4 × 5.85 mm slots), top wall right of the fan, top wall left of the fan (cleared when `arm_mount = true`),
+  and left wall above the USB-C board. Ten ribbed slots along the bottom-back edge (`Y = 0..4.4`) vent behind the solid bottom bevel and
+  screen hinge arm, baffled from the intake wedge.
 - **USB-C:** the board stands parallel to the front face on two posts from the front wall. Outside, the left wall is
   counterbored down to 0.6 mm around the opening so the plug's overmold sits in it and the plug reaches full depth.
-- **Switch:** in the front face just left of the fan, in the top band the tilted screen never covers, about 7 mm
-  below the top and 7 mm right of the eyepiece's edge. The knob sticks out ~2.4 mm.
+- **Switch:** in the front face just left of the fan (`X_cam ≈ 37.6`), in the top band the tilted screen never covers, about 7 mm
+  below the top and ~7.5 mm right of the rubber eyecup (`3.1 mm` proud of it). The knob sticks out ~2.4 mm.
 - **Eye sensor:** it sits on the eyepiece, right above the box. Set *FINDER/MONITOR → Monitor (manual)*.
-- **Mounting: shoe arm** ([sony-a6300-fan-arm.scad](sony-a6300-fan-arm.scad), [close-up](scene-mount.png)).
+- **Mounting: shoe arm** ([sony-a6300-fan-arm.scad](sony-a6300-fan-arm.scad), [close-up](dev/scene-mount.png)).
   A foot (ISO 518, 18.4 × 16 × 1.9 mm) slides into the camera's shoe from the back, a bridge crosses the top
   edge and the hump behind the shoe, and a 12 × 4 mm tab drops in front of the box. It screws to the box's
   front face with 2 × M3 × 6 into M3 × 4 heat-set inserts, inside the top 14.5 mm band the tilting screen never
@@ -107,7 +107,7 @@ Both are manifold and print **without supports** (checked with `tools/stl-check.
 
 | Part | On the bed | Watch |
 |---|---|---|
-| Box | Front face (grille) down, open back up | Short bridges only: 4 mm over the insert holes, 6–8 mm over the USB-C opening. The posts, insert bosses and switch cradle grow straight up from the front plate |
+| Box | Front face (grille) down, open back up | Short horizontal bridges only: 4.9–7.3 mm over the side/top exhaust windows (bridged by the solid back rim), 4 mm over the insert holes, 6–8 mm over the USB-C opening. Bottom-back ribs are open to the top. The posts, insert bosses, switch cradle and lower bay divider grow straight up from the front plate |
 | Arm | Upside down, on the top shoe block | 18.8 mm bridge over the top shoe's slot. The foot's flanges overhang the neck by 3.2 mm: print slowly with full cooling, and sand lightly if they droop (that face slides under the camera shoe's lips). The tab grows straight up |
 
 PETG or ASA, 0.2 mm layers, 3 perimeters. Print the fit-test shell and the arm first: check the shell on the camera and the foot in the shoe.
@@ -153,6 +153,7 @@ on **thermal tape** under the fan may add a little. Plain double-sided tape insu
 | Top band under the eyepiece where the screen never reaches, at any depth | 14.5–15 | – |
 | Recess right edge from the eyepiece-side end (photo, ruler) | ~87 | 77 |
 | Shoe centre from the eyepiece-side end (from photo scale, ±1.5) | ~41 | 52 |
+| Dual-hinge LCD linkage (side photo + cardboard fit, ±1–2) | lower arm ~29.5 mm, mechanical stop ~54° from vertical, upper pivot ~12 mm below LCD top | single bottom hinge |
 
 ## Steps
 

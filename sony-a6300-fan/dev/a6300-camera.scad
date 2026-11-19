@@ -4,8 +4,8 @@
 // https://creativecommons.org/licenses/by-nc/4.0/
 //
 // Built from Sony's spec (120.0 x 66.9 x 48.8 mm from grip to monitor, 3.0" 16:9 tilting LCD),
-// calipers and photos of a real body (2026-11-18): screen recess, eyepiece, shoe, flash / MENU buttons.
-// The LCD's tilt linkage is not modelled (drawn flipped flat). Positions from photos are +/- 2 mm.
+// calipers and photos of a real body (2026-11-18): screen recess, eyepiece, shoe, flash / MENU buttons,
+// plus a photo-fitted dual-hinge LCD tilt linkage (+/- 1-2 mm from side photo + cardboard test).
 //
 // X runs left to right seen from behind, Z is up, the back plate is at Y = 0, and the operator is at +Y.
 
@@ -18,15 +18,43 @@ recess = [3, 87, 2, 47.5];      // x0, x1, z0, z1 (photo / caliper)
 lcd = [80, 44, 6.35];           // LCD module W x H x thickness (6.3-6.4 measured)
 lcd_at = [5, 2];
 lcd_view = [66.4, 37.4];        // 3.0" 16:9 active area
-eyecup = [3, 36, 47.5, 66.4, 9.92]; // x0, x1, z0, z1, protrusion from the plate (9.92 measured)
+// Dual-hinge tilt linkage (fitted +/- 1-2 mm to side photo & cardboard test):
+// lower arm pivots on the body at lcd_hinge1, stops at lcd_arm_max, and carries the LCD's upper pivot.
+lcd_hinge1 = [1.5, 4.5];        // lower pivot [y, z] near the recess bottom
+lcd_arm_len = 29.5;             // pivot-to-pivot length of the lower tilt arm
+lcd_arm_t = 3.0;                // thickness of the tilt arm bracket
+lcd_arm_w = 64;                 // width of the tilt arm bracket, centered on the LCD
+lcd_pivot_from_top = 12.0;      // distance from the LCD's top edge down to the upper pivot
+lcd_arm_max = 54;               // mechanical stop angle (deg back from +Z toward +Y) of the lower tilt arm
+eyecup = [3, 30, 47.5, 66.4, 9.92]; // x0, x1, z0, z1, protrusion from the plate (9.92 measured; diopter sits beside it)
 mount = [41, 31];               // lens axis x, z (shoe sits right above it in the top photo)
 
 function a6300_eyecup() = eyecup;
-function a6300_lcd_hinge() = [0, lcd_at[1]];   // y, z of the tilt axis (bottom-back edge of the LCD)
+function a6300_lcd_hinge() = lcd_hinge1;   // [y, z] of the lower tilt pivot
+function a6300_lcd_arm_angle(lcd_tilt, lcd_arm = undef) =
+    (lcd_arm == undef) ? max(0, min(lcd_tilt, lcd_arm_max)) : lcd_arm;
+function a6300_lcd_pose(lcd_tilt, lcd_arm = undef) =
+    let(
+        a = a6300_lcd_arm_angle(lcd_tilt, lcd_arm),
+        p1 = lcd_hinge1,
+        p2 = [p1[0] + lcd_arm_len * sin(a), p1[1] + lcd_arm_len * cos(a)],
+        d_top = lcd_pivot_from_top,
+        d_bot = lcd[1] - d_top,
+        tb = [p2[0] - d_top * sin(lcd_tilt), p2[1] + d_top * cos(lcd_tilt)],
+        tf = [tb[0] + lcd[2] * cos(lcd_tilt), tb[1] + lcd[2] * sin(lcd_tilt)],
+        bb = [p2[0] + d_bot * sin(lcd_tilt), p2[1] - d_bot * cos(lcd_tilt)],
+        bf = [bb[0] + lcd[2] * cos(lcd_tilt), bb[1] + lcd[2] * sin(lcd_tilt)]
+    ) [p1, p2, tb, tf, bb, bf, a];
+function a6300_lcd_arm_top_z(y, lcd_tilt, lcd_arm = undef) =
+    let(
+        a = a6300_lcd_arm_angle(lcd_tilt, lcd_arm),
+        y0 = lcd_hinge1[0] - (lcd_arm_t / 2) * cos(a),
+        z0 = lcd_hinge1[1] + (lcd_arm_t / 2) * sin(a)
+    ) (a > 0 ? z0 + (y - y0) / tan(a) : 1e6);
 shoe = [mount[0], frame - 5.88 - 18, frame - 5.88];   // centre x, front y, open end 5.88 in from the back edge
 function a6300_shoe() = [shoe[0], shoe[1], shoe[2], body[1]];
-function a6300_menu() = [73, 50.5, 5.7];         // MENU button x, z, diameter (photo; the cardboard block under the eyepiece cleared it)
-function a6300_flash() = [62, 50.5, 5.7];        // flash button
+function a6300_menu() = [73, 52.5, 5.7];         // MENU button x, z, diameter (photo; the cardboard block under the eyepiece cleared it)
+function a6300_flash() = [62, 52.5, 5.7];        // flash button
 function a6300_frame() = frame;
 function a6300_recess() = recess;
 
@@ -55,8 +83,9 @@ module a6300_lcd() {
     color(c_rubber) translate([lcd[0] - 6, lcd[2] - 0.5, 4]) cube([4, 0.6, 2]); // "SONY" plate hint
 }
 
-// lcd_tilt: 0 = closed, 90 = facing straight up. The top edge swings out and down about the hinge.
-module a6300(lcd_tilt = 0, lens = true) {
+// lcd_tilt: 0 = closed, 90 = facing straight up. Lower arm tilts out up to lcd_arm_max,
+// while the LCD pivots up (+lcd_tilt around X) so its top edge swings in and its bottom swings out.
+module a6300(lcd_tilt = 0, lens = true, lcd_arm = undef) {
     // body shell with a recessed top-left (flash) and a raised right shoulder
     color(c_body) difference() {
         rounded_slab(0, body[0], -shell_t, frame, 0, body[1]);
@@ -91,11 +120,12 @@ module a6300(lcd_tilt = 0, lens = true) {
     }
     color("#101828") translate([eyecup[0] + 7, eyecup[4] - 2.1, eyecup[2] + 6]) cube([eyecup[1] - eyecup[0] - 14, 0.2, eyecup[3] - eyecup[2] - 10]);
     color("#444") for (dx = [-3, 3]) translate([(eyecup[0] + eyecup[1]) / 2 + dx, eyecup[4], eyecup[2] + 3]) rotate([-90, 0, 0]) cylinder(d = 2, h = 0.3, $fn = 12);
-    // back controls (on the frame): flash, MENU, AF/MF-AEL lever, then the right-hand cluster
+    // back controls (on the frame): diopter, flash, MENU, AF/MF-AEL lever, then the right-hand cluster
+    btn(35.5, 52.5, 7, 1.5, c_rubber);                    // diopter wheel
     btn(a6300_flash()[0], a6300_flash()[1], a6300_flash()[2]);
     btn(a6300_menu()[0], a6300_menu()[1], a6300_menu()[2]);
-    color(c_body) translate([79, frame, 45]) cube([10, 2, 8]);
-    btn(84, 49, 5, 2.5, c_metal);
+    color(c_body) translate([88, frame, 49]) cube([11, 2, 7]);
+    btn(93.5, 52.5, 6, 2.5, c_metal);
     btn(113, 47, 7, 1.5, "#7a1f1f");                      // MOVIE
     btn(103, 40, 7);                                      // Fn
     btn(103, 23, 22, 2.5);                                // control wheel
@@ -105,11 +135,23 @@ module a6300(lcd_tilt = 0, lens = true) {
     color(c_metal) for (x = [-2.5, body[0] + 0.5]) translate([x, -16, 55]) cube([2, 6, 6]);
     // terminal door on the left side (cable side)
     color(c_rubber) translate([-0.6, -24, 12]) cube([1, 18, 30]);
-    // LCD on its hinge
-    hinge = a6300_lcd_hinge();
-    translate([lcd_at[0], hinge[0], hinge[1]]) rotate([-lcd_tilt, 0, 0]) translate([0, 0, -0])
+    // LCD on its dual-hinge tilt linkage
+    pose = a6300_lcd_pose(lcd_tilt, lcd_arm);
+    p1 = pose[0];
+    p2 = pose[1];
+    arm_a = pose[6];
+    arm_x0 = lcd_at[0] + (lcd[0] - lcd_arm_w) / 2;
+    d_bot = lcd[1] - lcd_pivot_from_top;
+    color(c_rubber) translate([arm_x0, p1[0], p1[1]]) rotate([-arm_a, 0, 0]) difference() {
+        union() {
+            translate([0, -lcd_arm_t / 2, 0]) cube([lcd_arm_w, lcd_arm_t, lcd_arm_len]);
+            for (z = [0, lcd_arm_len]) translate([0, 0, z]) rotate([0, 90, 0]) cylinder(d = lcd_arm_t, h = lcd_arm_w, $fn = 16);
+        }
+        for (x0 = [8, 38]) translate([x0, -lcd_arm_t, 6]) cube([18, 2 * lcd_arm_t, 16]);
+    }
+    color(c_metal) translate([arm_x0 + 4, p1[0], p1[1]]) rotate([0, 90, 0]) cylinder(d = 2.0, h = lcd_arm_w - 8, $fn = 16);
+    translate([lcd_at[0], p2[0], p2[1]]) rotate([lcd_tilt, 0, 0]) translate([0, 0, -d_bot])
         a6300_lcd();
-    color(c_metal) translate([lcd_at[0] + 8, -0.5, 0]) cube([lcd[0] - 16, 1.5, 1.5]);   // hinge bracket
 }
 
-a6300(35);
+a6300(65);

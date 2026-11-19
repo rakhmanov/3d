@@ -34,6 +34,8 @@ scad_files = subprocess.check_output(['git', 'ls-files', '*.scad']).decode().spl
 
 entries = []
 for path in scad_files:
+    if 'dev' in path.split('/')[:-1]:
+        continue
     base = os.path.splitext(path)[0]
     source_commits = [c for c in map(last_commit, sources(path)) if c]
     stale = False

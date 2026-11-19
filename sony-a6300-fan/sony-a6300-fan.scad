@@ -3,16 +3,18 @@
 // License: CC BY-NC 4.0
 // https://creativecommons.org/licenses/by-nc/4.0/
 //
-// The printable part only. sony-a6300-fan-scene.scad shows it on the camera with the parts fitted.
-// Not measured on the camera yet. The part sizes are real (see README), the clear space is a guess.
+// The printable part only. dev/sony-a6300-fan-scene.scad shows it on the camera with the parts fitted.
+// Sized from cardboard test and caliper measurements (2026-11-18); not printed yet.
 //
 // Seen from behind the camera. X runs left to right, Z is up, the camera back plate is at Y = 0.
 // Modules are drawn with the operator at +Y, and the display is mirrored so the operator stands at -Y.
 //
-//      ┌──────┬───────────┐
-//   ▯──┤ bay  │  ( fan )  │   left wall: 3-position slide switch H / O / L (upper), Adafruit 4090 USB-C (lower)
-//   ▭──┤      │   grille  │   fan blows onto the back plate, air leaves through the ribbed band
-//       \_____┴───────────┘   along the back edge of all four walls. Bottom-front edge slanted.
+//      ┌──────┬──────────┬──────────┬───┐
+//      │      │     L◦H  │          │   │  switch in top band, left of fan; 6 mm right exhaust duct
+//   ▭──┤ bay  │ chamber  │  ( fan ) │   │  USB-C out of left wall; fan blows onto the plate
+//      └──────┴──────────┴──────────┴───┘  bottom bevelled from 0 at the plate to 3 mm at the front
+//   solid back rim on left/top/right inside the 5.2 mm recess; exhaust windows outside the recess
+//   (right wall, top wall, left wall above USB-C) plus ribbed bottom-back outlet behind the hinge arm.
 
 /* [Fan] */
 // 30 = 3007 5V fan, e.g. WINSINN 3007 hydraulic (30x30x7, holes on 24); a Sunon MF30060 (6.5 thick) also fits.
@@ -31,12 +33,15 @@ wall_top = 1.2;       // thinner top wall lets the fan sit higher, which leaves 
 air_gap = 4.4;   // box 13.0 deep: the screen allows ~14 (cardboard test), 1 mm kept as margin
 // Electronics bay inner width (USB-C board is 13.97 deep from the wall)
 bay_w = 15.5;
+// Right exhaust duct inside the box (feeds the right-wall and top-right outlets)
+right_duct = 6.0;
+// Side and top exhaust slots start this far from the back plate (past the 5.2 mm recess walls)
+recess_clear = 5.6;
 // Exhaust ribs
-rib = 1.2;
+rib = 1.4;
 rib_pitch = 7;
-// Minimum box width. 74 = the LCD's width, so the box covers the whole pocket the screen leaves.
-// The fan sits centred in the space right of the bay; the rest is a closed plenum that makes the
-// air sweep the plate sideways to the exhaust ribs. 0 = just wide enough for the fan
+// Minimum box width. 80 mm fits the recess pocket under the eyepiece.
+// The fan sits left of right_duct; the rest is a plenum that sweeps the plate to the unblocked exits.
 box_w_min = 80;
 // The bottom is bevelled across the full depth to clear the screen's hinge arm: 0 at the plate,
 // slant_rise up at the outside face (cardboard test: 35 against the plate, 32.5-33 outside).
@@ -94,8 +99,8 @@ box_d = front + fan_t + air_gap;
 box_h = box_h_set;
 inner_h = box_h - wall - wall_top;
 sec_x = wall + bay_w + wall;                        // fan section starts right of the divider
-box_w = max(sec_x + fan + 0.6 + wall, box_w_min);
-fan_x = box_w - wall - 0.3 - fan;                   // fan at the right end: the plenum left of it is where the arm comes down
+box_w = max(sec_x + fan + 0.6 + right_duct + wall, box_w_min);
+fan_x = box_w - wall - right_duct - 0.3 - fan;      // leaves right_duct mm clear on the right for exhaust
 fan_zc = box_h - wall_top - 0.3 - fan / 2;          // fan at the top: room for the bottom bevel
 assert(inner_h >= fan + 0.6, "box too short for the fan");
 function slant(y) = slant_rise * (y + 0.5) / (box_d + 0.5);   // starts 0.5 behind the plate: no knife edge at the back corner
@@ -111,15 +116,41 @@ if (arm_mount && abs(sw_xc - arm_xc) < sw_body[0] / 2 + sw_rim + boss_d / 2 && s
     echo("WARNING: switch and the arm's screw bosses overlap: move one of them before printing with the arm");
 assert(sw_zc + sw_body[1] / 2 + sw_rim < box_h - wall_top, "switch cradle hits the top wall");
 assert(sw_from_top + sw_slot[1] / 2 < tab_band, "switch is below the band the screen leaves uncovered");
-n_x = floor((box_w - 6 + rib) / rib_pitch);
-n_z = floor((box_h - 6 + rib) / rib_pitch);
-slot_s = (box_w - 6 - (n_x * rib_pitch - rib)) / 2;
-exit_area = 2 * (n_x + n_z) * (rib_pitch - rib) * air_gap;
+
+// Unblocked exhaust zones: side/top windows sit outside the 5.2 mm recess (Y = out_y0 .. out_y1);
+// bottom-back slots sit in the back gap (Y = 0 .. air_gap), baffled behind the screen hinge arm.
+out_y0 = recess_clear;
+out_y1 = box_d - front;
+out_d = out_y1 - out_y0;
+assert(out_y0 > 5.2 && out_d >= 4.0, "side/top exhaust must sit outside the 5.2 mm recess");
+rz0 = 4.8;
+rz1 = box_h - wall_top - 1.4;
+n_right = 4;
+r_slot = (rz1 - rz0 - (n_right - 1) * rib) / n_right;
+tx_r0 = fan_x + fan + 0.8;
+tx_r1 = box_w - wall - 0.6;
+tx_l0 = 33.8;                                       // strictly right of the eyepiece (X_box = 32)
+tx_l1 = fan_x - 1.0;
+lz0 = usb_top + 0.8;                                // strictly above the USB-C PCB and its upper post
+lz1 = box_h - wall_top - 1.2;
+n_bot = floor((box_w - 11 + rib) / rib_pitch);
+bot_slot = rib_pitch - rib;
+bot_span = n_bot * rib_pitch - rib;
+bot_x0 = (box_w - bot_span) / 2;
+
+a_right = n_right * max(0, r_slot) * out_d;
+a_top_r = max(0, tx_r1 - tx_r0) * out_d;
+a_top_l = (!arm_mount && tx_l1 > tx_l0) ? (tx_l1 - tx_l0) * out_d : 0;
+a_left = max(0, lz1 - lz0) * out_d;
+a_bot = n_bot * bot_slot * air_gap;
+side_top_area = a_right + a_top_r + a_top_l + a_left;
+exit_area = side_top_area + a_bot;
 fan_free = PI * (pow(fan / 2 - 1, 2) - pow(fan * 0.2, 2));
 assert(arm_xc - boss_d / 2 > sec_x && arm_xc + boss_d / 2 < fan_x, "arm screw bosses must sit in the plenum between the bay and the fan");
 
-echo(str("Box W x H x D = ", box_w, " x ", box_h, " x ", box_d, " mm, fan ", fan, "x", fan, "x", fan_t));
-echo(str("Exhaust ", round(exit_area), " mm2 vs fan free area ", round(fan_free), " mm2"));
+echo(str("Box W x H x D = ", box_w, " x ", box_h, " x ", box_d, " mm, fan ", fan, "x", fan, "x", fan_t, " at x=", fan_x));
+echo(str("Unblocked exhaust ", round(exit_area), " mm2 (side/top ", round(side_top_area),
+         " + bottom-back ", round(a_bot), ") vs fan free area ", round(fan_free), " mm2"));
 
 // ---------- part ----------
 module front_face_2d() {
@@ -129,22 +160,12 @@ module front_face_2d() {
             difference() {
                 circle(d = fan - 2);
                 circle(d = fan * 0.25);                                  // hub disc over the motor
-                for (r = [fan * 0.2 : 5 : fan / 2 - 3]) difference() { circle(r = r + 1); circle(r = r); }
-                for (a = [90, 210, 330]) rotate(a) translate([0, -0.9]) square([fan, 1.8]);
+                difference() { circle(r = fan * 0.30 + 1); circle(r = fan * 0.30); }
+                for (a = [90, 210, 330]) rotate(a) translate([0, -0.7]) square([fan, 1.4]);
             }
             for (i = [-1, 1], j = [-1, 1]) translate([i, j] * fan_holes / 2) circle(d = fan_screw_d);
         }
     }
-}
-
-module slots_x(z0) {
-    s = (box_w - 6 - (n_x * rib_pitch - rib)) / 2;
-    for (i = [0 : n_x - 1]) let(x = 3 + s + i * rib_pitch)
-        translate([x, -1, z0 - 1]) cube([rib_pitch - rib, air_gap + 1, wall + 2]);
-}
-module slots_z(x0) {
-    s = (box_h - 6 - (n_z * rib_pitch - rib)) / 2;
-    for (i = [0 : n_z - 1]) translate([x0 - 1, -1, 3 + s + i * rib_pitch]) cube([wall + 2, air_gap + 1, rib_pitch - rib]);
 }
 
 module rrect_x(w_y, h_z, len, r = 1) {  // rounded rectangle prism along X, centred in Y/Z
@@ -162,7 +183,8 @@ module box() {
                 translate([0, box_d + 1, 0]) rotate([90, 0, 0]) linear_extrude(front + 1.01)
                     difference() { square([box_w, box_h]); front_face_2d(); }
             }
-            translate([wall + bay_w, 0, 0]) cube([wall, box_d - front, box_h]);   // bay / fan divider
+            // lower bay divider (Z <= usb_zc, Y >= air_gap): guards USB-C bay while leaving back & top open
+            translate([wall + bay_w, air_gap, 0]) cube([wall, box_d - front - air_gap + 0.01, usb_zc]);
             // inside floor following the bevel (thinner where the fan's bottom edge sits)
             difference() {
                 rotate([90, 0, 90]) translate([0, 0, wall - 0.01]) linear_extrude(box_w - 2 * wall + 0.02)
@@ -183,12 +205,18 @@ module box() {
                     cylinder(d = 2.2, h = box_d - front - usb_pcb_y + usb_pcb[2] + 0.6);
                 }
         }
-        // exhaust band along the back edge of all four walls, plus the divider (bay air out the left)
-        for (z0 = [0, box_h - wall_top]) slots_x(z0);
-        for (x0 = [0, box_w - wall]) slots_z(x0);
-        translate([wall + bay_w - 1, -1, wall]) cube([wall + 2, air_gap + 1, box_h - wall - wall_top]);
-        // fan wires into the bay
-        translate([wall + bay_w - 1, box_d - front - fan_t, fan_zc - 4]) cube([wall + 2, fan_t, 8]);
+        // unblocked exhaust windows outside the 5.2 mm recess (solid back rim on left, top, right)
+        if (r_slot > 0) for (i = [0 : n_right - 1])
+            translate([box_w - wall - 1, out_y0, rz0 + i * (r_slot + rib)]) cube([wall + 2, out_d, r_slot]);
+        if (tx_r1 > tx_r0)
+            translate([tx_r0, out_y0, box_h - wall_top - 1]) cube([tx_r1 - tx_r0, out_d, wall_top + 2]);
+        if (!arm_mount && tx_l1 > tx_l0)
+            translate([tx_l0, out_y0, box_h - wall_top - 1]) cube([tx_l1 - tx_l0, out_d, wall_top + 2]);
+        if (lz1 > lz0)
+            translate([-1, out_y0, lz0]) cube([wall + 2, out_d, lz1 - lz0]);
+        // bottom-back exhaust band (baffled behind the screen hinge arm)
+        for (i = [0 : n_bot - 1])
+            translate([bot_x0 + i * rib_pitch, -1, -1]) cube([bot_slot, air_gap + 1, slant(air_gap) + floor_t + 1.6]);
         // USB-C: shell opening, and the outside counterbore down to a thin wall
         translate([-1, usb_yc, usb_zc]) rrect_x(usb_rec[2] + 0.4, usb_rec[0] + 0.4, wall + 2, 1.2);
         translate([-1, usb_yc, usb_zc]) rrect_x(usb_cbore[1], usb_cbore[0], 1 + wall - usb_thin, 2.5);
