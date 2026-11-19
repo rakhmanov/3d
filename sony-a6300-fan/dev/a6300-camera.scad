@@ -5,7 +5,7 @@
 //
 // Built from Sony's spec (120.0 x 66.9 x 48.8 mm from grip to monitor, 3.0" 16:9 tilting LCD),
 // calipers and photos of a real body (2026-11-18): screen recess, eyepiece, shoe, flash / MENU buttons,
-// plus a photo-fitted dual-hinge LCD tilt linkage (+/- 1-2 mm from side photo + cardboard test).
+// plus ruler photos of the top strip and tilted LCD hinge / flex-ribbon shelf (2026-11-19).
 //
 // X runs left to right seen from behind, Z is up, the back plate is at Y = 0, and the operator is at +Y.
 
@@ -14,7 +14,7 @@ shell_t = 29;        // front plate to back plate
 grip_t = 13;         // grip in front of the front plate (29 + 13 + 7 LCD ~= 48.8)
 // The back: a magnesium plate (Y = 0) in a recess; the body frame around it stands frame mm proud
 frame = 5.2;
-recess = [3, 87, 2, 47.5];      // x0, x1, z0, z1 (photo / caliper)
+recess = [3, 88, 2, 47.5];      // x0, x1, z0, z1 (photo / caliper / 2026-11-19 ruler photo)
 lcd = [80, 44, 6.35];           // LCD module W x H x thickness (6.3-6.4 measured)
 lcd_at = [5, 2];
 lcd_view = [66.4, 37.4];        // 3.0" 16:9 active area
@@ -26,7 +26,7 @@ lcd_arm_t = 3.0;                // thickness of the tilt arm bracket
 lcd_arm_w = 64;                 // width of the tilt arm bracket, centered on the LCD
 lcd_pivot_from_top = 12.0;      // distance from the LCD's top edge down to the upper pivot
 lcd_arm_max = 54;               // mechanical stop angle (deg back from +Z toward +Y) of the lower tilt arm
-eyecup = [3, 30, 47.5, 66.4, 9.92]; // x0, x1, z0, z1, protrusion from the plate (9.92 measured; diopter sits beside it)
+eyecup = [2.5, 26.5, 47.5, 66.4, 9.92]; // x0, x1, z0, z1, protrusion (24 mm wide in 2026-11-19 ruler photo; 9.92 measured)
 mount = [41, 31];               // lens axis x, z (shoe sits right above it in the top photo)
 
 function a6300_eyecup() = eyecup;
@@ -53,8 +53,8 @@ function a6300_lcd_arm_top_z(y, lcd_tilt, lcd_arm = undef) =
     ) (a > 0 ? z0 + (y - y0) / tan(a) : 1e6);
 shoe = [mount[0], frame - 5.88 - 18, frame - 5.88];   // centre x, front y, open end 5.88 in from the back edge
 function a6300_shoe() = [shoe[0], shoe[1], shoe[2], body[1]];
-function a6300_menu() = [73, 52.5, 5.7];         // MENU button x, z, diameter (photo; the cardboard block under the eyepiece cleared it)
-function a6300_flash() = [62, 52.5, 5.7];        // flash button
+function a6300_menu() = [76.2, 52.5, 5.7];       // MENU button x, z, diameter (2026-11-19 ruler photo)
+function a6300_flash() = [63.5, 52.5, 5.7];      // flash button (2026-11-19 ruler photo)
 function a6300_frame() = frame;
 function a6300_recess() = recess;
 
@@ -116,12 +116,12 @@ module a6300(lcd_tilt = 0, lens = true, lcd_arm = undef) {
     // EVF eyecup with eyepiece and eye sensor
     color(c_rubber) difference() {
         rounded_slab(eyecup[0], eyecup[1], frame - 1, eyecup[4], eyecup[2], eyecup[3], 2, 0.01);
-        translate([eyecup[0] + 7, eyecup[4] - 2, eyecup[2] + 6]) cube([eyecup[1] - eyecup[0] - 14, 3, eyecup[3] - eyecup[2] - 10]);
+        translate([eyecup[0] + 5, eyecup[4] - 2, eyecup[2] + 6]) cube([eyecup[1] - eyecup[0] - 10, 3, eyecup[3] - eyecup[2] - 10]);
     }
-    color("#101828") translate([eyecup[0] + 7, eyecup[4] - 2.1, eyecup[2] + 6]) cube([eyecup[1] - eyecup[0] - 14, 0.2, eyecup[3] - eyecup[2] - 10]);
+    color("#101828") translate([eyecup[0] + 5, eyecup[4] - 2.1, eyecup[2] + 6]) cube([eyecup[1] - eyecup[0] - 10, 0.2, eyecup[3] - eyecup[2] - 10]);
     color("#444") for (dx = [-3, 3]) translate([(eyecup[0] + eyecup[1]) / 2 + dx, eyecup[4], eyecup[2] + 3]) rotate([-90, 0, 0]) cylinder(d = 2, h = 0.3, $fn = 12);
     // back controls (on the frame): diopter, flash, MENU, AF/MF-AEL lever, then the right-hand cluster
-    btn(35.5, 52.5, 7, 1.5, c_rubber);                    // diopter wheel
+    btn(33.5, 52.5, 7, 1.5, c_rubber);                    // diopter wheel (2026-11-19 ruler photo)
     btn(a6300_flash()[0], a6300_flash()[1], a6300_flash()[2]);
     btn(a6300_menu()[0], a6300_menu()[1], a6300_menu()[2]);
     color(c_body) translate([88, frame, 49]) cube([11, 2, 7]);
@@ -147,7 +147,11 @@ module a6300(lcd_tilt = 0, lens = true, lcd_arm = undef) {
             translate([0, -lcd_arm_t / 2, 0]) cube([lcd_arm_w, lcd_arm_t, lcd_arm_len]);
             for (z = [0, lcd_arm_len]) translate([0, 0, z]) rotate([0, 90, 0]) cylinder(d = lcd_arm_t, h = lcd_arm_w, $fn = 16);
         }
-        for (x0 = [8, 38]) translate([x0, -lcd_arm_t, 6]) cube([18, 2 * lcd_arm_t, 16]);
+        translate([42, -lcd_arm_t, -0.5]) cube([18, 2 * lcd_arm_t, 7.5]);   // bottom-right corner notch above tripod thread
+    }
+    translate([arm_x0, p1[0], p1[1]]) rotate([-arm_a, 0, 0]) {
+        color("#141416") translate([2, lcd_arm_t / 2, 3]) cube([20, 2.0, 21]);   // raised flex-ribbon connector shelf (X_cam ~15..35)
+        color(c_metal) translate([17, lcd_arm_t / 2 - 0.2, 14]) cube([5, 2.4, 11]); // silver flex ribbon
     }
     color(c_metal) translate([arm_x0 + 4, p1[0], p1[1]]) rotate([0, 90, 0]) cylinder(d = 2.0, h = lcd_arm_w - 8, $fn = 16);
     translate([lcd_at[0], p2[0], p2[1]]) rotate([lcd_tilt, 0, 0]) translate([0, 0, -d_bot])

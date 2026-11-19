@@ -4,11 +4,11 @@
 // https://creativecommons.org/licenses/by-nc/4.0/
 //
 // Second printable part. After placing the box in the screen recess, slide this arm forward (-Y)
-// into the camera's flash shoe: a drop-tab enters the uncovered top band in front of the box, and
-// its locating lug (flat load-bearing top shelf + 0.6 mm tip chamfers + 45-deg bottom ramp) engages
-// the box's front pocket during the last ~4 mm of shoe travel (zero screws or inserts). Underside
-// ribs on the foot add gentle shoe-spring retention; on top sits a passive cold shoe (or 1/4"-20
-// insert block).
+// into the camera's flash shoe: a 4 mm drop-tab enters the uncovered top band in front of the box
+// (thickening to 8.2 mm with a 45-deg bridge gusset right above the box top), and its locating lug
+// (flat load-bearing top shelf + 0.6 mm tip chamfers + 45-deg bottom ramp) engages the box's front
+// pocket during the last ~4 mm of shoe travel (zero screws or inserts). Underside ribs on the foot
+// add gentle shoe-spring retention; on top sits a passive cold shoe (or 1/4"-20 insert block).
 //
 // Printed lying flat on its back (+Y face of the tab/bridge/top block on the bed, -Y pointing up):
 // continuous XY perimeters wrap the bridge-to-tab corner for bending strength, the lug grows straight
@@ -62,6 +62,12 @@ t_x0 = arm_xc - arm_w / 2;
 t_y0 = box_d + tab_gap;
 t_y1 = t_y0 + arm_t;
 t_z0 = pin_z0 - 2.0;
+tab_thick_z0 = box_h + 0.8;          // 0.8 mm clear above the box top
+tab_thick_y0 = t_y0 - pin_len;       // 8.2 mm thick above the box; clears diopter (Y=6.7) & camera back (Y=5.2)
+gusset_y0 = a6300_frame() + 0.8;     // 0.8 mm behind the camera body back edge
+gusset_d = tab_thick_y0 - gusset_y0; // 45-deg corner gusset into the bridge
+assert(tab_thick_y0 > a6300_frame() + 2.0, "thickened arm too close to camera back / diopter");
+assert(gusset_d > 0 && bridge_z0 - gusset_d > tab_thick_z0, "arm bridge gusset geometry invalid");
 pin_tip_h = pin_h - pin_len - pin_chamfer;
 assert(pin_tip_h >= 1.0, "lug tip too thin after 45-deg bottom ramp and top chamfer");
 y_f0 = s_y0 + 1;
@@ -111,7 +117,12 @@ module arm() {
             for (sx = [-1, 1]) rotate([90, 0, 90]) translate([0, 0, s_x + sx * 4.0 - 1.0]) linear_extrude(2.0)
                 polygon([[y_f0 + 2.5, foot_z0 + 0.01], [y_f0 + 2.5 + foot_rib_h + 0.15, foot_z0 - foot_rib_h],
                          [y_f0 + 8.5 - foot_rib_h - 0.15, foot_z0 - foot_rib_h], [y_f0 + 8.5, foot_z0 + 0.01]]);
-            translate([t_x0, t_y0, t_z0]) cube([arm_w, arm_t, bridge_z0 - t_z0 + 0.5]);
+            // drop-tab: 4 mm thick in front of the box, thickened to 8.2 mm above it with a 45-deg bridge gusset
+            rotate([90, 0, 90]) translate([0, 0, t_x0]) linear_extrude(arm_w, convexity = 4)
+                polygon([[t_y0, t_z0], [t_y1, t_z0], [t_y1, bridge_z0 + 0.5],
+                         [gusset_y0, bridge_z0 + 0.5], [gusset_y0, bridge_z0],
+                         [tab_thick_y0, bridge_z0 - gusset_d],
+                         [tab_thick_y0, tab_thick_z0], [t_y0, tab_thick_z0]]);
             // reversed locating lug: flat horizontal top bearing shelf + 0.6 mm tip chamfers + 45-deg bottom ramp
             intersection() {
                 rotate([90, 0, 90]) translate([0, 0, arm_xc - pin_w / 2]) linear_extrude(pin_w)

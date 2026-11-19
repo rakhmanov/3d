@@ -7,7 +7,7 @@ slides into the flash shoe after the box is seated and locks it in place with ze
 The box size comes from a cardboard test on the real camera; the shoe and button positions from caliper
 readings and photos (±2 mm). **Not printed yet.**
 
-**Status and known problems: see [HANDOFF.md](HANDOFF.md).** The camera's dual-hinge screen linkage is now modelled and checked in the scene, the exhaust outlets sit outside the 5.2 mm recess (`467 mm²` unblocked vs `503 mm²` fan free area), and Option #1 from [dev/MOUNTING-NOTES.md](dev/MOUNTING-NOTES.md) (tool-free pin-and-socket slide-on shoe arm, with micro-suction + screen clamp as a zero-hardware fallback) is implemented.
+The camera's dual-hinge screen linkage, solid lower tilt arm, left-center flex-ribbon shelf, and `2026-11-19` top ruler positions are modelled and checked in the scene; the exhaust outlets sit outside the 5.2 mm recess and avoid the eyecup, fan housing, and flex-ribbon shelf (`313 mm²` unblocked free-air exhaust on right/top/left with `arm_mount = true`, `337 mm²` standalone, plus `181 mm²` secondary right-side bottom-back bleed vs `503 mm²` fan free area), and Option #1 from [dev/MOUNTING-NOTES.md](dev/MOUNTING-NOTES.md) (tool-free pin-and-socket slide-on shoe arm, with micro-suction + screen clamp as a zero-hardware fallback) is implemented.
 
 | On the camera | Inside (front cut away) | Side | Arm and shoe |
 |---|---|---|---|
@@ -17,9 +17,9 @@ readings and photos (±2 mm). **Not printed yet.**
 |---|---|
 | [sony-a6300-fan.scad](sony-a6300-fan.scad) | The printable box ([preview](sony-a6300-fan.png)). Parameters at the top |
 | [sony-a6300-fan-arm.scad](sony-a6300-fan-arm.scad) | Second printable part: tool-free pin-and-socket slide-on shoe arm ([preview](sony-a6300-fan-arm.png)). Locating lug engages the box's front pocket on `-Y` slide-in (zero screws/inserts). `top_mount = "shoe"`, `"quarter"` or `"none"` |
-| [dev/sony-a6300-fan-fit-test.scad](dev/sony-a6300-fan-fit-test.scad) | Thin shell with the box's outside shape and front-face V-groove scribe marks (`14.5 mm` band, switch slot, arm pocket, fan grille), to try on the camera first |
+| [dev/sony-a6300-fan-fit-test.scad](dev/sony-a6300-fan-fit-test.scad) | Thin shell with the box's outside shape, side depth marks (`2`, `4`, `5.3 mm` recess edge, `8`/`10 mm` ticks), front V-grooves (`14.5 mm` band, switch slot, arm pocket, fan grille + 4 screw holes), and 45°-beveled blind fake cutouts for every exhaust slot and the stepped USB-C port, to try on the camera first |
 | [dev/sony-a6300-fan-scene.scad](dev/sony-a6300-fan-scene.scad) | Display only: the box and arm on the camera with the fan, switch, diodes, USB-C board, wires and cable. `-D cutaway=true` |
-| [dev/a6300-camera.scad](dev/a6300-camera.scad) | Display model of the a6300 from Sony's dimensions plus measurements of a real body and a photo-fitted dual-hinge LCD linkage (arm stops at `~54°`, ±1–2 mm) |
+| [dev/a6300-camera.scad](dev/a6300-camera.scad) | Display model of the a6300 from Sony's dimensions plus calipers, `2026-11-19` ruler photos (top controls/eyecup + solid tilt arm & flex-ribbon shelf), and a photo-fitted dual-hinge LCD linkage (`~54°` arm stop, ±1–2 mm) |
 | [dev/MOUNTING-NOTES.md](dev/MOUNTING-NOTES.md) | Five brainstormed tool-free mounting options, physical constraints, and 3-criterion ranking |
 
 ## Parts
@@ -63,18 +63,21 @@ Tools: soldering iron, calipers, M3 tap or screwdriver.
       │      │ L◦H  [ ] │          │   │   switch left of arm socket in top band; 6 mm right duct
     ▭─┤ bay  │ chamber  │  ( fan ) │   │   USB-C out of the left wall; fan blows onto the plate
       └──────┴──────────┴──────────┴───┘   bottom bevelled from 0 at the plate to 3 mm at the front
-    solid back rim on left/top/right inside the 5.2 mm recess; exhaust windows outside the recess + bottom-back ribs
+    solid back rim inside the 5.2 mm recess; 3 right + 6 top + 1 upper-left windows + 4 right-side bottom-back bleed slots
 
-**80 × 35 × 13 mm**, unblocked exhaust 467 mm² (side/top 221 + bottom-back 246) vs 503 mm² fan free area.
+**80 × 35 × 13 mm**, free-air exhaust `313 mm²` (right `155` + top `110` + left `47`; `337 mm²` with `arm_mount = false`: `155` + `135` + `47`) plus `181 mm²` secondary right-side bottom-back bleed (framed by a `1.6 mm` back rail behind the `7 mm` bevel, solid `X = 0..32.0` over the ribbon shelf) vs `503 mm²` fan free area.
 
 - **Size, from the cardboard test on the camera:** 35 mm tall against the plate (36 just squeezes in) and 32.5 mm at the
   front in the test; the box goes to 32 (`slant_rise = 3`, about the most before the bevel reaches the fan). The
   bottom is bevelled straight from the plate to clear the screen's hinge arm, and the inside floor follows it.
   The top wall is 1.2 mm so the fan sits as high as possible. The screen leaves about 14 mm of depth, so the box is 13.0 (1.6 front + 7 fan + 4.4 gap). The
   recess is about 84 mm wide; the box is 80, placed 1 mm from its left edge.
-- **Layout:** the electronics bay is on the left (cable side) with a lower divider stopping at the USB-C centre (`usb_zc`) so
-  the upper bay stays open for wiring and upper-left exhaust; the fan sits at `X = 42.1..72.1` leaving a 6 mm exhaust duct along the
-  right wall; the open chamber between bay and fan makes the air sweep the plate. The grille uses a single slim mid-radius ring and 3 × 1.4 mm spokes so the uncovered upper blade arc stays open.
+- **Layout:** the electronics bay is on the left (cable side) with a lower divider (`Y >= 5.2`, `0.17 mm` behind the USB-C PCB)
+  stopping at the USB-C centre (`usb_zc`) so the upper bay stays open for wiring and upper-left exhaust; the fan sits at
+  `X = 42.1..72.1` leaving a 6 mm exhaust duct along the right wall; the open chamber between bay and fan makes the air sweep the plate.
+  The intake grille uses an open 4-spoke diagonal X-guard (`45°/135°/225°/315°`, `1.2 mm` spokes, no mid-radius ring), giving `~522 mm²`
+  open intake area (`> fan free area 503 mm²`, `+10%` over the old mid-ring grille), keeping the uncovered top arc wide open, and
+  staying coprime with the 9-blade impeller (`gcd(4, 9) = 1`) to avoid in-phase blade-pass whine near a mic.
 - **Noise is mostly speed.** Sofasco's datasheet for its 3007 family (same size, sleeve bearing) shows it clearly:
   12000 rpm 35 dBA, 10000 rpm 31, 8000 rpm 26, 6000 rpm 22 (1.6 CFM). The bearing type adds tick or hum on top of that.
   So a hydraulic bearing plus a lower speed is the quiet combination.
@@ -83,21 +86,25 @@ Tools: soldering iron, calipers, M3 tap or screwdriver.
   If it won't start on Low, use one diode (~4.2 V) or a Schottky 1N5819 pair (~4.2 V, 0.4 V each).
   Diodes beat a resistor here: a resistor drops more voltage when the fan pulls its higher starting current.
   Mount the fan with the label side (the outlet) toward the camera.
-- **Airflow:** blowing onto the plate cools better than sucking air off it. Because the camera's recess is 5.2 mm deep, the left,
-  top, and right walls keep a solid 5.6 mm back rim inside the recess; unblocked exhaust windows sit outside the recess (`Y = 5.6..11.4`
-  from the plate) on the right wall (4 × 5.85 mm slots), top wall left of the fan (the socket collar stops 1.15 mm below the top wall, so the upper-left window stays completely open),
-  and left wall above the USB-C board. Ten ribbed slots along the bottom-back edge (`Y = 0..4.4`) vent behind the solid bottom bevel and
-  screen hinge arm, baffled from the intake wedge.
+- **Airflow & microphones:** blowing onto the plate cools better than sucking air off it. With the LCD tilted up, the screen sits right in front of the box and its solid tilt arm covers most of the recess bottom, so exhaust relies on truly unblocked free-air windows outside the `5.2 mm` recess (`Y = 5.6..11.4`) plus a secondary right-side bottom-back bleed:
+  - **Right (`+X`, `155 mm²`):** 3 × 8.93 mm wide slots (`Z = 4.0..33.2`, `1.2 mm` ribs) fed directly by the `6 mm` right exhaust duct; unobstructed out into open air.
+  - **Top (`+Z`, `110 mm²` with `arm_mount = true`, `135 mm²` standalone):** 6 slots (`Y = 5.6..11.35`, `3.15 mm` behind the arm boss) that stay **solid** over the `24 mm` EVF eyecup / USB-C bay (`X < 22.5`):
+    - `top_l` (`X = 22.5..31.15`, `8.65 × 5.75 mm` = `50 mm²`): sits cleanly right of the `24 mm` eyecup and directly above the lowered switch cradle (`3.85 mm` clear headroom inside);
+    - `top_m` (`X = 32.35..41.8`, `9.45 × 3.15 mm` = `30 mm²`, or `5.75 mm` = `54 mm²` standalone): vents the mid plenum cleanly behind the fused top boss & thickened arm (`Y = 5.6..8.75`, `0.25 mm` behind the arm's `-Y` face);
+    - `4 × 7.70 mm` uniform right-half slots (`X = 43.0..77.4`, `1.2 mm` ribs): the left portion (`X = 43.0..72.1`) sits `0.3 mm` above the solid 3007 fan housing (excluded from the `110 mm²` unblocked count), while the rightmost slot clears the `6 mm` right duct (`X = 72.1..77.4`, `5.30 × 5.75 mm` = `30 mm²`, no rib inside the duct; keep a windscreen/deadcat on a cold-shoe mic if used).
+  - **Left (`-X`, `47 mm²`):** 1 × 8.14 mm slot above the USB-C PCB (`Z = 25.1..33.2`, `~20 mm` behind the left terminal door / `3.5 mm` mic jack). Wide slots (`rib = 1.2`) keep hydraulic diameter high for lower pressure drop and less hissing.
+  - **Bottom (`-Z`, `181 mm²` secondary bleed):** 4 × 10.30 mm right-side slots (`Y = 1.6..6.0`, `X = 32.0..76.8`), framed by a continuous `1.6 mm` connecting rail along `Y = 0..1.6` so no free-ended ribs can snag or snap when sliding past the screen linkage, behind the `7.0 mm` front bevel toward the tilt arm's bottom-right notch (`X_cam ≈ 55..73`). The left/middle bottom (`X = 0..32.0`) is kept solid so exhaust never blows onto the screen's flex-ribbon connector shelf (`X_cam ≈ 15..35`).
 - **USB-C:** the board stands parallel to the front face on two posts from the front wall. Outside, the left wall is
   counterbored down to 0.6 mm around the opening so the plug's overmold sits in it and the plug reaches full depth.
-- **Switch:** in the front face left of the arm tab & socket (`sw_xc = 23.65`, `X_cam ≈ 27.7`), in the top band the tilted screen never covers, 7 mm
-  below the top (`~7.3 mm` below the rubber eyecup, `3.1 mm` proud at the front face / `~5.5 mm` at the knob tip).
+- **Switch:** in the front face left of the arm tab & boss (`sw_xc = 23.65`, `X_cam ≈ 27.7`), in the top band the tilted screen never covers, `8.5 mm`
+  below the top (`sw_zc = 26.5`, `3.85 mm` below the inner roof for clear airflow under `top_l`, `8.8 mm` below the rubber eyecup, `+4.8 mm` above the `65°` LCD / `+9.3 mm` at `90°`, `~2.4 mm` knob protrusion).
 - **Eye sensor:** it sits on the eyepiece, right above the box. Set *FINDER/MONITOR → Monitor (manual)*.
 - **Mounting: tool-free pin-and-socket slide-on shoe arm** ([sony-a6300-fan-arm.scad](sony-a6300-fan-arm.scad), [close-up](dev/scene-mount.png), [dev/MOUNTING-NOTES.md](dev/MOUNTING-NOTES.md)).
   After sliding the box into the screen recess, slide the arm `-Y` into the camera's flash shoe:
   - Its ISO 518 foot (`18.4 × 16 × 1.9 mm` footprint, 45° rear taper leaving `~10.1 mm` full-width rail / `13.25 mm` total lip/floor engagement) has `0.8 mm` 45° front-entry corner chamfers and two `0.2 mm` tapered underside friction ribs engaging the shoe floor spring;
-  - A `10 × 4 mm` drop-tab stays inside the top `14.5 mm` screen-free band (`13.15 mm` clear of the flash button, `2.5 mm` above the 65° LCD / `7.0 mm` at 90°), carrying a `6.0 × 6.0 × 4.2 mm` locating lug with a **flat horizontal load-bearing top shelf** (`3.4 mm` flat bearing inside the socket + `0.6 mm` top/side tip lead-in chamfers) and a **45° bottom ramp**;
-  - During the final ~4 mm of shoe travel, the lug seats into the `6.5 × 6.5 × 4.6 mm` open-backed front socket on the box, taking gravity in pure vertical shear (zero backward wedging force) and locking all 6 DOF with zero screws or inserts (the same box also works standalone with micro-suction pads + tilted screen clamp as a zero-hardware fallback).
+  - A `10 × 4 mm` drop-tab clears the box inside the top `14.5 mm` screen-free band (`14.65 mm` clear of the flash button, `2.5 mm` above the 65° LCD / `7.0 mm` at 90°), thickening right above the box top (`Z >= 35.8`, `+0.8 mm` clear) to **`8.2 mm`** (`Y = 9.0..17.2`, `2.3 mm` clear of the diopter wheel) with a `3.0 mm` 45° corner gusset into the bridge (`0.8 mm` behind the camera body);
+  - At the box top band, the tab carries a `6.0 × 6.0 × 4.2 mm` locating lug with a **flat horizontal load-bearing top shelf** (`3.4 mm` flat bearing inside the socket + `0.6 mm` top/side tip lead-in chamfers) and a **45° bottom ramp**;
+  - During the final ~4 mm of shoe travel, the lug enters a `6.5 × 6.5 mm` front-plate pocket backed by a **monolithic fused top bearing boss** (`2.6 mm` deep behind the `1.6 mm` plate = `4.2 mm` total bearing depth, `0.8 mm` past the flat lug shelf and `0.2 mm` past the lug tip, fused `2.55 mm` solid up into the `1.2 mm` top wall for a `3.75 mm` solid roof with no side or bottom internal collar walls), taking gravity in pure vertical shear (zero backward wedging force) and locking all 6 DOF with zero screws or inserts (the same box also works standalone with micro-suction pads + tilted screen clamp as a zero-hardware fallback).
   - A printed cold shoe on top keeps the shoe usable for a light mic; `top_mount = "quarter"` gives a 1/4"-20 insert for a metal shoe adapter.
 - **Material:** PETG or ASA, not PLA.
 
@@ -108,7 +115,7 @@ Both are manifold and print **without supports** (checked with `tools/stl-check.
 
 | Part | On the bed | Watch |
 |---|---|---|
-| Box | Front face (grille) down, open back up | Short horizontal bridges only: 4.9–7.3 mm over the side/top exhaust windows (bridged by the solid back rim), 6–8 mm over the USB-C opening. Bottom-back ribs are open to the top. The open-backed pin socket collar, posts, switch cradle and lower bay divider grow straight up from the front plate with zero bridges or overhangs |
+| Box | Front face (grille) down, open back up | Short horizontal bridges only: 7.7–10.3 mm over the exhaust windows (`8.9 mm` right, `8.7` / `9.5` / `7.7 mm` top, `8.1 mm` left bridged by the solid back rim, plus `10.3 mm` across the 4 bottom-back slots along the `1.6 mm` connecting back rail), 6–8 mm over the USB-C opening. The fused top bearing boss, posts, switch cradle and lower bay divider grow straight up from the front plate and top wall with zero bridges or overhangs |
 | Arm | Lying flat on its back (`+Y` tab/bridge/top-block face down, `-Y` up) | Zero faces flatter than 45° (`tools/stl-check.py`): continuous XY perimeters wrap the bridge-to-tab corner for bending strength, the flat-top / 45°-bottom-ramped lug grows straight up support-free off the tab, and the 45° rear foot taper eliminates the old `3.2 mm` foot flange overhangs and `18.8 mm` cold-shoe ceiling bridge (only a small front-stop bridge remains on the top cold shoe) |
 
 PETG or ASA, 0.2 mm layers, 3 perimeters. Print the fit-test shell and the arm first: check the shell on the camera and the foot in the shoe.
@@ -155,10 +162,18 @@ on **thermal tape** under the fan may add a little. Plain double-sided tape insu
 | Recess right edge from the eyepiece-side end (photo, ruler) | ~87 | 77 |
 | Shoe centre from the eyepiece-side end (from photo scale, ±1.5) | ~41 | 52 |
 | Dual-hinge LCD linkage (side photo + cardboard fit, ±1–2) | lower arm ~29.5 mm, mechanical stop ~54° from vertical, upper pivot ~12 mm below LCD top | single bottom hinge |
+| Top strip controls & eyecup (`2026-11-19` ruler photo) | eyecup `~24 mm` (`X_cam ≈ 2.5..26.5`), diopter `~33.5`, flash `~63.5`, MENU `~76.2`, recess right `~88` | eyecup `3..30`, diopter `35.5`, flash `62`, MENU `73`, recess `87` |
+| Tilted LCD lower bracket (`2026-11-19` ruler photo) | solid tilt arm with raised left-center flex-ribbon shelf (`X_cam ≈ 15..35`) and small bottom-right notch (`X_cam ≈ 55..73`) | open dual cutouts |
+
+## Open / unproven
+
+- **Tilted screen clearances & partial intake:** Modelled dual-hinge clearances at `lcd_tilt = 65°` (`arm = 54°`): `front = +1.5 mm` (`+0.4 mm` at `90°`), `bevel = +0.5 mm`, `switch_above_lcd = +4.8 mm` (`+9.3 mm` at `90°`), `tab_above_lcd = +2.5 mm` (`+7.0 mm` at `90°`). `12.0 mm` of the `28 mm` grille sits completely above `lcd_tf` (`17.8 mm` above `lcd_tb`; `16.5 mm` / `22.9 mm` at `90°`); the lower half draws through the side wedge behind the screen, reducing airflow below the fan rating by an unknown amount.
+- **Airflow, recirculation & noise (untested on hardware):** Thermal effectiveness of blowing into the `4.4 mm` plate gap, warm-air recirculation behind the tilted screen, cold-shoe mic wind noise over the top vents, actual WINSINN 3007 hydraulic noise, and Low-mode startup at `~3.4 V` with two `1N4001` diodes (fallback: one diode).
+- **Mounting & photo tolerances (±1–2 mm):** Shoe-spring friction retention (`foot_rib_h = 0.2 mm`), thumb reach to the switch under the eyecup, and lug-to-socket alignment (`mount[0] = 41 mm` in the model vs `~43–44 mm` in the `2026-11-19` top ruler photo — verify with the fit-test shell's front pocket scribe marks and adjust `arm_xc` if needed).
 
 ## Steps
 
-1. Print the fit-test shell ([dev/sony-a6300-fan-fit-test.scad](dev/sony-a6300-fan-fit-test.scad), ~15 min) and the arm ([sony-a6300-fan-arm.scad](sony-a6300-fan-arm.scad)) first: verify recess fit, hinge bevel clearance, shoe friction retention, lug-to-socket alignment against the front pocket scribe marks, and thumb reach to the switch under the eyecup.
+1. Print the fit-test shell ([dev/sony-a6300-fan-fit-test.scad](dev/sony-a6300-fan-fit-test.scad), ~15 min) and the arm ([sony-a6300-fan-arm.scad](sony-a6300-fan-arm.scad)) first: verify recess fit, hinge bevel clearance, shoe friction retention, lug-to-socket alignment against the front pocket scribe marks, every exhaust/USB-C fake cutout position relative to the eyecup, terminal door, and ribbon shelf, and thumb reach to the switch under the eyecup.
 2. Check that the screen still tilts up far enough to see from above without crossing the `14.5 mm` scribe line.
 3. Order the parts above, plus a short right-angle C-to-C cable (no M3 arm screws or inserts needed).
 4. Print the box, wire it, fit it.
