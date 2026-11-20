@@ -1,14 +1,18 @@
-// Sony a6300 rear cooling fan: fit test 2 (DRAFT)
+// Sony a6300 rear cooling fan: fit test 4 (DRAFT)
 // Author: Denis Shatilov
 // License: CC BY-NC 4.0
 // https://creativecommons.org/licenses/by-nc/4.0/
 //
 // A thin open-backed shell with the box's outside size, to try against the camera before printing
-// the real box. Fit test 2 includes the real arm pocket + fused top bearing boss (to test the
+// the real box. Since fit test 3 it has the box's new bottom (flat heel at the plate, then a 30-deg bevel parallel to
+// the screen's tilt bracket) and the bottom slots moved into the bracket's cut-back window; fit test 4 adds
+// 0.8 mm of room under the arm's lug in the pocket. See FIT-TEST.md.
+// As in fit test 2 it has the real arm pocket + fused top bearing boss (to test the
 // printed shoe arm directly), staggered 1 mm side depth grooves (1, 2, 3, 4, 5.3 mm + left
 // 8, 10 mm), built-in 5/10 mm X-rulers on the top-front and bottom-back edges, +2/+4 mm Z-ticks
 // on the left front corner, front V-grooves, and 45-deg beveled blind fake cutouts for all
 // exhaust vents, the left-wall Off/On switch slot, and the stepped USB-C port.
+// The grooves, rulers and ticks are measuring marks only: the real box does not have them.
 // Printed front face down with zero overhangs.
 
 include <../sony-a6300-fan.scad>
@@ -58,15 +62,21 @@ module front_circle_vgroove(xc, zc, r, d = mark) {
         polygon([[max(0.05, r - d - 0.02), 0], [r, d + 0.02], [r + d + 0.02, 0]]);
 }
 
+// Blind fake bottom slot that follows the heel and the bevel: mark deep, 45-deg ends, straight sides
+module bottom_blind(x0, w) {
+    rotate([90, 0, 90]) translate([0, 0, x0]) linear_extrude(w)
+        polygon([[bot_rim, slant(bot_rim) - 0.04], [slant_y0, -0.04], [bot_y1, slant(bot_y1) - 0.04],
+                 [bot_y1 - mark, slant(bot_y1 - mark) + mark], [slant_y0, mark], [bot_rim + mark + 0.1, slant(bot_rim + mark + 0.1) + mark]]);   // top end steeper than 45 deg on the bed
+}
+
 module fit_test() {
-    slant_a = atan(slant_rise / (box_d + 0.5));
     difference() {
         union() {
             difference() {
                 cube([box_w, box_d, box_h]);
-                // inner cavity whose bottom follows the bevel so the sloped bottom wall stays continuous from bed to back
+                // inner cavity whose bottom follows the heel and the bevel so the bottom wall stays continuous from bed to back
                 rotate([90, 0, 90]) translate([0, 0, t]) linear_extrude(box_w - 2 * t)
-                    polygon([[-1, slant(-1) + t], [box_d - t, slant(box_d - t) + t],
+                    polygon([[-1, t], [slant_y0, t], [box_d - t, slant(box_d - t) + t],
                              [box_d - t, box_h - t], [-1, box_h - t]]);
             }
             // fused top bearing boss matching the real box so the printed shoe arm engages & locks
@@ -75,7 +85,7 @@ module fit_test() {
         }
         // same bottom bevel as the box
         rotate([90, 0, 90]) translate([0, 0, -1]) linear_extrude(box_w + 2)
-            polygon([[-1, -1], [box_d + 1, -1], [box_d + 1, slant(box_d + 1)], [-1, slant(-1)]]);
+            polygon([[slant_y0, -1], [box_d + 1, -1], [box_d + 1, slant(box_d + 1)], [slant_y0, 0]]);
         // same rounded leading (right) end and latch hook channel as the box
         lead_in_cut();
         latch_channel();
@@ -87,8 +97,8 @@ module fit_test() {
         }
         for (y = [8, 10]) side_vgroove(0, 1, y, mark, usb_top - 3.0, usb_top);
         // real arm pocket through-cut (test actual printed shoe-arm lock)
-        if (arm_mount) translate([arm_xc - sock_w / 2, box_d - t - 0.5, pin_z0 - sock_clear])
-            cube([sock_w, t + 1.5, sock_h]);
+        if (arm_mount) translate([arm_xc - sock_w / 2, box_d - t - 0.5, pin_z0 - sock_clear - sock_drop])
+            cube([sock_w, t + 1.5, sock_h + sock_drop]);
         // front-face reference 45-deg V-grooves: uncovered top band line, top 5/10 mm X-ruler, fan grille & screws
         front_hgroove(2, box_w - 2, box_h - tab_band, mark - 0.04);
         for (x = [5 : 5 : box_w - 5])
@@ -100,11 +110,10 @@ module fit_test() {
         for (dz = [2, 4])
             translate([0, box_d + 0.02, slant(box_d) + dz - 0.4]) rotate([90, 0, -90])
                 blind_rect(2.5, 0.8, 0.35, 0.35, 0.35, 0.35, 0.35);
-        // bottom-back edge X-ruler ticks (every 5 mm, longer every 10 mm; open at Y=0 -> zero overhangs, visible from below)
-        for (x = [5 : 5 : box_w - 5]) let(d = 0.35, ly = (x % 10 == 0) ? 1.35 : 0.9, L = ly / cos(slant_a))
-            translate([x, 0, slant(0)]) rotate([slant_a, 0, 0]) translate([0, L, 0]) rotate([90, 0, 0])
-                linear_extrude(L + 0.25)
-                    polygon([[-d - 0.02, -0.02], [0, d], [d + 0.02, -0.02]]);
+        // bottom-back edge X-ruler ticks on the heel (every 5 mm, longer every 10 mm; open at Y=0 -> zero overhangs, visible from below)
+        for (x = [5 : 5 : box_w - 5]) let(d = 0.35, L = (x % 10 == 0) ? 1.35 : 0.9)
+            translate([x, L, 0]) rotate([90, 0, 0]) linear_extrude(L + 0.25)
+                polygon([[-d - 0.02, -0.02], [0, d], [d + 0.02, -0.02]]);
         // right wall fake exhaust cutouts (3 slots, X = box_w)
         if (r_slot > 0) for (i = [0 : n_right - 1])
             translate([box_w, out_y0, rz0 + i * (r_slot + rib)]) rotate([90, 0, 90])
@@ -121,11 +130,8 @@ module fit_test() {
             blind_rrect(usb_cbore[1], usb_cbore[0], 2.5, 0.35);
             translate([0, 0, -0.35 + 0.01]) blind_rrect(usb_rec[2] + 0.4, usb_rec[0] + 0.4, 1.2, 0.36);
         }
-        // bottom bevel fake exhaust cutouts (4 right-side slots along Y = bot_rim .. bot_y1)
-        for (i = [0 : n_bot - 1])
-            translate([bot_x0 + i * bot_pitch, 0, slant(0)]) rotate([slant_a, 0, 0]) mirror([0, 0, 1])
-                translate([0, bot_rim / cos(slant_a), 0])
-                    blind_rect(bot_slot, bot_d / cos(slant_a), mark, mark, mark, max(mark, mark / tan(42 - slant_a)), mark);
+        // bottom fake exhaust cutouts (4 slots along Y = bot_rim .. bot_y1, inside the tilt bracket's cut-back window)
+        for (i = [0 : n_bot - 1]) bottom_blind(bot_x0 + i * bot_pitch, bot_slot);
     }
 }
 

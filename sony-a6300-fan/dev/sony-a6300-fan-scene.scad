@@ -6,6 +6,14 @@
 // Box from ../sony-a6300-fan.scad, camera from a6300-camera.scad. The box sits under the eyecup,
 // left-aligned with the LCD. The screen is drawn on its dual-hinge linkage at a typical shooting tilt
 // (override with -D lcd_tilt=...).
+//
+// Previews (800x600, preview mode, --camera=tx,ty,tz,rx,ry,rz,dist):
+//   scene-iso      --camera=62,-5,30,62,0,25,300 --projection=p
+//   scene-mount    --camera=62,-5,34,62,0,25,300 --projection=p -D show_arm_in_scene=true
+//   scene-cutaway  --camera=38,-10,34,58,0,20,105 --projection=p -D cutaway=true
+//   scene-side     --camera=0,5,33,90,0,270,260 --projection=o
+//   scene-bottom   --camera=44,-10,5,180,0,0,150 --projection=o -D show_cable=false   (from straight below)
+//   scene-bracket  --camera=0,-9,16,90,0,270,80 --projection=o -D show_cable=false    (bottom against the tilt bracket)
 
 include <../sony-a6300-fan-arm.scad>
 
@@ -20,7 +28,7 @@ cutaway = false;
 
 hinge = a6300_lcd_hinge();
 
-// Typical shooting tilt on the dual-hinge linkage (arm stops at 54 deg; screen tilts to 65 deg)
+// Typical shooting tilt on the dual-hinge linkage (the arm stops at 60 deg; the screen tilts on to 65 deg)
 lcd_tilt = 65;
 
 // ---------- parts (box coordinates) ----------
@@ -107,7 +115,15 @@ tf = pose[3];
 min_y = min(tb[0], tf[0]);
 max_z = max(tb[1], tf[1]);
 front_clear = min_y - box_d;
-bevel_clear = (box_z + slant(box_d)) - a6300_lcd_arm_top_z(box_d, lcd_tilt);
+// bottom against the tilt bracket: the gap under the bevel at its two ends, the heel over the hinge knuckles,
+// and the bottom slots inside the bracket's cut-back window
+gap_front = (box_z + slant(box_d)) - a6300_lcd_arm_top_z(box_d, lcd_tilt);
+gap_knee = (box_z + slant(slant_y0)) - a6300_lcd_arm_top_z(slant_y0, lcd_tilt);
+bevel_clear = min(gap_front, gap_knee);
+knk = a6300_lcd_knuckle();
+knuckle_clear = box_z - (knk[1] + knk[2]);
+arm_cut = a6300_lcd_arm_cut();
+slot_in_window = [box_x + bot_x0 - arm_cut[0], arm_cut[1] - (box_x + bot_x1), arm_cut[2] - bot_y1];
 sw_clear = (box_z + sw_zc - sw_slot[1] / 2) - max_z;
 tab_clear = (box_z + t_z0) - max_z;
 grille_top = box_z + fan_zc + (fan - 2) / 2;
@@ -116,13 +132,18 @@ grille_above_tb = grille_top - tb[1];
 pose90 = a6300_lcd_pose(90);
 front_clear_90 = min(pose90[2][0], pose90[3][0]) - box_d;
 echo(str("Clearances at lcd_tilt=", lcd_tilt, " (arm=", pose[6], "): front=", round(front_clear * 10) / 10,
-         " mm, bevel=", round(bevel_clear * 10) / 10, " mm, switch_above_lcd=", round(sw_clear * 10) / 10,
+         " mm, bevel=", round(bevel_clear * 10) / 10, " mm (front ", round(gap_front * 100) / 100, " / knee ",
+         round(gap_knee * 100) / 100, " vertical, ", round(bevel_clear * sin(pose[6]) * 100) / 100,
+         " square to the bracket), heel_above_knuckle=", round(knuckle_clear * 100) / 100,
+         " mm, bottom slots inside the bracket window by x0/x1/y=", slot_in_window, " mm, switch_above_lcd=", round(sw_clear * 10) / 10,
          " mm, tab_above_lcd=", round(tab_clear * 10) / 10, " mm; grille above lcd_tf/tb=",
          round(grille_above_tf * 10) / 10, "/", round(grille_above_tb * 10) / 10,
          " mm (front at 90 deg=", round(front_clear_90 * 10) / 10, " mm)"));
 if (lcd_tilt >= 45) {
     assert(front_clear >= 0, "box front collides with tilted LCD");
     assert(bevel_clear >= 0, "box bottom bevel collides with LCD hinge arm");
+    assert(knuckle_clear >= 0.5, "box heel too close to the hinge knuckles");
+    assert(min(slot_in_window) >= 0, "bottom slots leave the tilt bracket's cut-back window");
     assert(sw_clear > 0, "switch slot sits below the tilted LCD top edge");
     assert(tab_clear > 0, "arm tab hits tilted LCD");
 }

@@ -5,31 +5,45 @@
 //
 // Built from Sony's spec (120.0 x 66.9 x 48.8 mm from grip to monitor, 3.0" 16:9 tilting LCD),
 // calipers and photos of a real body (2026-11-18): screen recess, eyepiece, shoe, flash / MENU buttons,
-// plus ruler photos of the top strip and tilted LCD hinge / flex-ribbon shelf (2026-11-19).
+// plus ruler photos of the top strip and tilted LCD hinge / flex-ribbon shelf (2026-11-19),
+// the tilt bracket read off the fit test 2 photos (2026-11-20, FIT-TEST.md measurements M1..M12),
+// and the top deck height from the shoe arm in fit test 3 (M13).
 //
 // X runs left to right seen from behind, Z is up, the back plate is at Y = 0, and the operator is at +Y.
 // With the operator at +Y the module comes out as a mirror image (controls on the left). Like the box and arm, it is
 // shown through mirror([0, 1, 0]), which puts the operator at -Y and the grip and controls back on the right.
 
-body = [120.0, 66.9];
+body = [120.0, 66.9];           // Sony's overall W x H; the height includes the dials
+// M13 (fit test 3): the top deck, where the hot shoe sits, is lower than the overall height. The printed shoe arm
+// hung 2.8-3.4 mm lower against the shell than modelled; 2.9 is used so the lug errs low, where the pocket has room.
+top_z = body[1] - 2.9;
 shell_t = 29;        // front plate to back plate
 grip_t = 13;         // grip in front of the front plate (29 + 13 + 7 LCD ~= 48.8)
 // The back: a magnesium plate (Y = 0) in a recess; the body frame around it stands frame mm proud
 frame = 5.2;
-recess = [0, 88, 2, 47.5];      // x0, x1, z0, z1 (open left end from fit test 1; right/bottom/top from photos/calipers)
+recess = [0, 88, 0, 47.5];      // x0, x1, z0, z1: open at the left end (fit test 1) and at the bottom (M11: no frame lip under the screen)
 // Screen latch pin hanging from the middle of the recess top edge (fit test 1, photo 1). PLACEHOLDER: from photos only
 latch_pin = [43.5, 5, 1.2, 1.0, 3.8];  // x centre, width, hang below recess top, y0, y1 (~1 mm from plate, ~2-3 mm thick)
 lcd = [80, 44, 6.35];           // LCD module W x H x thickness (6.3-6.4 measured)
 lcd_at = [5, 2];
 lcd_view = [66.4, 37.4];        // 3.0" 16:9 active area
-// Dual-hinge tilt linkage (fitted +/- 1-2 mm to side photo & cardboard test):
-// lower arm pivots on the body at lcd_hinge1, stops at lcd_arm_max, and carries the LCD's upper pivot.
-lcd_hinge1 = [1.5, 4.5];        // lower pivot [y, z] near the recess bottom
+// Dual-hinge tilt linkage: the lower arm is a sheet-metal bracket that pivots on the body at lcd_hinge1,
+// stops at lcd_arm_max, and carries the LCD's upper pivot. Its plate lies against the back plate when the
+// screen is closed, so with the screen out the plate faces the fan box's bottom and the side flanges point away.
+// Bracket numbers are from the fit test 2 photos (FIT-TEST.md M1..M12, +/- 0.5 mm, +/- 2 deg), placed relative
+// to the fit-test shell: 80 x 37.5, left end at camera x 4, bottom at z 9.7.
+lcd_hinge1 = [2.0, 6.7];        // M1: lower pivot [y, z], 2.0 behind the plate and 3.2 below the shell's back-bottom corner
+lcd_knuckle_r = 2.05;           // M2: hinge knuckle radius at both flanges (its top is 1.15 below the shell's back-bottom corner)
 lcd_arm_len = 29.5;             // pivot-to-pivot length of the lower tilt arm
-lcd_arm_t = 3.0;                // thickness of the tilt arm bracket
-lcd_arm_w = 64;                 // width of the tilt arm bracket, centered on the LCD
+lcd_arm_top = 1.15;             // M3: the plate's box-facing face stands this far off the pivot axis
+lcd_arm_flange = 3.9;           // M5: side flange width, from the plate away from the box
+lcd_arm_web_t = 0.8;            // plate thickness: a guess, not measured
+lcd_arm_x = [1.5, 82.2];        // M6: outside faces of the two flanges, camera x (box x -2.5 .. 78.2)
+lcd_arm_cut = [40.2, 80.8, 6.7]; // M7, M8: cut-back window, camera x0, x1 (box x 36.2 .. 76.8) and the plate edge's y
+lcd_arm_relief = [6.4, 7.0];    // M9: quarter-round relief at the plate's lower-left corner, camera x centre and radius
+lcd_arm_cover = [13.5, 26.3];   // M10: flex cover panel on the LCD side of the plate, camera x (box x 9.5 .. 22.3)
 lcd_pivot_from_top = 12.0;      // distance from the LCD's top edge down to the upper pivot
-lcd_arm_max = 58;               // mechanical stop angle (deg back from +Z toward +Y; 57-58 deg in fit test 1 photos 3-5)
+lcd_arm_max = 60;               // M4: mechanical stop (deg back from +Z toward +Y): 59-61 in fit test 2, 57-58 in fit test 1
 eyecup = [2.5, 26.5, 47.5, 66.4, 9.92]; // x0, x1, z0, z1, protrusion (24 mm wide in 2026-11-19 ruler photo; 9.92 measured)
 mount = [41, 31];               // lens axis x, z (shoe sits right above it in the top photo)
 
@@ -49,14 +63,18 @@ function a6300_lcd_pose(lcd_tilt, lcd_arm = undef) =
         bb = [p2[0] + d_bot * sin(lcd_tilt), p2[1] - d_bot * cos(lcd_tilt)],
         bf = [bb[0] + lcd[2] * cos(lcd_tilt), bb[1] + lcd[2] * sin(lcd_tilt)]
     ) [p1, p2, tb, tf, bb, bf, a];
+// Height of the bracket plate's box-facing face at depth y
 function a6300_lcd_arm_top_z(y, lcd_tilt, lcd_arm = undef) =
     let(
         a = a6300_lcd_arm_angle(lcd_tilt, lcd_arm),
-        y0 = lcd_hinge1[0] - (lcd_arm_t / 2) * cos(a),
-        z0 = lcd_hinge1[1] + (lcd_arm_t / 2) * sin(a)
+        y0 = lcd_hinge1[0] - lcd_arm_top * cos(a),
+        z0 = lcd_hinge1[1] + lcd_arm_top * sin(a)
     ) (a > 0 ? z0 + (y - y0) / tan(a) : 1e6);
+function a6300_lcd_knuckle() = [lcd_hinge1[0], lcd_hinge1[1], lcd_knuckle_r];   // y, z, radius
+function a6300_lcd_arm_x() = lcd_arm_x;         // outside faces of the bracket's flanges, camera x
+function a6300_lcd_arm_cut() = lcd_arm_cut;     // cut-back window: camera x0, x1, plate edge y
 shoe = [mount[0], frame - 5.88 - 18, frame - 5.88];   // centre x, front y, open end 5.88 in from the back edge
-function a6300_shoe() = [shoe[0], shoe[1], shoe[2], body[1]];
+function a6300_shoe() = [shoe[0], shoe[1], shoe[2], top_z];   // centre x, front y, open-end y, floor z (top deck)
 function a6300_menu() = [76.2, 52.5, 5.7];       // MENU button x, z, diameter (2026-11-19 ruler photo)
 function a6300_flash() = [63.5, 52.5, 5.7];      // flash button (2026-11-19 ruler photo)
 function a6300_frame() = frame;
@@ -92,13 +110,13 @@ module a6300_lcd() {
 module a6300(lcd_tilt = 0, lens = true, lcd_arm = undef) {
     // body shell with a recessed top-left (flash) and a raised right shoulder
     color(c_body) difference() {
-        rounded_slab(0, body[0], -shell_t, frame, 0, body[1]);
-        translate([recess[0] - 1, 0, recess[2]]) cube([recess[1] - recess[0] + 1, frame + 1, recess[3] - recess[2]]);   // screen recess (open left)
+        rounded_slab(0, body[0], -shell_t, frame, 0, top_z);
+        translate([recess[0] - 1, 0, recess[2] - 1]) cube([recess[1] - recess[0] + 1, frame + 1, recess[3] - recess[2] + 1]);   // screen recess (open left and bottom)
     }
     color(c_body) translate([latch_pin[0] - latch_pin[1] / 2, latch_pin[3], recess[3] - latch_pin[2]])
         cube([latch_pin[1], latch_pin[4] - latch_pin[3], latch_pin[2] + 0.01]);           // screen latch pin
     // grip
-    color(c_rubber) rounded_slab(body[0] - 30, body[0], -shell_t - grip_t, -shell_t + 2, 0, body[1] - 3, 6, 4);
+    color(c_rubber) rounded_slab(body[0] - 30, body[0], -shell_t - grip_t, -shell_t + 2, 0, top_z - 3, 6, 4);
     // lens mount and lens (16-50 PZ: 64.7 x 29.9)
     translate([mount[0], -shell_t, mount[1]]) rotate([90, 0, 0]) {
         color(c_metal) cylinder(d = 60, h = 2.5);
@@ -110,15 +128,15 @@ module a6300(lcd_tilt = 0, lens = true, lcd_arm = undef) {
     }
     // top: hot shoe, mode dial, control dial, shutter + power collar on the grip
     // Multi Interface Shoe, ISO 518 size: 18.6 slot, 12.6 opening, 2 mm slot height, open at the back
-    color(c_metal) translate([shoe[0], 0, body[1]]) difference() {
+    color(c_metal) translate([shoe[0], 0, top_z]) difference() {
         translate([-11, shoe[1], 0]) cube([22, shoe[2] - shoe[1], 2.8]);
         translate([-9.3, shoe[1] + 1.5, 0.3]) cube([18.6, 30, 2.0]);
         translate([-6.3, shoe[1] + 1.5, 0.3]) cube([12.6, 30, 5]);
     }
-    color(c_body) translate([96, -12, body[1]]) cylinder(d = 25, h = 6, $fn = 48);
-    color(c_body) translate([78, -4, body[1]]) cylinder(d = 17, h = 4, $fn = 48);
-    color(c_metal) translate([107, -shell_t - 6, body[1] - 3]) cylinder(d = 14, h = 2, $fn = 32);
-    color(c_body) translate([107, -shell_t - 6, body[1] - 3]) cylinder(d = 9, h = 3.5, $fn = 32);
+    color(c_body) translate([96, -12, top_z]) cylinder(d = 25, h = body[1] - top_z, $fn = 48);   // mode dial, up to the overall height
+    color(c_body) translate([78, -4, top_z]) cylinder(d = 17, h = 2, $fn = 48);
+    color(c_metal) translate([107, -shell_t - 6, top_z - 3]) cylinder(d = 14, h = 2, $fn = 32);
+    color(c_body) translate([107, -shell_t - 6, top_z - 3]) cylinder(d = 9, h = 3.5, $fn = 32);
     // EVF eyecup with eyepiece and eye sensor
     color(c_rubber) difference() {
         rounded_slab(eyecup[0], eyecup[1], frame - 1, eyecup[4], eyecup[2], eyecup[3], 2, 0.01);
@@ -146,20 +164,31 @@ module a6300(lcd_tilt = 0, lens = true, lcd_arm = undef) {
     p1 = pose[0];
     p2 = pose[1];
     arm_a = pose[6];
-    arm_x0 = lcd_at[0] + (lcd[0] - lcd_arm_w) / 2;
+    arm_x0 = lcd_arm_x[0];
+    arm_w = lcd_arm_x[1] - lcd_arm_x[0];
     d_bot = lcd[1] - lcd_pivot_from_top;
-    color(c_rubber) translate([arm_x0, p1[0], p1[1]]) rotate([-arm_a, 0, 0]) difference() {
-        union() {
-            translate([0, -lcd_arm_t / 2, 0]) cube([lcd_arm_w, lcd_arm_t, lcd_arm_len]);
-            for (z = [0, lcd_arm_len]) translate([0, 0, z]) rotate([0, 90, 0]) cylinder(d = lcd_arm_t, h = lcd_arm_w, $fn = 16);
-        }
-        translate([28, -lcd_arm_t, -0.5]) cube([lcd_arm_w - 28 + 1, 2 * lcd_arm_t, 7.5]);   // wide right cut-back from X_cam ~41 (fit test 1 photo 6)
-    }
+    // distance along the arm from the pivot to the cut-back window's edge
+    cut_s = arm_a > 0 ? (lcd_arm_cut[2] - p1[0] + lcd_arm_top * cos(arm_a)) / sin(arm_a) : lcd_arm_cut[2];
+    // arm frame: z runs along the arm from the lower pivot, -y is the plate's box-facing side, +y the LCD side
     translate([arm_x0, p1[0], p1[1]]) rotate([-arm_a, 0, 0]) {
-        color("#141416") translate([2, lcd_arm_t / 2, 3]) cube([20, 2.0, 21]);   // raised flex-ribbon connector shelf (X_cam ~15..35)
-        color(c_metal) translate([17, lcd_arm_t / 2 - 0.2, 14]) cube([5, 2.4, 11]); // silver flex ribbon
+        color("#3a3a3d") difference() {
+            translate([0, -lcd_arm_top, 0]) cube([arm_w, lcd_arm_web_t, lcd_arm_len]);
+            translate([lcd_arm_cut[0] - arm_x0, -5, -1]) cube([lcd_arm_cut[1] - lcd_arm_cut[0], 10, cut_s + 1]);
+            intersection() {
+                translate([lcd_arm_relief[0] - arm_x0, 0, 0]) rotate([90, 0, 0]) cylinder(r = lcd_arm_relief[1], h = 10, center = true, $fn = 48);
+                translate([1, -5, -1]) cube([arm_w, 10, lcd_arm_len]);
+            }
+        }
+        // side flanges with the hinge knuckles
+        color("#3a3a3d") for (x = [0, arm_w - 1.4]) {
+            translate([x, -lcd_arm_top, 0]) cube([1.4, lcd_arm_flange, lcd_arm_len]);
+            translate([x, 0, 0]) rotate([0, 90, 0]) cylinder(r = lcd_knuckle_r, h = 1.4, $fn = 32);
+            translate([x, lcd_arm_flange / 2 - lcd_arm_top, lcd_arm_len]) rotate([0, 90, 0]) cylinder(d = lcd_arm_flange, h = 1.4, $fn = 24);
+        }
+        color("#141416") translate([lcd_arm_cover[0] - arm_x0, lcd_arm_web_t - lcd_arm_top, 0.5])
+            cube([lcd_arm_cover[1] - lcd_arm_cover[0], 1.2, 21]);                    // flex cover panel on the LCD side
+        color(c_metal) translate([lcd_arm_cover[0] - arm_x0 + 1.5, -lcd_arm_top, -1.0]) cube([9, 0.3, 2.0]);   // flex ribbon at the pivot line
     }
-    color(c_metal) translate([arm_x0 + 4, p1[0], p1[1]]) rotate([0, 90, 0]) cylinder(d = 2.0, h = lcd_arm_w - 8, $fn = 16);
     translate([lcd_at[0], p2[0], p2[1]]) rotate([lcd_tilt, 0, 0]) translate([0, 0, -d_bot])
         a6300_lcd();
 }
