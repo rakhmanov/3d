@@ -1,0 +1,155 @@
+// Sony a6300 rear cooling fan: display scene (camera + box + parts), not for printing
+// Author: Denis Shatilov
+// License: CC BY-NC 4.0
+// https://creativecommons.org/licenses/by-nc/4.0/
+//
+// Box from ../sony-a6300-fan.scad, camera from a6300-camera.scad. The box sits under the eyecup,
+// left-aligned with the LCD. The screen is drawn on its dual-hinge linkage at a typical shooting tilt
+// (override with -D lcd_tilt=...).
+//
+// Previews (800x600, preview mode, --camera=tx,ty,tz,rx,ry,rz,dist):
+//   scene-iso      --camera=62,-5,30,62,0,25,300 --projection=p
+//   scene-mount    --camera=62,-5,34,62,0,25,300 --projection=p -D show_arm_in_scene=true
+//   scene-cutaway  --camera=38,-10,34,58,0,20,105 --projection=p -D cutaway=true
+//   scene-side     --camera=0,5,33,90,0,270,260 --projection=o
+//   scene-bottom   --camera=44,-10,5,180,0,0,150 --projection=o -D show_cable=false   (from straight below)
+//   scene-bracket  --camera=0,-9,16,90,0,270,80 --projection=o -D show_cable=false    (bottom against the tilt bracket)
+
+include <../sony-a6300-fan-arm.scad>
+
+show_part = false;
+show_arm = false;
+arm_mount = true;         // pin-and-socket collar on the box front (matches default box)
+show_arm_in_scene = false;
+show_camera = true;
+show_cable = true;
+// Cut away the box front to show the parts inside
+cutaway = false;
+
+hinge = a6300_lcd_hinge();
+
+// Typical shooting tilt on the dual-hinge linkage (the arm stops at 60 deg; the screen tilts on to 65 deg)
+lcd_tilt = 65;
+
+// ---------- parts (box coordinates) ----------
+// Noctua: beige frame, brown impeller. 3007: black frame and impeller
+module fan_model() {
+    c_frame = fan == 40 ? "#d6c3a3" : "#1c1c1c";
+    c_blade = fan == 40 ? "#6d3a2b" : "#262626";
+    translate([fan_x, air_gap, fan_zc - fan / 2]) {
+        color(c_frame) difference() {
+            hull() for (x = [2, fan - 2], z = [2, fan - 2]) translate([x, 0, z]) rotate([-90, 0, 0]) cylinder(r = 2, h = fan_t, $fn = 16);
+            translate([fan / 2, -1, fan / 2]) rotate([-90, 0, 0]) cylinder(d = fan - 2, h = fan_t + 2);
+            for (i = [-1, 1], j = [-1, 1]) translate([fan / 2 + i * fan_holes / 2, -1, fan / 2 + j * fan_holes / 2])
+                rotate([-90, 0, 0]) cylinder(d = 3.2, h = fan_t + 2, $fn = 16);
+        }
+        color(c_frame) for (a = [45, 165, 285]) translate([fan / 2, 0, fan / 2]) rotate([0, a, 0]) translate([0, 0, -0.8]) cube([fan / 2, 1.2, 1.6]);
+        translate([fan / 2, 0.5, fan / 2]) rotate([-90, 0, 0]) {
+            color(c_blade) cylinder(d = fan * 0.36, h = fan_t - 1.5);
+            color(c_blade) for (a = [0 : 360 / 9 : 359]) rotate([0, 0, a]) translate([fan * 0.16, -0.5, 1])
+                rotate([30, 0, 0]) cube([fan * 0.31, 1, fan_t - 4]);
+        }
+    }
+}
+
+// SS12D00G4 Off/On slide switch in its cradle on the left wall, knob shown at On (+Y)
+sw_pos = 1;   // 1 = On (+Y, operator side), -1 = Off (-Y, camera side)
+module slide_switch() {
+    translate([wall, sw_yc, sw_zc]) {
+        color("#b9bcc2") translate([0, -sw_body[0] / 2, -sw_body[1] / 2]) cube([0.4, sw_body[0], sw_body[1]]);
+        color("#1a1a1a") translate([0.4, -sw_body[0] / 2, -sw_body[1] / 2]) cube([sw_body[2] - 0.4, sw_body[0], sw_body[1]]);
+        color("#1a1a1a") translate([-sw_knob[2], sw_pos * sw_step / 2 - sw_knob[0] / 2, -sw_knob[1] / 2])
+            cube([sw_knob[2], sw_knob[0], sw_knob[1]]);
+        color("#c8a24a") for (i = [-1 : 1]) translate([sw_body[2], i * 2.54 - 0.3, -0.4])
+            cube([sw_pins, 0.6, 0.8]);
+    }
+}
+
+module adafruit_4090() {  // PCB parallel to the front face, receptacle through the left wall
+    translate([wall, usb_pcb_y, usb_zc]) {
+        color("#161616") translate([0, -usb_pcb[2], -usb_pcb[0] / 2]) cube([usb_pcb[1], usb_pcb[2], usb_pcb[0]]);
+        color("#c8a24a") for (s = [-1, 1]) translate([usb_hole_in, 0.01, s * usb_hole_dx / 2]) rotate([-90, 0, 0])
+            difference() { cylinder(d = 4.2, h = 0.05, $fn = 24); cylinder(d = usb_hole_d, h = 1, center = true, $fn = 24); }
+        color("#c8a24a") for (i = [0 : 7]) translate([usb_pcb[1] - 2.54, 0.01, (i - 3.5) * 2.54]) rotate([-90, 0, 0])
+            cylinder(d = 1.6, h = 0.05, $fn = 16);
+        color("#d0d0d0") for (dz = [5.8, 7.6]) translate([3.5, 0, -dz]) cube([1.6, 0.5, 0.8]);   // R1, R2 5.1k
+        color("#c9cbd0") translate([-usb_thin - 0.01, 0, 0]) rrect_x(usb_rec[2], usb_rec[0], usb_rec[1], 1.4);
+    }
+}
+
+module wires() {
+    module run(pts, c) color(c) for (i = [0 : len(pts) - 2]) hull() { translate(pts[i]) sphere(d = 1.2, $fn = 8); translate(pts[i + 1]) sphere(d = 1.2, $fn = 8); }
+    yb = usb_pcb_y - usb_pcb[2] - 0.8;   // behind the board
+    px = wall + sw_body[2] + sw_pins;    // switch pin tips
+    yf = box_d - front - fan_t + 3;
+    run([[wall + usb_pcb[1] - 2.54, yb, usb_zc + 3.8], [px, yb, sw_zc], [px, sw_yc, sw_zc]], "#b02020");                                  // VBUS -> common
+    run([[px, sw_yc + 2.54, sw_zc], [px, 5.5, pin_z0 - 3.0], [fan_x - 1, 5.5, pin_z0 - 3.0], [fan_x + 3, yf, fan_zc + 2]], "#b02020");    // On -> fan +
+    run([[wall + usb_pcb[1] - 2.54, yb, usb_zc - 3.8], [wall + bay_w - 1, yb, fan_zc - 2], [fan_x + 3, box_d - front - fan_t + 5, fan_zc - 2]], "#202020"); // GND -> fan
+}
+
+module usb_c_cable() {
+    color("#3c3c3e") translate([-usb_thin - 6.65 + 0.01, usb_yc, usb_zc]) rrect_x(2.4, 8.25, 6.65, 1.1); // plug shell, hidden
+    color("#5a5a5e") translate([-(wall - usb_thin) - 24, usb_yc, usb_zc]) rrect_x(usb_cbore[1] - 0.4, usb_cbore[0] - 0.6, 24, 2.4);
+    color("#5a5a5e") hull() {
+        translate([-(wall - usb_thin) - 23.5, usb_yc, usb_zc]) sphere(d = 4, $fn = 16);
+        translate([-(wall - usb_thin) - 45, usb_yc + 4, usb_zc - 30]) sphere(d = 4, $fn = 16);
+    }
+}
+
+module fan_box_assembly() {
+    difference() {
+        color("WhiteSmoke") box();
+        if (cutaway) translate([wall + 0.5, box_d - front - 0.5, wall]) cube([box_w, front + 1, box_h - 2 * wall]);
+    }
+    fan_model();
+    slide_switch();
+    adafruit_4090();
+    wires();
+    if (show_cable) usb_c_cable();
+}
+
+// ---------- clearance checks ----------
+pose = a6300_lcd_pose(lcd_tilt);
+tb = pose[2];
+tf = pose[3];
+min_y = min(tb[0], tf[0]);
+max_z = max(tb[1], tf[1]);
+front_clear = min_y - box_d;
+// bottom against the tilt bracket: the gap under the bevel at its two ends, the heel over the hinge knuckles,
+// and the bottom slots inside the bracket's cut-back window
+gap_front = (box_z + slant(box_d)) - a6300_lcd_arm_top_z(box_d, lcd_tilt);
+gap_knee = (box_z + slant(slant_y0)) - a6300_lcd_arm_top_z(slant_y0, lcd_tilt);
+bevel_clear = min(gap_front, gap_knee);
+knk = a6300_lcd_knuckle();
+knuckle_clear = box_z - (knk[1] + knk[2]);
+arm_cut = a6300_lcd_arm_cut();
+slot_in_window = [box_x + bot_x0 - arm_cut[0], arm_cut[1] - (box_x + bot_x1), arm_cut[2] - bot_y1];
+sw_clear = (box_z + sw_zc - sw_slot[1] / 2) - max_z;
+tab_clear = (box_z + t_z0) - max_z;
+grille_top = box_z + fan_zc + (fan - 2) / 2;
+grille_above_tf = grille_top - max_z;
+grille_above_tb = grille_top - tb[1];
+pose90 = a6300_lcd_pose(90);
+front_clear_90 = min(pose90[2][0], pose90[3][0]) - box_d;
+echo(str("Clearances at lcd_tilt=", lcd_tilt, " (arm=", pose[6], "): front=", round(front_clear * 10) / 10,
+         " mm, bevel=", round(bevel_clear * 10) / 10, " mm (front ", round(gap_front * 100) / 100, " / knee ",
+         round(gap_knee * 100) / 100, " vertical, ", round(bevel_clear * sin(pose[6]) * 100) / 100,
+         " square to the bracket), heel_above_knuckle=", round(knuckle_clear * 100) / 100,
+         " mm, bottom slots inside the bracket window by x0/x1/y=", slot_in_window, " mm, switch_above_lcd=", round(sw_clear * 10) / 10,
+         " mm, tab_above_lcd=", round(tab_clear * 10) / 10, " mm; grille above lcd_tf/tb=",
+         round(grille_above_tf * 10) / 10, "/", round(grille_above_tb * 10) / 10,
+         " mm (front at 90 deg=", round(front_clear_90 * 10) / 10, " mm)"));
+if (lcd_tilt >= 45) {
+    assert(front_clear >= 0, "box front collides with tilted LCD");
+    assert(bevel_clear >= 0, "box bottom bevel collides with LCD hinge arm");
+    assert(knuckle_clear >= 0.5, "box heel too close to the hinge knuckles");
+    assert(min(slot_in_window) >= 0, "bottom slots leave the tilt bracket's cut-back window");
+    assert(sw_clear > 0, "switch slot sits below the tilted LCD top edge");
+    assert(tab_clear > 0, "arm tab hits tilted LCD");
+}
+
+// ---------- scene ----------
+mirror([0, 1, 0]) {
+    translate([box_x, 0, box_z]) { fan_box_assembly(); if (show_arm_in_scene) color("#e6e6e6") arm(); }
+    if (show_camera) a6300(lcd_tilt);
+}

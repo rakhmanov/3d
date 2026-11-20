@@ -16,6 +16,22 @@ From the repo root, with the CI image:
 - Read stderr for `echo()` and `assert()` output.
 - To check committed STLs are current, render to a scratch dir and `cmp`.
 
+- On WSL, Docker Desktop must be running; Windows `.exe`s (including a local OpenSCAD) cannot be run from WSL here.
+
+## Concept drafts
+
+Sketch new ideas as an OpenSCAD draft in the design's folder, not as SVGs or generated images,
+so the draft grows into the real model.
+
+- Header says `DRAFT` and which dimensions are placeholders; README holds the plan and a `Measure` list.
+- Keep the printable part in `<name>.scad`. Put non-normally-printable helpers (`<name>-scene.scad`, host devices like `a6300-camera.scad`,
+  fit-test shells like `<name>-fit-test.scad`) and `scene-*.png` previews in `<design>/dev/` (`.github/matrix/generate.py` skips `dev/`).
+  The scene `include`s the part (`../<name>.scad`), sets `show_part = false`, and adds the host device and bought parts
+  (fans, switches, boards) at their datasheet sizes, in real colors. Name the part numbers in the README.
+- Render previews **without** `--render` (preview mode keeps colors) to `dev/scene-*.png`, with
+  `--camera=...` views and `-D` overrides for variants (size, `cutaway`). Look at every PNG before reporting it.
+- No STL and no root README entry until the dimensions are measured.
+
 ## Check
 
     python3 tools/stl-check.py dir/name.stl
