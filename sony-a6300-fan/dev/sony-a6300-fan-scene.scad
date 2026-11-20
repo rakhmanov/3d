@@ -44,22 +44,16 @@ module fan_model() {
     }
 }
 
-// SS13D07 slide switch in its cradle behind the bay's front plate, knob shown at High (right)
-sw_pos = 1;   // 1 = High, 0 = Off, -1 = Low
-sw_back = box_d - front - sw_body[2];
+// SS12D00G4 Off/On slide switch in its cradle on the left wall, knob shown at On (+Y)
+sw_pos = 1;   // 1 = On (+Y, operator side), -1 = Off (-Y, camera side)
 module slide_switch() {
-    translate([sw_xc, 0, sw_zc]) {
-        color("#b9bcc2") translate([-sw_body[0] / 2, box_d - front - 0.4, -sw_body[1] / 2]) cube([sw_body[0], 0.4, sw_body[1]]);   // metal cover
-        color("#1a1a1a") translate([-sw_body[0] / 2, sw_back, -sw_body[1] / 2]) cube([sw_body[0], sw_body[2] - 0.4, sw_body[1]]);
-        color("#1a1a1a") translate([sw_pos * sw_step - sw_knob[0] / 2, box_d - front, -sw_knob[1] / 2]) cube([sw_knob[0], sw_knob[2], sw_knob[1]]);
-        color("#c8a24a") for (i = [0 : 3]) translate([(i - 1.5) * 2.5 - 0.3, sw_back - sw_pins, -0.4]) cube([0.6, sw_pins, 0.8]);
-    }
-}
-
-module diode(p) {  // 1N4001, DO-41, lying along Z, band toward +Z
-    translate(p) {
-        color("#1a1a1a") cylinder(d = 2.7, h = 5.2, $fn = 20);
-        color("#c9cbd0") translate([0, 0, 4.2]) cylinder(d = 2.75, h = 0.7, $fn = 20);
+    translate([wall, sw_yc, sw_zc]) {
+        color("#b9bcc2") translate([0, -sw_body[0] / 2, -sw_body[1] / 2]) cube([0.4, sw_body[0], sw_body[1]]);
+        color("#1a1a1a") translate([0.4, -sw_body[0] / 2, -sw_body[1] / 2]) cube([sw_body[2] - 0.4, sw_body[0], sw_body[1]]);
+        color("#1a1a1a") translate([-sw_knob[2], sw_pos * sw_step / 2 - sw_knob[0] / 2, -sw_knob[1] / 2])
+            cube([sw_knob[2], sw_knob[0], sw_knob[1]]);
+        color("#c8a24a") for (i = [-1 : 1]) translate([sw_body[2], i * 2.54 - 0.3, -0.4])
+            cube([sw_pins, 0.6, 0.8]);
     }
 }
 
@@ -78,14 +72,10 @@ module adafruit_4090() {  // PCB parallel to the front face, receptacle through 
 module wires() {
     module run(pts, c) color(c) for (i = [0 : len(pts) - 2]) hull() { translate(pts[i]) sphere(d = 1.2, $fn = 8); translate(pts[i + 1]) sphere(d = 1.2, $fn = 8); }
     yb = usb_pcb_y - usb_pcb[2] - 0.8;   // behind the board
-    py = sw_back - sw_pins;                       // switch pin tips
+    px = wall + sw_body[2] + sw_pins;    // switch pin tips
     yf = box_d - front - fan_t + 3;
-    dz = sw_zc - 9;                               // diodes lie in the chamber, below the switch
-    run([[wall + usb_pcb[1] - 2.54, yb, usb_zc + 3.8], [sw_xc - 1.25, yb, usb_zc + 3.8], [sw_xc - 1.25, py, sw_zc]], "#b02020");    // VBUS -> common
-    run([[sw_xc + 3.75, py, sw_zc], [sw_xc + 3.75, 5.5, 22.0], [fan_x - 1, 5.5, 22.0], [fan_x + 3, yf, fan_zc + 2]], "#b02020");   // H -> fan + (clears socket)
-    run([[sw_xc - 3.75, py, sw_zc], [sw_xc - 3.75, py, dz], [20.5, py, dz]], "#b02020");                                          // L -> diodes
-    translate([20.5, py, dz]) rotate([0, 90, 0]) { diode([0, 0, 0]); diode([0, 0, 6]); }
-    run([[32.5, py, dz], [fan_x + 3, yf, fan_zc - 2]], "#b02020");                                                                // diodes -> fan +
+    run([[wall + usb_pcb[1] - 2.54, yb, usb_zc + 3.8], [px, yb, sw_zc], [px, sw_yc, sw_zc]], "#b02020");                                  // VBUS -> common
+    run([[px, sw_yc + 2.54, sw_zc], [px, 5.5, pin_z0 - 3.0], [fan_x - 1, 5.5, pin_z0 - 3.0], [fan_x + 3, yf, fan_zc + 2]], "#b02020");    // On -> fan +
     run([[wall + usb_pcb[1] - 2.54, yb, usb_zc - 3.8], [wall + bay_w - 1, yb, fan_zc - 2], [fan_x + 3, box_d - front - fan_t + 5, fan_zc - 2]], "#202020"); // GND -> fan
 }
 

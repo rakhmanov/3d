@@ -1,20 +1,22 @@
-// Sony a6300 rear cooling fan: fit test (DRAFT)
+// Sony a6300 rear cooling fan: fit test 2 (DRAFT)
 // Author: Denis Shatilov
 // License: CC BY-NC 4.0
 // https://creativecommons.org/licenses/by-nc/4.0/
 //
 // A thin open-backed shell with the box's outside size, to try against the camera before printing
-// the real box. Hold it in the pocket under the eyepiece, back against the magnesium plate, and
-// tilt the screen: where the screen touches is how much the real box has to lose. Side depth marks
-// (every 2 mm plus the 5.3 mm recess edge), front V-groove scribe marks, and 45-deg beveled blind
-// "fake cutouts" for all exhaust vents and the stepped USB-C port show where every opening lands
-// while keeping the shell printable without supports or overhangs. Printed front face down.
+// the real box. Fit test 2 includes the real arm pocket + fused top bearing boss (to test the
+// printed shoe arm directly), staggered 1 mm side depth grooves (1, 2, 3, 4, 5.3 mm + left
+// 8, 10 mm), built-in 5/10 mm X-rulers on the top-front and bottom-back edges, +2/+4 mm Z-ticks
+// on the left front corner, front V-grooves, and 45-deg beveled blind fake cutouts for all
+// exhaust vents, the left-wall Off/On switch slot, and the stepped USB-C port.
+// Printed front face down with zero overhangs.
 
 include <../sony-a6300-fan.scad>
 
 show_part = false;
 t = 1.2;          // shell wall (follows the bottom bevel; 3 perimeters, thick enough for V-grooves)
 mark = 0.4;       // 45-deg V-groove depth
+lead_r_back = 0.5; // back-edge lead-in on the right end, leaves 0.7 mm on the 1.2 mm shell wall (box: 0.8 on 1.6)
 
 module side_vgroove(x_face, dir, yc, d, z0, z1) {
     translate([0, 0, z0]) linear_extrude(z1 - z0)
@@ -26,26 +28,9 @@ module front_hgroove(x0, x1, zc, d) {
         polygon([[box_d + 0.02, zc - d - 0.02], [box_d - d, zc], [box_d + 0.02, zc + d + 0.02]]);
 }
 
-module front_rect_vgroove(xc, zc, w, h, d) {
-    dm = d + 0.02;
-    ym = box_d + 0.02;
-    ya = box_d - d;
-    hw = w / 2;
-    hh = h / 2;
-    pts = [
-        [xc - hw - dm, ym, zc - hh - dm], [xc + hw + dm, ym, zc - hh - dm],
-        [xc + hw + dm, ym, zc + hh + dm], [xc - hw - dm, ym, zc + hh + dm],
-        [xc - hw + dm, ym, zc - hh + dm], [xc + hw - dm, ym, zc - hh + dm],
-        [xc + hw - dm, ym, zc + hh - dm], [xc - hw + dm, ym, zc + hh - dm],
-        [xc - hw,      ya, zc - hh],      [xc + hw,      ya, zc - hh],
-        [xc + hw,      ya, zc + hh],      [xc - hw,      ya, zc + hh]
-    ];
-    faces = [
-        for (k = [0 : 3]) let(n = (k + 1) % 4) [k, n, 4 + n, 4 + k],       // mouth at +Y (CW from outside)
-        for (k = [0 : 3]) let(n = (k + 1) % 4) [k, 8 + k, 8 + n, n],       // outer 45-deg slope
-        for (k = [0 : 3]) let(n = (k + 1) % 4) [4 + k, 4 + n, 8 + n, 8 + k] // inner 45-deg slope
-    ];
-    polyhedron(points = pts, faces = faces, convexity = 4);
+module front_vgroove(xc, z0, z1, d = 0.35) {
+    translate([0, 0, z0]) linear_extrude(z1 - z0)
+        polygon([[xc - d - 0.02, box_d + 0.02], [xc, box_d - d], [xc + d + 0.02, box_d + 0.02]]);
 }
 
 module blind_rect(w, h, d = mark, bx0 = mark, bx1 = mark, by0 = mark, by1 = mark) {
@@ -76,27 +61,50 @@ module front_circle_vgroove(xc, zc, r, d = mark) {
 module fit_test() {
     slant_a = atan(slant_rise / (box_d + 0.5));
     difference() {
-        cube([box_w, box_d, box_h]);
-        // inner cavity whose bottom follows the bevel so the sloped bottom wall stays continuous from bed to back
-        rotate([90, 0, 90]) translate([0, 0, t]) linear_extrude(box_w - 2 * t)
-            polygon([[-1, slant(-1) + t], [box_d - t, slant(box_d - t) + t],
-                     [box_d - t, box_h - t], [-1, box_h - t]]);
+        union() {
+            difference() {
+                cube([box_w, box_d, box_h]);
+                // inner cavity whose bottom follows the bevel so the sloped bottom wall stays continuous from bed to back
+                rotate([90, 0, 90]) translate([0, 0, t]) linear_extrude(box_w - 2 * t)
+                    polygon([[-1, slant(-1) + t], [box_d - t, slant(box_d - t) + t],
+                             [box_d - t, box_h - t], [-1, box_h - t]]);
+            }
+            // fused top bearing boss matching the real box so the printed shoe arm engages & locks
+            if (arm_mount) translate([sock_x0, box_d - sock_d, sock_top_z])
+                cube([sock_x1 - sock_x0, sock_d - t + 0.5, box_h - t - sock_top_z + 0.5]);
+        }
         // same bottom bevel as the box
         rotate([90, 0, 90]) translate([0, 0, -1]) linear_extrude(box_w + 2)
             polygon([[-1, -1], [box_d + 1, -1], [box_d + 1, slant(box_d + 1)], [-1, slant(-1)]]);
-        // side depth V-grooves: 2, 4 mm + 5.3 mm recess edge on both walls, plus 8, 10 mm ticks in left mid zone
-        for (s = [[0, 1], [box_w, -1]]) {
-            for (y = [2, 4]) side_vgroove(s[0], s[1], y, mark, 4, box_h - 4);
-            side_vgroove(s[0], s[1], 5.3, 0.45, slant(5.3) + 0.8, box_h - 1);
+        // same rounded leading (right) end and latch hook channel as the box
+        lead_in_cut();
+        latch_channel();
+        // staggered 1 mm side depth V-grooves: 2, 4 mm (mid) + 1, 3 mm (upper) + 5.3 mm recess edge on both walls, plus 8, 10 mm left ticks
+        for (s = [[0, 1, sw_zc - sw_slot[1] / 2 - 1.0], [box_w, -1, box_h - max(1, lead_r) - 0.3]]) {
+            for (y = [2, 4]) side_vgroove(s[0], s[1], y, mark, 6, 30);
+            for (y = [1, 3]) side_vgroove(s[0], s[1], y, 0.35, 30.5, 34.5);
+            side_vgroove(s[0], s[1], 5.3, 0.28, slant(5.3) + max(0.8, lead_r / cos(slant_a) + 0.2), s[2]);
         }
-        for (y = [8, 10]) side_vgroove(0, 1, y, mark, usb_top - 3.0, lz0 - 0.6);
-        // front-face reference 45-deg V-grooves: uncovered top band line, switch, arm pocket, fan grille & screws
+        for (y = [8, 10]) side_vgroove(0, 1, y, mark, usb_top - 3.0, usb_top);
+        // real arm pocket through-cut (test actual printed shoe-arm lock)
+        if (arm_mount) translate([arm_xc - sock_w / 2, box_d - t - 0.5, pin_z0 - sock_clear])
+            cube([sock_w, t + 1.5, sock_h]);
+        // front-face reference 45-deg V-grooves: uncovered top band line, top 5/10 mm X-ruler, fan grille & screws
         front_hgroove(2, box_w - 2, box_h - tab_band, mark - 0.04);
-        front_rect_vgroove(sw_xc, sw_zc, sw_slot[0], sw_slot[1], mark);
-        if (arm_mount) front_rect_vgroove(arm_xc, pin_z0 + pin_h / 2, sock_w, sock_h, mark);
+        for (x = [5 : 5 : box_w - 5])
+            front_vgroove(x, box_h - ((x % 10 == 0) ? 2.0 : 1.2), box_h + 0.02, 0.35);
         front_circle_vgroove(fan_x + fan / 2, fan_zc, (fan - 2) / 2, mark);
         for (i = [-1, 1], j = [-1, 1])
             front_circle_vgroove(fan_x + fan / 2 + i * fan_holes / 2, fan_zc + j * fan_holes / 2, fan_screw_d / 2, mark);
+        // left-wall bottom-front Z-ticks (+2, +4 mm above bottom-front corner) for side clearance readings
+        for (dz = [2, 4])
+            translate([0, box_d + 0.02, slant(box_d) + dz - 0.4]) rotate([90, 0, -90])
+                blind_rect(2.5, 0.8, 0.35, 0.35, 0.35, 0.35, 0.35);
+        // bottom-back edge X-ruler ticks (every 5 mm, longer every 10 mm; open at Y=0 -> zero overhangs, visible from below)
+        for (x = [5 : 5 : box_w - 5]) let(d = 0.35, ly = (x % 10 == 0) ? 1.35 : 0.9, L = ly / cos(slant_a))
+            translate([x, 0, slant(0)]) rotate([slant_a, 0, 0]) translate([0, L, 0]) rotate([90, 0, 0])
+                linear_extrude(L + 0.25)
+                    polygon([[-d - 0.02, -0.02], [0, d], [d + 0.02, -0.02]]);
         // right wall fake exhaust cutouts (3 slots, X = box_w)
         if (r_slot > 0) for (i = [0 : n_right - 1])
             translate([box_w, out_y0, rz0 + i * (r_slot + rib)]) rotate([90, 0, 90])
@@ -106,9 +114,9 @@ module fit_test() {
         translate([top_m_x0, out_y0, box_h]) blind_rect(top_m_x1 - top_m_x0, top_d_boss, mark);
         for (i = [0 : n_top_r - 1])
             translate([top_r_x0 + i * top_r_pitch, out_y0, box_h]) blind_rect(top_r_slot, top_d_full, mark);
-        // left wall fake cutouts: upper exhaust slot + stepped USB-C counterbore & receptacle (X = 0)
-        if (lz1 > lz0)
-            translate([0, out_y1, lz0]) rotate([90, 0, -90]) blind_rect(out_d, lz1 - lz0, mark);
+        // left wall fake cutouts: Off/On switch slot above USB-C + stepped USB-C counterbore & receptacle (X = 0)
+        translate([0, sw_yc + sw_slot[0] / 2, sw_zc - sw_slot[1] / 2]) rotate([90, 0, -90])
+            blind_rect(sw_slot[0], sw_slot[1], 0.35, 0.35, 0.35, 0.35, 0.35);
         translate([0, usb_yc, usb_zc]) rotate([90, 0, -90]) {
             blind_rrect(usb_cbore[1], usb_cbore[0], 2.5, 0.35);
             translate([0, 0, -0.35 + 0.01]) blind_rrect(usb_rec[2] + 0.4, usb_rec[0] + 0.4, 1.2, 0.36);
@@ -117,7 +125,7 @@ module fit_test() {
         for (i = [0 : n_bot - 1])
             translate([bot_x0 + i * bot_pitch, 0, slant(0)]) rotate([slant_a, 0, 0]) mirror([0, 0, 1])
                 translate([0, bot_rim / cos(slant_a), 0])
-                    blind_rect(bot_slot, bot_d / cos(slant_a), mark, mark, mark, 0.8, mark);
+                    blind_rect(bot_slot, bot_d / cos(slant_a), mark, mark, mark, max(mark, mark / tan(42 - slant_a)), mark);
     }
 }
 
